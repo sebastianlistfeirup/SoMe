@@ -2,7 +2,7 @@
 
 Dato: 2026-11-08
 Miljø: Windows-vært, Docker Engine 29.9.2, container Python 3.11, SQLite, FFmpeg, faster-whisper small/int8, Microsoft Zira Desktop
-Releasehash: registreres i det endelige releasecommit før push.
+Releasehash for testet kode: 92861b0081a85986556a8d7f1913146cb4c5306c. Efterfølgende commit opdaterer kun testprotokollen.
 Formål: Adskille faktisk udførte tests fra ikke-verificerede eksterne integrationer.
 
 ## Automatiserede tests
