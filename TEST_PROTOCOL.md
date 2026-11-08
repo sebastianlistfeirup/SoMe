@@ -2,7 +2,7 @@
 
 Dato: 2026-11-08
 Miljø: Windows-vært, Docker Engine 29.9.2, container Python 3.11, SQLite, FFmpeg, faster-whisper small/int8, Kokoro-82M ONNX
-Releasehash: registreres i det endelige releasecommit før push.
+Releasehash for testet kode: 56fb591d20a9d2e8185563012ecdc831775150a1. Efterfølgende commit opdaterer kun testprotokollen.
 Formål: Adskille faktisk udførte tests fra ikke-verificerede eksterne integrationer.
 
 ## Automatiserede tests
