@@ -2,9 +2,9 @@
 
 Der er ikke foretaget køb, login, OAuth, betalte API-kald eller offentlig publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
-## 0. Gennemse den nye platformpakke
+## 0. Gennemse de to nye mobilvarianter
 
-Start med `some-pilot/data/versions/handheld-reels-v2/video.mp4` på 102,2 sekunder. Lyt til den nye Kokoro-stemme og kontrollér fuldskærms-actionen. Se derefter `handheld-tiktok-v2/video.mp4` på 49,2 sekunder og `handheld-youtube-v4/video.mp4` på 171,4 sekunder i samme mappe. Sig om stemme og billedstil er godkendt, eller hvad der skal justeres. Alle tre står i `AWAITING_OWNER` og er ikke publiceret.
+Start med `some-pilot/data/versions/handheld-zoom-v11/video.mp4` på 102,1 sekunder. Kontrollér de to fuldskærms-zooms pr. spil, Celeste-actionen og at der ikke er beskårne review-citater eller store tekstkort. Se derefter `some-pilot/data/versions/handheld-safe-v10/video.mp4`, som bevarer hele spilbilledet og teksten over en dæmpet baggrund. Sig hvilken variant du foretrækker, eller hvad der konkret skal justeres. Begge står i `AWAITING_OWNER` og er ikke publiceret. De tidligere TikTok- og YouTube-versioner er beholdt som separate formater.
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
@@ -80,4 +80,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Udfør kun punkt 0 nu: gennemse den nye platformpakke, start med `some-pilot/data/versions/handheld-reels-v2/video.mp4`, og giv konkret feedback om stemme og billedstil. Kontopunkterne kommer først bagefter.
+Udfør kun punkt 0 nu: start med `some-pilot/data/versions/handheld-zoom-v11/video.mp4`, og sig om du foretrækker zoom eller safe. Kontopunkterne kommer først bagefter.

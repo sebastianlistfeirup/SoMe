@@ -3,13 +3,15 @@
   "editorial_focus": "Handheld gaming, controller-first experiences, readable gameplay and useful purchase guidance",
   "rules": [
     "Every production clip requires documented commercial and derivative-use permission before rendering.",
-    "Vertical versions use full-screen action crops, not a small landscape window with empty space.",
+    "Vertical zoom versions alternate full-width gameplay and at least two full-screen action zooms per game with exact phase durations.",
+    "Vertical safe versions preserve the complete gameplay width and text over a muted blurred background; choose safe whenever cropping would lose essential content.",
     "Each platform gets its own edit, narration, CTA, safe areas and thumbnail.",
     "No FPS, battery-life, compatibility or performance claims without current source evidence or real measurement.",
-    "Every final video requires owner review before publication."
+    "Every final video requires owner review before publication.",
+    "Ten additional evidence-linked concepts are stored in research/handheld-trend-ideas-2026-11-08.json; chart positions and view counts must be refreshed before production."
   ],
   "items": [
-    {"id": "handheld-001", "title": "10 games worth your time on Legion Go 2", "formats": ["tiktok", "reels", "youtube"], "status": "AWAITING_OWNER", "outputs": ["handheld-tiktok-v2", "handheld-reels-v2", "handheld-youtube-v4"]},
+    {"id": "handheld-001", "title": "10 games worth your time on Legion Go 2", "formats": ["tiktok", "reels", "youtube"], "status": "AWAITING_OWNER", "outputs": ["handheld-tiktok-v2", "handheld-reels-v2", "handheld-youtube-v4", "handheld-zoom-v11", "handheld-safe-v10"]},
     {"id": "handheld-002", "title": "Hades or Hades II: which should you play first on a handheld?", "formats": ["reels", "youtube"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Hades", "Hades II"]},
     {"id": "handheld-003", "title": "Three brilliant deck builders for short handheld sessions", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Slay the Spire", "Slay the Spire 2", "Balatro"]},
     {"id": "handheld-004", "title": "Why Balatro makes you say just one more run", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Balatro"]},

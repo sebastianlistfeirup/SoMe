@@ -1,44 +1,44 @@
 SoMe-maskinen — STATUS
-Opdateret: 2026-11-08T18:56:00Z
+Opdateret: 2026-11-08T20:28:21Z
 Repository: https://github.com/sebastianlistfeirup/SoMe
 
 UDFØRT
 - Piloten har research, dashboard, database/jobs, rettigheds- og godkendelsesflow, manuel/API-publicering, metrics, versionsstyret læring, budgetloft, backup og sikker downloader.
-- Mini-bibel v1.2: dokumenterede internetklip, fuldskærms-action i vertikale formater, separate platformvarianter og energisk neural speak.
-- Ti officielle Steam-gameplayklip med kilde- og politikbeviser er kontrolleret. Ingen tilfældige streamerklip eller uafklarede musikvalg.
-- Kokoro-82M v1.0 ONNX kører lokalt på CPU med af_bella. Model og runtime er låst; Apache-2.0/MIT og SHA-256 er registreret.
-- TikTok: video_id=15, 49,2 sekunder, hurtigere kommentar, tæt 9:16-action og egen CTA.
-- Instagram Reels: video_id=14, 102,2 sekunder, fuld 9:16-action med Reels-safe-area og gem/del-CTA.
-- YouTube: video_id=18, 171,4 sekunder, 1920×1080 med længere kommentar og eget 16:9-thumbnail.
-- Alle tre versioner har separate manuskripter, neural speak, overgange, indbrændte undertekster, SRT, storyboard, rettigheder, checks og manifest.
-- Narration til Whisper bruger den faktisk afspillede lyd med samme trim og tempo. Ingen skjult 14-sekunders trunkering.
-- research/handheld-content-calendar.json indeholder 12 emner med research-, licens- og målekrav.
+- Mini-bibel v1.3 beskriver rigtige licensede internetklip, separate platformvarianter, ZOOM med to præcise fuldskærmsfaser pr. spil og SAFE uden beskåret spilindhold.
+- Ni officielle Steam-gameplayklip og Playstacks officielle Balatro-trailer fra YouTube har kilde- og politikbeviser. Alle ti SHA-256 matcher de lokale filer. Ingen tilfældige streamerklip eller uafklarede musikvalg.
+- Balatro bruger launch traileren i 640×360; HD er ikke påstået. Produktionsmetadata linker til den konkrete udgiver-URL for hvert klip.
+- Celeste bruger reel platform-action fra 32 sekunder. Slay the Spire, Slay the Spire 2 og Balatro er flyttet væk fra review-citater og store tekstkort i zoom.
+- `handheld-safe-v10`: video_id=31, 102,1 sekunder, 1080×1920, komplet spilbredde og tekst over dæmpet baggrund.
+- `handheld-zoom-v11`: video_id=32, 102,1 sekunder, 1080×1920 og to præcise fuldskærms-zooms pr. spil. Hades II bruger 77-sekundersklippet i zoom for at undgå titelkort.
+- Tidligere versioner er beholdt: TikTok 49,2 sekunder, Reels 102,2 sekunder og YouTube 171,4 sekunder med hver deres manuskript, format og CTA.
+- `research/handheld-trend-ideas-2026-11-08.json` indeholder 10 nye idéer med Valves aktuelle Deck-rankinger og direkte målte YouTube-formatsignaler.
+- `research/local-ai-hardware-2026-11-08.md` sammenligner Framework 192 GB, DGX Spark, RTX 5090 og Mac Studio M5 Max/Ultra med priser, modelkapacitet, strøm og manglende benchmarkdata.
+- `research/channel-name-candidates.md` indeholder 10 navne; Pixel & Parameters er anbefalet. Navneledighed er ikke kontrolleret.
 
 VERIFICERET
-- Endelig Docker-build med Kokoro og 43 automatiske tests bestod.
-- Alle tre produktionsversioner er AWAITING_OWNER med rights, technical, safety og quality ALLOW.
-- Speakmatch: TikTok 96,67 %, Reels 99,34 %, YouTube 99,55 %.
-- Teknik: H.264 High/yuv420p, AAC 48 kHz, 30 fps, 1:1 pixels. Vertikalt 1080×1920; YouTube 1920×1080.
-- Lyd: TikTok −16,8 LUFS/−1,0 dBTP; Reels −16,5/−1,0; YouTube −16,4/−0,9.
-- Alle 27 leverancefiler og deres SHA-256 er verificeret mod de tre manifester.
-- Reels/TikTok-storyboards viser fuldskærms-gameplay uden den gamle tomme boks. YouTube-thumbnail og landskabsstoryboard er visuelt kontrolleret.
-- Mini-bibel v1.2 PDF er bygget og visuelt kontrolleret med korrekte danske tegn; 29 sider.
-- Ingen betalte API-kald, køb, OAuth, privat/offentlig upload eller publicering er foretaget.
+- Endelig Docker-build og 45 automatiske tests bestod. Testene dækker også safe-layout, to zoom-faser og eksakt fasevarighed.
+- Zoom-v11: rights, technical, safety og quality ALLOW; speakmatch 99,51 %; −16,5 LUFS og −0,9 dBTP; AWAITING_OWNER.
+- Safe-v10: rights, technical, safety og quality ALLOW; speakmatch 99,51 %; −16,4 LUFS og −1,0 dBTP; AWAITING_OWNER.
+- Zoom-v11 er kontrolleret ved fire præcise tidspunkter for hvert af de ti spil: bred visning, zoom 1, bred visning og zoom 2. Safe-v10 er kontrolleret som storyboard og billedserie for hvert sekund.
+- Alle 18 manifestfiler i de to nye versioner er SHA-256-verificeret. De ældre tre platformversioner har 27 verificerede manifestfiler.
+- Mini-bibel v1.3 PDF er bygget med 29 sider; forsiden og de nye mobilregler på side 17-18 er visuelt kontrolleret med korrekte danske tegn.
+- Ingen betalte API-kald, køb, OAuth, privat/offentlig upload eller social publicering er foretaget.
 
 MANGLER / BLOKERET
-- Ejeren skal gennemse og godkende de konkrete versioner, især den nye stemme og billedbeskæring, før publicering.
+- Ejeren skal se og lytte til de konkrete versioner før publicering; automatisk visuel kontrol erstatter ikke den fulde visning.
 - VPS-deploy, Claude API, YouTube/Meta OAuth, kanal/konto, privat upload og virkelige metrics er ikke verificeret.
-- Rangeringen er redaktionel; FPS og batteritid er ikke målt. Views/likes/abonnementer kan ikke garanteres.
+- Rangeringen er redaktionel; FPS og batteritid er ikke målt. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
+- Lokal AI-hardware er produktresearch, ikke uafhængige tokens/sekund-benchmarks. Ingen maskine er købt.
 - Krypteret offsite backup, BACKUP_KEY, affiliate, skat/moms og kontomonetisering mangler.
 - Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt.
 
 SIKKERHEDSTILSTAND
 DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false.
 Nødstop og diskgrænser må ikke omgås. Ukendte rettigheder/alder/sikkerhed blokerer.
-Demo og produktion holdes adskilt. Fejlede prøveversioner er ikke leveret.
+Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Gennemse den nye pakke, start med some-pilot/data/versions/handheld-reels-v2/video.mp4. Lyt til stemmen og se fuldskærms-actionen. Kontrollér derefter TikTok og YouTube i samme mappe. Sig om stemme og billedstil er godkendt, eller hvad der skal justeres.
+Se `some-pilot/data/versions/handheld-zoom-v11/video.mp4`, og sig om du foretrækker zoom eller safe. Kontopunkterne kommer først bagefter.
 
 TESTBEVIS
-Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen 100 % fejlfriheds-, indtægts- eller performancegaranti gives.
+Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Der gives ingen 100 % fejlfriheds-, indtægts- eller performancegaranti.

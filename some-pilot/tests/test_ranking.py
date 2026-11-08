@@ -111,3 +111,26 @@ def test_youtube_uses_reviewed_tempo_without_scene_truncation():
     assert get_platform("youtube").tempo == 1.07
     assert get_platform("tiktok").tempo == 1.0
     assert get_platform("reels").tempo == 1.0
+
+
+def test_safe_mobile_layout_preserves_full_gameplay_width():
+    from app.pipeline.mobile import mobile_filter
+    from app.pipeline.ranking import get_platform
+    result = mobile_filter(RankingScene.model_validate(scene()), 1920, 1080, get_platform("reels"), "safe", 10)
+    assert "scale=1040:-2" in result
+    assert "crop=608" not in result
+    assert "overlay=(W-w)/2:(H-h)/2" in result
+
+
+def test_zoom_mobile_layout_has_two_single_frame_zoom_phases():
+    from app.pipeline.mobile import mobile_filter
+    from app.pipeline.ranking import get_platform
+    result = mobile_filter(RankingScene.model_validate(scene()), 1920, 1080, get_platform("reels"), "zoom", 10)
+    assert result.count("zoompan=") == 2
+    assert result.count(":d=1:s=1080x1920") == 2
+    assert result.count("setpts=N/(30*TB)") == 4
+    assert "trim=duration=1.800" in result
+    assert result.count("trim=duration=2.800") == 1
+    assert "trim=duration=2.000" in result
+    assert result.count("trim=duration=3.400") == 1
+    assert "concat=n=4:v=1:a=0" in result

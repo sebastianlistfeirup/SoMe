@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from app.pipeline.downloader import detect_media_type
 from app.pipeline.media import MediaError, probe, run, srt_timestamp, synthesize, technical_checks
+from app.pipeline.mobile import mobile_filter
 
 WIDTH = 1080
 HEIGHT = 1920
@@ -115,7 +116,7 @@ def _crop_filter(scene: RankingScene, source_width: int, source_height: int, spe
     return f"[0:v]crop={crop_width}:{crop_height}:{x:.3f}:{y:.3f},scale={spec.width}:{spec.height},setsar=1[composite];"
 
 
-def _render_scene(scene: RankingScene, source: Path, directory: Path, narration: str, voice_dir: str | None = None, hook: bool = False, platform: str = "reels") -> tuple[Path, float, list[dict]]:
+def _render_scene(scene: RankingScene, source: Path, directory: Path, narration: str, voice_dir: str | None = None, hook: bool = False, platform: str = "reels", mobile_style: str = "zoom") -> tuple[Path, float, list[dict]]:
     spec = get_platform(platform)
     stem = "hook" if hook else f"rank-{scene.rank:02d}"
     audio = directory / f"{stem}.wav"
@@ -154,7 +155,7 @@ def _render_scene(scene: RankingScene, source: Path, directory: Path, narration:
         overlay = "drawbox=x=0:y=0:w=iw:h=246:color=0x07101f@0.68:t=fill,drawbox=x=60:y=234:w=960:h=4:color=0x58efff:t=fill"
         badge_x, title_x, subtitle_x = 60, 60, 60
     filter_graph = (
-        _crop_filter(scene, video_stream["width"], video_stream["height"], spec)
+        _crop_filter(scene, video_stream["width"], video_stream["height"], spec) if spec.landscape else mobile_filter(scene, video_stream["width"], video_stream["height"], spec, mobile_style, duration)
         + f"[composite]{overlay},"
         + _drawtext(badge, 25 if spec.landscape else 27, str(badge_x), str(badge_y), "0x58efff") + ","
         + _drawtext(title, title_size, str(title_x), str(title_y)) + ","
@@ -172,7 +173,7 @@ def _render_scene(scene: RankingScene, source: Path, directory: Path, narration:
     return directory / f"{stem}.mp4", duration, [{"start": 0.0, "end": duration, "text": narration}]
 
 
-def render_ranking(plan_path: Path, output: Path, platform: str = "reels") -> dict:
+def render_ranking(plan_path: Path, output: Path, platform: str = "reels", mobile_style: str = "zoom") -> dict:
     plan = RankingPlan.model_validate_json(plan_path.read_text(encoding="utf-8"))
     spec = get_platform(platform)
     validate_sources(plan_path, plan)
@@ -186,7 +187,7 @@ def render_ranking(plan_path: Path, output: Path, platform: str = "reels") -> di
     durations = []
     captions = []
     for scene_index, scene in enumerate([first, *ordered]):
-        segment, duration, scene_captions = _render_scene(scene, (plan_path.parent / scene.source_path).resolve(), work, plan.hook if scene_index == 0 else scene.narration, plan.voice_dir, scene_index == 0, platform)
+        segment, duration, scene_captions = _render_scene(scene, (plan_path.parent / scene.source_path).resolve(), work, plan.hook if scene_index == 0 else scene.narration, plan.voice_dir, scene_index == 0, platform, mobile_style)
         segments.append(segment)
         durations.append(duration)
         captions.extend(scene_captions)
@@ -227,7 +228,7 @@ def render_ranking(plan_path: Path, output: Path, platform: str = "reels") -> di
     caption_path.write_text("\n\n".join(f"{index}\n{srt_timestamp(item['start'])} --> {srt_timestamp(item['end'])}\n{item['text']}" for index, item in enumerate(timeline, 1)), encoding="utf-8")
     (output / "editorial.json").write_text(json.dumps(plan.model_dump(mode="json"), indent=2, ensure_ascii=False), encoding="utf-8")
     technical = technical_checks(video, caption_path, expected_dimensions=(spec.width, spec.height))
-    return {"decision": "ALLOW" if technical["decision"] == "ALLOW" else "BLOCK", "video": str(video), "platform": platform, "scenes": len(ordered), "real_video_clips": True, "synthetic_fallback": False, "full_bleed_action": not spec.landscape, "transitions": len(offsets), "technical": technical}
+    return {"decision": "ALLOW" if technical["decision"] == "ALLOW" else "BLOCK", "video": str(video), "platform": platform, "mobile_style": mobile_style, "zooms_per_game": 2 if mobile_style == "zoom" and not spec.landscape else 0, "scenes": len(ordered), "real_video_clips": True, "synthetic_fallback": False, "full_bleed_action": not spec.landscape and mobile_style == "zoom", "transitions": len(offsets), "technical": technical}
 
 
 def _wrap_caption(text: str) -> list[str]:

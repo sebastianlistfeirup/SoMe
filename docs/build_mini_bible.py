@@ -11,14 +11,14 @@ from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "SoMe-mini-bibel-v1.0-source.txt"
-TARGET = ROOT / "docs" / "SoMe-mini-bibel-v1.2.md"
-PDF = ROOT / "docs" / "SoMe-mini-bibel-v1.2.pdf"
+TARGET = ROOT / "docs" / "SoMe-mini-bibel-v1.3.md"
+PDF = ROOT / "docs" / "SoMe-mini-bibel-v1.3.pdf"
 
 
 def revised_text() -> str:
     text = SOURCE.read_text(encoding="utf-8")
-    text = text.replace("VERSION 1.0 · 5. NOVEMBER 2026 · DANSK", "VERSION 1.1 · 8. NOVEMBER 2026 · DANSK")
-    text = text.replace("v1.0", "v1.2")
+    text = text.replace("VERSION 1.0 · 5. NOVEMBER 2026 · DANSK", "VERSION 1.3 · 8. NOVEMBER 2026 · DANSK")
+    text = text.replace("v1.0", "v1.3")
     old_step = "1) Vælg en godkendt emnekandidat. Saml faktakilder og lovligt materiale. Download til karantæne med\nstørrelses- og tidsgrænser. Valider URL, indholdstype, filsignatur og faktisk medieformat; blokér private\nnetværksadresser og cloud-metadata-endpoints."
     new_step = """1) Vælg en godkendt emnekandidat. Saml faktakilder og lovligt materiale. Produktionsvideoer skal ALTID som standard bygges på rigtige klip fra internettet med dokumenteret tilladelse. Download til karantæne med størrelses- og tidsgrænser. Valider URL, indholdstype, filsignatur og faktisk medieformat; blokér private netværksadresser og cloud-metadata-endpoints.
 
@@ -43,10 +43,12 @@ Overgange, titler, thumbnails og grafik skal understøtte det rigtige klipmateri
     text = text.replace(old_rights, new_rights)
     platform_rules = """
 
-PLATFORMFORMAT OG BILLEDKOMPOSITION v1.2
-Vertikale gamingvideoer skal bruge fuldskærms-gameplay med et tæt 9:16-crop og et dokumenteret fokuspunkt pr. klip. Et lille 16:9-udsnit med stor tom eller sløret flade må ikke være standard. Tekst og undertekster skal ligge i platformens safe areas uden at skjule den vigtigste action.
+PLATFORMFORMAT OG BILLEDKOMPOSITION v1.3
+Vertikale gamingvideoer skal som hovedregel bruge dynamisk fuldskærms-gameplay med et dokumenteret fokuspunkt pr. klip. Et lille 16:9-udsnit med stor tom flade må ikke være eneste version. Tekst og undertekster skal ligge i platformens safe areas uden at skjule den vigtigste action.
 
-Lav separate redaktionelle varianter: TikTok med kortere og hurtigere kommentar, Instagram Reels med vertikal action og gem/del-CTA, og YouTube med 16:9, længere kommentar og eget landskabsthumbnail. Gem platform, format og CTA som features før publicering, så resultaterne kan sammenlignes korrekt.
+Lav ved behov to vertikale varianter. ZOOM veksler mellem fuld originalbredde og mindst to tydelige fuldskærms-zooms pr. spil eller emne. Hver fase skal have en eksakt varighed og synkron tidskode, så den anden zoom ikke forsvinder eller forskyder lyden. SAFE viser hele spillets originale bredde på op til 1040 pixels med dæmpet, sløret udfyldning bagved. SAFE er obligatorisk når tekstkort, brugerflade eller vigtig action ellers ville blive beskåret. Begge varianter skal kontrolleres som faktiske billedserier, ikke kun som filterkode.
+
+Lav separate redaktionelle varianter: TikTok med kortere og hurtigere kommentar, Instagram Reels med vertikal action og gem/del-CTA, og YouTube med 16:9, længere kommentar og eget landskabsthumbnail. Gem platform, mobiltilstand, antal zooms og CTA som features før publicering, så resultaterne kan sammenlignes korrekt.
 
 Brug en naturlig og energisk stemme med dokumenteret modellicens og kvalitetsgodkendt udtale. Generisk eller kedelig oplæsning er ikke færdig produktionskvalitet. Kokoro kan køre lokalt på CPU med Apache-2.0-modellicens; hver stemme og hastighed skal evalueres. Ingen stemmeefterligning af en virkelig person uden tilladelse.
 """
@@ -75,7 +77,7 @@ def pdf(text: str) -> None:
     heading = ParagraphStyle("heading", parent=regular, fontName="DejaVuBold", fontSize=17, leading=22, spaceBefore=3, spaceAfter=14, textColor="#12365b")
     cover = ParagraphStyle("cover", parent=heading, fontSize=28, leading=34, alignment=TA_CENTER, spaceBefore=65)
     code = ParagraphStyle("code", parent=regular, fontName="Courier", fontSize=7.8, leading=10.5, backColor="#f0f4f7")
-    doc = SimpleDocTemplate(str(PDF), pagesize=A4, rightMargin=20 * mm, leftMargin=20 * mm, topMargin=18 * mm, bottomMargin=17 * mm, title="SoMe-maskinen — mini-bibel v1.2", author="SoMe-maskinen")
+    doc = SimpleDocTemplate(str(PDF), pagesize=A4, rightMargin=20 * mm, leftMargin=20 * mm, topMargin=18 * mm, bottomMargin=17 * mm, title="SoMe-maskinen — mini-bibel v1.3", author="SoMe-maskinen")
     story = []
     for page_number, page in enumerate(text.split("\f"), 1):
         lines = page.strip().splitlines()
@@ -108,7 +110,7 @@ def pdf(text: str) -> None:
         canvas.saveState()
         canvas.setFont("DejaVu", 7.5)
         canvas.setFillColor("#61758b")
-        canvas.drawString(20 * mm, 9 * mm, "SoMe-maskinen · Bygge- og driftsinstruktion · v1.2")
+        canvas.drawString(20 * mm, 9 * mm, "SoMe-maskinen · Bygge- og driftsinstruktion · v1.3")
         canvas.drawRightString(190 * mm, 9 * mm, str(document.page))
         canvas.restoreState()
 

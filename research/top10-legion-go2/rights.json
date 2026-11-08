@@ -234,11 +234,11 @@
       "game": "Balatro",
       "app_id": 2379780,
       "store_url": "https://store.steampowered.com/app/2379780/",
-      "clip_url": "https://store.steampowered.com/app/2379780/?movie=257198110",
-      "clip_title": "Accolades Gameplay Video",
-      "download_page": "https://video.akamai.steamstatic.com/store_trailers/2379780/581550014/e9a47276c1efe4165c2e25e35a06d417d78e1724/1758033766/hls_264_master.m3u8?t=1759138871",
-      "local_path": "clips/2379780-257198110.mp4",
-      "duration_seconds": 38.687696,
+      "clip_url": "https://www.youtube.com/watch?v=2n9pkiuSZLU",
+      "clip_title": "Balatro - Launch Trailer | THE POKER ROGUELIKE",
+      "download_page": "https://www.youtube.com/watch?v=2n9pkiuSZLU",
+      "local_path": "clips/balatro-launch.mp4",
+      "duration_seconds": 67.570068,
       "policy_url": "https://www.playstack.com/video-policy",
       "rights_holder": "Playstack Ltd / LocalThunk",
       "commercial_allowed": true,
@@ -254,14 +254,14 @@
       "rights_evidence": "Official video policy permits free, publicly available monetized videos with original creative input and commentary using released Gaming Content or official promotional trailers.",
       "evidence_date": "2026-11-08",
       "download": {
-        "source_url": "https://video.akamai.steamstatic.com/store_trailers/2379780/581550014/e9a47276c1efe4165c2e25e35a06d417d78e1724/1758033766/hls_264_master.m3u8?t=1759138871",
-        "transport": "official_steam_hls_h264",
-        "bytes": 28678459
+        "source_url": "https://www.youtube.com/watch?v=2n9pkiuSZLU",
+        "transport": "official_publisher_youtube",
+        "bytes": 5198049
       },
-      "sha256": "f30e93409d97d85ec2d6afea9d692bd72abd979bddb054073455fb11b76271c5",
+      "sha256": "abd7f6d2b010228cc3c3107695642522e81c45d5af41b7ea7d518724e854450c",
       "media": {
-        "width": 1920,
-        "height": 1080,
+        "width": 640,
+        "height": 360,
         "codec": "h264"
       },
       "official_movies": [
@@ -270,7 +270,8 @@
           "name": "Accolades Gameplay Video",
           "highlight": true
         }
-      ]
+      ],
+      "resolution_note": "Official Playstack launch trailer; verified local copy is 640x360. A higher-resolution download was unavailable, so no quality claim is made."
     },
     {
       "game": "Stardew Valley",

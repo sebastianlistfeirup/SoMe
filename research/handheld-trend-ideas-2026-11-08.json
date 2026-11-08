@@ -1,0 +1,114 @@
+{
+  "researched_at": "2026-11-08",
+  "scope": "Ten new editorial concepts, not published videos and not a promise of views.",
+  "evidence": [
+    {
+      "source": "Valve Steam Deck Top Played, weekly chart 2026-11-02 through 2026-11-08",
+      "url": "https://store.steampowered.com/charts/steamdecktopplayed",
+      "observed": {
+        "Slay the Spire 2": 1,
+        "Stardew Valley": 5,
+        "Balatro": 10,
+        "Hades II": 26,
+        "Slay the Spire": 29,
+        "Hades": 30,
+        "Hollow Knight: Silksong": 44,
+        "Hollow Knight": 45
+      }
+    },
+    {
+      "source": "Deck Wizard: The TOP 50 MOST PLAYED Steam Deck Games Of October 2026",
+      "url": "https://www.youtube.com/watch?v=hs6O4dS7zxs",
+      "observed": "34,376 views, seven days after publication. Evidence of interest in a current data-led chart format, not a forecast for this channel."
+    },
+    {
+      "source": "HiTechKing: Legion Go 2 Review: Can It Handle AAA Games? (Performance, Battery & Gaming Tests)",
+      "url": "https://www.youtube.com/watch?v=-rN3yjQwKUc",
+      "observed": "30,148 views, one month after publication. Supports interest in concrete handheld testing; no performance claims may be copied without our own measurements."
+    }
+  ],
+  "footage_status": "All candidate_assets refer to the already documented publisher clips and policies in research/top10-legion-go2/rights.json. Rights must be rechecked on the actual publication date. No third-party review footage is licensed for reuse.",
+  "ideas": [
+    {
+      "id": "handheld-013",
+      "title": "Steam Deck's #1 this week: why Slay the Spire 2 is everywhere",
+      "format": "45-second TikTok and Reels; chart card, combat and three specific reasons",
+      "trend_signal": "Valve rank #1 this week",
+      "candidate_assets": ["Slay the Spire 2"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-014",
+      "title": "Slay the Spire 2 vs Slay the Spire: the Deck chart rematch",
+      "format": "60-second versus edit plus a longer YouTube comparison",
+      "trend_signal": "Valve ranks #1 and #29; compare design, not unmeasured FPS",
+      "candidate_assets": ["Slay the Spire 2", "Slay the Spire"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-015",
+      "title": "Three games in this week's Deck top 10 for your next short session",
+      "format": "Fast three-pick vertical ranking with one gameplay payoff per title",
+      "trend_signal": "Slay the Spire 2 #1, Stardew Valley #5 and Balatro #10",
+      "candidate_assets": ["Slay the Spire 2", "Stardew Valley", "Balatro"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-016",
+      "title": "Hades II vs Hades: which one are Deck players choosing this week?",
+      "format": "Split-screen combat comparison with a chart-based opening hook",
+      "trend_signal": "Hades II #26 and Hades #30; popularity is weekly context, not a quality verdict",
+      "candidate_assets": ["Hades II", "Hades"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-017",
+      "title": "Silksong vs Hollow Knight: sequel or original first?",
+      "format": "Three rounds: movement, combat and exploration; vertical and landscape edits",
+      "trend_signal": "Adjacent weekly ranks #44 and #45 make the comparison timely",
+      "candidate_assets": ["Hollow Knight: Silksong", "Hollow Knight"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-018",
+      "title": "Five non-AAA games in this week's Deck top 30",
+      "format": "Data-led countdown with large rank graphics and full-screen gameplay",
+      "trend_signal": "Slay the Spire 2 #1, Stardew Valley #5, Balatro #10, Hades II #26 and Hades #30",
+      "candidate_assets": ["Slay the Spire 2", "Stardew Valley", "Balatro", "Hades II", "Hades"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-019",
+      "title": "Cozy or chaos: Stardew Valley vs Hades II",
+      "format": "Two contrasting 20-second halves; viewers vote for their evening mood",
+      "trend_signal": "Stardew Valley #5 and Hades II #26 this week",
+      "candidate_assets": ["Stardew Valley", "Hades II"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-020",
+      "title": "Why Balatro is still a Deck top-10 game",
+      "format": "Single-game hook, one combination payoff and three design reasons",
+      "trend_signal": "Balatro #10 in the current weekly chart",
+      "candidate_assets": ["Balatro"],
+      "status": "SCRIPT_AND_FACT_REVIEW_REQUIRED"
+    },
+    {
+      "id": "handheld-021",
+      "title": "We followed the Deck chart: five games to install next",
+      "format": "A recurring chart-reaction series with a dated chart snapshot and five picks",
+      "trend_signal": "Uses the current top-30 games above; each episode must capture a fresh chart",
+      "candidate_assets": ["Slay the Spire 2", "Stardew Valley", "Balatro", "Hades II", "Hades"],
+      "status": "PLAYTEST_AND_SCRIPT_REQUIRED"
+    },
+    {
+      "id": "handheld-022",
+      "title": "The Steam Deck chart tournament: you choose the winner",
+      "format": "Weekly viewer-voted bracket; two games per short and a finale on YouTube",
+      "trend_signal": "Eight documented games occupy ranks #1 through #45 this week",
+      "candidate_assets": ["Slay the Spire 2", "Stardew Valley", "Balatro", "Hades II", "Slay the Spire", "Hades", "Hollow Knight: Silksong", "Hollow Knight"],
+      "status": "SERIES_FORMAT_AND_COMMUNITY_REVIEW_REQUIRED"
+    }
+  ],
+  "measurement_rule": "Chart ranks and view counts are snapshots observed on 2026-11-08. Refresh them before scripting or titling a production. Views do not establish causation or guarantee performance."
+}
