@@ -11,3 +11,9 @@ __pycache__/
 *.db-shm
 *.zip
 *.enc
+.doc-venv/
+docs/.preview-*
+research/**/clips/
+research/**/voice*/
+research/**/previews/
+SoMe-mini-bibel-original.txt

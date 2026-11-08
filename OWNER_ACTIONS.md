@@ -2,9 +2,9 @@
 
 Der er ikke foretaget køb, login, OAuth, betalte API-kald eller offentlig publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
-## 0. Lokal diskblokering
+## 0. Se den færdige top-10-video
 
-Docker-rapporteringen viste 8. november 2026 ca. 34–36 GB fri plads og over 99 % forbrug. Systemet stopper derfor nye renderjobs som designet. Frigør tilstrækkelig plads på det valgte rendermiljø, eller fortsæt på den godkendte VPS. Ændr ikke 90 %-grænsen for at fremtvinge produktion. Kør derefter `doctor` og demo-pipeline igen.
+Åbn `some-pilot/data/versions/legion-go2-top10-v6/video.mp4` og se hele videoen på 96,2 sekunder. Kontrollér alle ti spil, rækkefølgen, speak, undertekster, klip og thumbnail. Sig derefter kun, om denne konkrete version er godkendt, eller hvad der skal ændres. Den står i `AWAITING_OWNER` og er ikke publiceret. Diskstatus er løst: doctor viser 85,69 % brugt, ca. 572 GB fri og `stop_render=false`.
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
@@ -71,8 +71,8 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## 6. Kvalitet, rettigheder og kommerciel lancering
 
-- Godkend engelsk speak på en 20-sekunders prøve. Espeak-ng er kun en funktionel demo; Kokoro/dansk TTS er ikke antaget understøttet.
-- Godkend hver færdig version i dashboardet efter at have set hele videoen. Ingen automatisk publicering af DEMO.
+- Den engelske top-10 bruger lokal Microsoft Zira-speak. Espeak-ng er kun fallback; Kokoro/dansk TTS er ikke antaget understøttet.
+- Godkend hver færdig version i dashboardet efter at have set hele videoen. Ingen automatisk publicering af DEMO eller AWAITING_OWNER-versioner.
 - Kontrollér konkrete stock-, gameplay-, musik- og personrettigheder pr. asset. Der findes ingen 10-sekundersregel.
 - Vælg et faktisk affiliateprogram, dokumentér vilkår, provision og reklamemarkering. Ingen RPM, købsrate eller indtjening antages.
 - Afklar reklamemarkering, skat/moms og juridiske fortolkninger med relevante fagpersoner før kommerciel lancering.
@@ -80,4 +80,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Start med punkt 0 eller en prisgodkendt VPS. Derefter kan den fulde mediepipeline køres og benchmarkes. Kontopunkterne kan derefter klares samlet uden at ændre arkitekturen.
+Udfør kun punkt 0 nu: se hele `some-pilot/data/versions/legion-go2-top10-v6/video.mp4` og giv konkret feedback eller godkend versionen. Kontopunkterne kommer først bagefter.

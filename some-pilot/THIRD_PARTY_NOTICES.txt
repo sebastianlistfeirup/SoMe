@@ -6,4 +6,9 @@ Project/license: https://github.com/bigskysoftware/htmx — MIT
 Bundled file: app/static/htmx.min.js
 SHA-256: e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447
 
+Pillow 11.3.0
+Project: https://python-pillow.org/
+License: HPND — Historical Permission Notice and Disclaimer
+Used for original scene graphics, not third-party media.
+
 Python and OS dependencies are pinned in requirements.lock. Their upstream licenses must be reviewed before commercial distribution. FFmpeg, espeak-ng, faster-whisper and model sources are registered in Dockerfile/models.lock. No third-party media or music is bundled.

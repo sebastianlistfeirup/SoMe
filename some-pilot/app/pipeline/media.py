@@ -1,3 +1,4 @@
+import gc
 import json
 import shutil
 import subprocess
@@ -14,7 +15,7 @@ class MediaError(RuntimeError):
 def run(args: list[str], timeout: int | None = None) -> subprocess.CompletedProcess:
     result = subprocess.run(args, capture_output=True, text=True, timeout=timeout or get_settings().render_max_seconds, check=False)
     if result.returncode != 0:
-        raise MediaError(f"command_failed:{args[0]}:{result.stderr[-1000:]}")
+        raise MediaError(f"command_failed:{args[0]}:{result.stderr[-5000:]}")
     return result
 
 
@@ -64,24 +65,78 @@ def transcribe(audio: Path, output: Path) -> dict:
     if not segments:
         raise MediaError("transcription_empty")
     write_srt(segments, output)
-    return {"language": info.language, "language_probability": info.language_probability, "segments": len(segments), "model": "small/int8", "segments_detail": segments}
+    result = {"language": info.language, "language_probability": info.language_probability, "segments": len(segments), "model": "small/int8", "segments_detail": segments}
+    del model
+    gc.collect()
+    return result
 
 
-def render(background: Path, narration: Path, captions: Path, title: str, output: Path) -> None:
+def _font_size(lines: list[str], base: int, max_width: int) -> int:
+    longest = max((len(line) for line in lines), default=1)
+    return max(24, min(base, int(max_width / max(1, longest) / 0.62)))
+
+
+def render(backgrounds: list[Path], narration: Path, captions: Path, title: str, output: Path) -> dict:
+    if not backgrounds:
+        raise MediaError("scene_assets_missing")
+    caption_blocks = [block for block in captions.read_text(encoding="utf-8").strip().split("\n\n") if block.strip()]
+    if len(backgrounds) != len(caption_blocks):
+        raise MediaError("scene_and_caption_count_mismatch")
+    title_lines = textwrap.wrap(title, width=32)[:2]
     title_file = output.parent / "title.txt"
-    title_file.write_text("\n".join(textwrap.wrap(title, width=32)[:2]), encoding="utf-8")
-    filters = (
-        f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile={title_file}:"
-        "fontcolor=white:fontsize=64:line_spacing=12:x=(w-text_w)/2:y=180:borderw=2:bordercolor=black,"
-        f"subtitles={captions}:force_style='FontName=DejaVu Sans,FontSize=18,PrimaryColour=&H00FFFFFF,"
-        "OutlineColour=&H00000000,BorderStyle=1,Outline=2,Alignment=2,MarginV=280'"
-    )
+    title_file.write_text("\n".join(title_lines), encoding="utf-8")
+    title_size = _font_size(title_lines, 64, 900)
+    input_args = []
+    scene_filters = []
+    for index, (background, block) in enumerate(zip(backgrounds, caption_blocks)):
+        timing = block.splitlines()[1].split(" --> ")
+        start = _srt_seconds(timing[0])
+        end = _srt_seconds(timing[1])
+        duration = max(0.2, end - start)
+        input_args.extend(["-loop", "1", "-t", f"{duration:.3f}", "-i", str(background)])
+        scene_filters.append(f"[{index}:v]scale=1080:1920,zoompan=z='min(zoom+0.0004,1.04)':d={max(1, round(duration * 30))}:s=1080x1920:fps=30,trim=duration={duration:.3f},setpts=PTS-STARTPTS[v{index}]")
+    filters = [
+        ";".join(scene_filters),
+        f"{''.join(f'[v{index}]' for index in range(len(backgrounds)))}concat=n={len(backgrounds)}:v=1:a=0[scenes]",
+    ]
+    caption_count = 0
+    max_estimated_width = 0
+    caption_filters = []
+    for block_index, block in enumerate(caption_blocks, 1):
+        lines = block.splitlines()
+        timing = lines[1].split(" --> ")
+        start = _srt_seconds(timing[0])
+        end = _srt_seconds(timing[1])
+        wrapped = textwrap.wrap(" ".join(lines[2:]), width=36)
+        chunks = [wrapped[index:index + 2] for index in range(0, len(wrapped), 2)]
+        for chunk_index, chunk in enumerate(chunks, 1):
+            caption_count += 1
+            caption_file = output.parent / f"caption-{block_index}-{chunk_index}.txt"
+            caption_file.write_text("\n".join(chunk), encoding="utf-8")
+            size = _font_size(chunk, 48, 920)
+            max_estimated_width = max(max_estimated_width, round(max(len(line) for line in chunk) * size * 0.62))
+            chunk_start = start + (end - start) * (chunk_index - 1) / len(chunks)
+            chunk_end = start + (end - start) * chunk_index / len(chunks)
+            caption_filters.append(
+                f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:textfile={caption_file}:"
+                f"fontcolor=white:fontsize={size}:line_spacing=10:x=(w-text_w)/2:y=h-450:borderw=2:bordercolor=black:"
+                f"enable='between(t,{chunk_start:.3f},{chunk_end:.3f})'"
+            )
+    filters.append(f"[scenes]{','.join(caption_filters)}")
+    input_args.extend(["-i", str(narration)])
     run([
-        "ffmpeg", "-y", "-loop", "1", "-i", str(background), "-i", str(narration),
-        "-vf", filters, "-af", "loudnorm=I=-16:TP=-1:LRA=11", "-c:v", "libx264",
+        "ffmpeg", "-y", *input_args,
+        "-threads", "2", "-filter_threads", "2",
+        "-filter_complex", ";".join(filters), "-af", "loudnorm=I=-16:TP=-1:LRA=11", "-c:v", "libx264",
         "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", "-r", "30",
         "-c:a", "aac", "-b:a", "128k", "-shortest", str(output),
     ])
+    return {"decision": "ALLOW", "reasons": [], "title_lines": len(title_lines), "caption_blocks": caption_count, "scene_count": len(backgrounds), "animated_scenes": True, "max_estimated_text_width": max_estimated_width, "safe_horizontal_margin_px": 80, "title_y_px": 180, "caption_bottom_margin_px": 450}
+
+
+def _srt_seconds(value: str) -> float:
+    hours, minutes, seconds = value.replace(",", ".").split(":")
+    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
 
 
 def thumbnail(video: Path, output: Path) -> None:
@@ -89,7 +144,9 @@ def thumbnail(video: Path, output: Path) -> None:
 
 
 def storyboard(video: Path, output: Path) -> None:
-    run(["ffmpeg", "-y", "-i", str(video), "-vf", "fps=1/5,scale=270:480,tile=3x1", "-frames:v", "1", str(output)])
+    duration = float(probe(video)["format"]["duration"])
+    interval = max(duration / 6, 0.1)
+    run(["ffmpeg", "-y", "-i", str(video), "-vf", f"fps=1/{interval:.6f},scale=216:384,tile=6x1", "-frames:v", "1", str(output)])
 
 
 def technical_checks(video: Path, captions: Path, expected_max_lines: int = 2) -> dict:

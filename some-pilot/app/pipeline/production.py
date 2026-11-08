@@ -10,14 +10,15 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
 from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
-from app.pipeline.media import make_background, probe, render, require_tools, storyboard, synthesize, technical_checks, thumbnail, transcribe
+from app.pipeline.media import probe, render, require_tools, storyboard, synthesize, technical_checks, thumbnail, transcribe
+from app.pipeline.scenes import make_scene_assets
 from app.pipeline.policy import content_policy, rights_policy
 
 
 def transcription_quality(script: str, transcription: dict) -> dict:
     spoken = " ".join(segment["text"] for segment in transcription.get("segments_detail", []))
     normalize = lambda value: re.sub(r"\s+", " ", re.sub(r"[^\wæøåÆØÅ ]", " ", value.lower())).strip()
-    similarity = difflib.SequenceMatcher(None, normalize(script), normalize(spoken)).ratio() if spoken else 0
+    similarity = difflib.SequenceMatcher(None, normalize(script), normalize(spoken), autojunk=False).ratio() if spoken else 0
     expected_numbers = re.findall(r"\d+(?:[.,]\d+)?", script)
     missing_numbers = [number for number in expected_numbers if number not in spoken]
     reasons = []
@@ -30,10 +31,12 @@ def transcription_quality(script: str, transcription: dict) -> dict:
     return {"decision": "ALLOW" if not reasons else "REVIEW", "reasons": reasons, "similarity": round(similarity, 4), "missing_numbers": missing_numbers, "names_and_numbers_require_owner_check": True}
 
 
-def produce(db: Session, topic_id: int, dry_run: bool = True) -> VideoVersion:
+def produce(db: Session, topic_id: int, dry_run: bool = True, allow_synthetic_fallback: bool = False) -> VideoVersion:
     settings = get_settings()
     if paused(db):
         raise RuntimeError("emergency_stop_active")
+    if not dry_run and not allow_synthetic_fallback:
+        raise ValueError("licensed_internet_assets_required")
     require_tools()
     disk = shutil.disk_usage(settings.data_dir)
     if disk.used / disk.total >= 0.90:
@@ -65,14 +68,18 @@ def produce(db: Session, topic_id: int, dry_run: bool = True) -> VideoVersion:
     db.add(video)
     db.flush()
     try:
-        background = output / "background.png"
-        make_background(background)
-        asset = Asset(path=str(background), source_url="synthetic://some-pilot/background", rights_status="CLEARED", sha256=sha256_file(str(background)), bytes=background.stat().st_size, media_type="image/png", metadata_json={"generated_by": "FFmpeg color source", "no_people": True})
-        db.add(asset)
-        db.flush()
-        license_ = License(asset_id=asset.id, rights_holder="SoMe pilot owner", license_text="Original synthetic image generated locally for this project; owner-controlled.", source_url="synthetic://some-pilot/background", commercial_allowed=True, derivative_allowed=True, platforms_json=["youtube", "instagram", "tiktok", "facebook"], territories_json=["global"], evidence_path=str(background), age_clearance="NO_PEOPLE", status="ALLOW")
-        db.add(license_)
-        rights = rights_policy(db, [asset.id], "youtube")
+        backgrounds = make_scene_assets(output)
+        assets = []
+        licenses = []
+        for index, background in enumerate(backgrounds, 1):
+            asset = Asset(path=str(background), source_url=f"synthetic://some-pilot/scene-{index}", rights_status="CLEARED", sha256=sha256_file(str(background)), bytes=background.stat().st_size, media_type="image/png", metadata_json={"generated_by": "Original Pillow motion-graphic scene", "no_people": True})
+            db.add(asset)
+            db.flush()
+            license_ = License(asset_id=asset.id, rights_holder="SoMe pilot owner", license_text="Original synthetic scene generated locally for this project; owner-controlled.", source_url=f"synthetic://some-pilot/scene-{index}", commercial_allowed=True, derivative_allowed=True, platforms_json=["youtube", "instagram", "tiktok", "facebook"], territories_json=["global"], evidence_path=str(background), age_clearance="NO_PEOPLE", status="ALLOW")
+            db.add(license_)
+            assets.append(asset)
+            licenses.append(license_)
+        rights = rights_policy(db, [asset.id for asset in assets], "youtube")
         if rights.decision != "ALLOW":
             transition(video, "BLOCKED")
             raise ValueError("rights_blocked:" + ",".join(rights.reasons))
@@ -83,10 +90,10 @@ def produce(db: Session, topic_id: int, dry_run: bool = True) -> VideoVersion:
         captions = output / "captions.srt"
         transcription = transcribe(narration, captions)
         audio_duration = float(probe(narration)["format"]["duration"])
-        clip_plan = build_clip_plan(transcription["segments_detail"], asset.id, audio_duration, [claim.id for claim in draft.claims])
+        clip_plan = build_clip_plan(transcription["segments_detail"], [asset.id for asset in assets], audio_duration, [claim.id for claim in draft.claims])
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
         rendered = output / "video.mp4"
-        render(background, narration, captions, draft.title, rendered)
+        layout = render(backgrounds, narration, captions, draft.title, rendered)
         thumb = output / "thumbnail.jpg"
         thumbnail(rendered, thumb)
         board = output / "storyboard.jpg"
@@ -102,14 +109,14 @@ def produce(db: Session, topic_id: int, dry_run: bool = True) -> VideoVersion:
         transition(video, "TECH_CHECKED")
         safety = content_policy(draft.narration + "\n" + draft.post_text, contains_people=False, ages_verified=False)
         quality = transcription_quality(draft.narration, transcription)
-        checks = {"rights": rights.model_dump(), "technical": technical, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "transcription": transcription, "owner_review_required": True}
+        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "transcription": transcription, "owner_review_required": True}
         (output / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
         if safety.decision != "ALLOW" or quality["decision"] != "ALLOW":
             transition(video, "BLOCKED")
             raise ValueError("safety_or_quality_blocked")
         transition(video, "SAFETY_REVIEWED")
         transition(video, "AWAITING_OWNER")
-        _write_deliverables(output, video, script, asset, license_, checks)
+        _write_deliverables(output, video, script, assets, licenses, checks)
         db.commit()
         db.refresh(video)
         return video
@@ -118,14 +125,14 @@ def produce(db: Session, topic_id: int, dry_run: bool = True) -> VideoVersion:
         raise
 
 
-def _write_deliverables(output: Path, video: VideoVersion, script: Script, asset: Asset, license_: License, checks: dict) -> None:
+def _write_deliverables(output: Path, video: VideoVersion, script: Script, assets: list[Asset], licenses: list[License], checks: dict) -> None:
     (output / "claims.json").write_text(json.dumps(script.claims_json, indent=2, ensure_ascii=False), encoding="utf-8")
-    rights = {"assets": [{"asset_id": asset.id, "source_url": asset.source_url, "sha256": asset.sha256, "rights_holder": license_.rights_holder, "license": license_.license_text, "commercial": license_.commercial_allowed, "derivatives": license_.derivative_allowed, "platforms": license_.platforms_json, "territories": license_.territories_json, "age_clearance": license_.age_clearance, "status": license_.status}]}
+    rights = {"assets": [{"asset_id": asset.id, "source_url": asset.source_url, "sha256": asset.sha256, "rights_holder": license_.rights_holder, "license": license_.license_text, "commercial": license_.commercial_allowed, "derivatives": license_.derivative_allowed, "platforms": license_.platforms_json, "territories": license_.territories_json, "age_clearance": license_.age_clearance, "status": license_.status} for asset, license_ in zip(assets, licenses)]}
     (output / "rights.json").write_text(json.dumps(rights, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "post.json").write_text(json.dumps(video.post_json, indent=2, ensure_ascii=False), encoding="utf-8")
     files = {}
     for name in ("video.mp4", "captions.srt", "thumbnail.jpg", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg"):
         files[name] = sha256_file(str(output / name))
-    manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "files_sha256": files}
+    manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id for asset in assets], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "files_sha256": files}
     video.manifest_json = manifest
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")

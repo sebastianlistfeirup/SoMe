@@ -98,6 +98,9 @@ def build_parser() -> argparse.ArgumentParser:
     produce_parser = sub.add_parser("produce")
     produce_parser.add_argument("--topic-id", type=int, required=True)
     produce_parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=True)
+    ranking_parser = sub.add_parser("ranking")
+    ranking_parser.add_argument("--plan", required=True)
+    ranking_parser.add_argument("--output", required=True)
     metrics = sub.add_parser("metrics")
     metrics.add_argument("--due", action="store_true")
     metrics.add_argument("--import-csv")
@@ -165,6 +168,9 @@ def main() -> int:
         elif args.command == "produce":
             video = produce(db, args.topic_id, args.dry_run)
             payload = {"video_id": video.id, "status": video.status, "output_dir": video.output_dir, "demo": args.dry_run}
+        elif args.command == "ranking":
+            from app.pipeline.production_ranking import produce_ranking
+            payload = produce_ranking(db, Path(args.plan), Path(args.output))
         elif args.command == "metrics":
             payload = import_csv_result(db, args)
         elif args.command == "learn":

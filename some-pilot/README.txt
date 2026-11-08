@@ -65,3 +65,9 @@ Tests
   docker compose run --rm --no-deps web pytest -q
 
 Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+
+Gameplay-ranking (internetklip som standard)
+-------------------------------------------
+Produktionen af top-10-videoer bruger `python -m app.cli ranking --plan /research/plan.json --output /data/versions/legion-go2-top10-v1`. Planen skal indeholde præcis ti unikke spil, et lokalt videoklip til hvert spil, officiel clip-URL og politik-URL, rettighedshaver, bevis, kreditering og musikvalg. Manglende eller ugyldige videofiler stopper produktionen. Den gamle Pillow-demo er tydeligt mærket DEMO og er ikke standardproduktion. Almindelig ikke-demo-produktion uden licenserede internetassets blokeres med `licensed_internet_assets_required`.
+
+`scripts/fetch_steam_gameplay.py` henter kun officielle Steam-udgivervideoer efter rettighedskontrol. `scripts/review_steam_clips.py` laver kontaktark og den redaktionelle plan. `scripts/New-RankingVoice.ps1` kan generere engelsk Zira-speak lokalt på Windows; ellers bruges espeak-ng kun som kvalitetsmærket fallback. Output stopper i AWAITING_OWNER og inkluderer video, thumbnail, SRT, storyboard, rettigheder, checks og manifest. Rigtige klipfiler ligger lokalt og er udelukket fra Git.

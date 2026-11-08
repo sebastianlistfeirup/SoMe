@@ -1,0 +1,615 @@
+{
+  "research_date": "2026-11-08",
+  "selection_method": "Editorial ranking for controller-first play, readable action, short-session suitability, genre quality and handheld fit. No performance on Legion Go 2 is claimed without measurement.",
+  "platforms": [
+    "youtube",
+    "instagram",
+    "tiktok",
+    "facebook"
+  ],
+  "territories": [
+    "global"
+  ],
+  "legal_review": "Publisher-policy evidence, not a legal guarantee. Owner must review the actual final edit before publication.",
+  "policies": [
+    {
+      "rights_holder": "Supergiant Games, LLC",
+      "games": [
+        "Hades II",
+        "Hades",
+        "Transistor"
+      ],
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "policy_updated": "2024-05-09",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": true,
+      "attribution": "Functional link to the relevant official game or store page.",
+      "evidence": "You're welcome to stream or create Let's Play-style videos of our games, and monetize them if you want. You're welcome to use our music as part of such content. Supergiant Games permits you to create free or ad-supported videos (including Let's Plays, speedruns, reviews, commentary, and so on) using captured or streamed video from Supergiant Games' video games. You do not need to request written permission to create such content.",
+      "limitations": "Policy can be updated; verify before publishing. Music is used only as part of game videos, never separately."
+    },
+    {
+      "rights_holder": "Team Cherry",
+      "games": [
+        "Hollow Knight: Silksong",
+        "Hollow Knight"
+      ],
+      "policy_url": "https://www.teamcherry.com.au/faq",
+      "policy_updated": null,
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": false,
+      "attribution": "Official game link and non-affiliation statement.",
+      "evidence": "Team Cherry hereby grants free license – to game owners and press – to use our games in the creation and publishing (or streaming) of original media content, including reviews, gameplay videos and Let’s Plays. Team Cherry also grants free license to content creators to monetise these works, whether through advertising, stream donations, or otherwise.",
+      "limitations": "Music is disabled because this specific permission does not separately document soundtrack use."
+    },
+    {
+      "rights_holder": "Mega Crit Games, LLC",
+      "games": [
+        "Slay the Spire 2",
+        "Slay the Spire"
+      ],
+      "policy_url": "https://www.megacrit.com/content-policy/",
+      "policy_updated": "site observed 2026-11-08",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": true,
+      "attribution": "Link to the respective store page for the version of the game used.",
+      "evidence": "You have permission to use gameplay footage in video content about our games; in fact, we encourage you to make such videos, including streams, Let’s Plays, reviews, etc. By extension, you also have permission to use our game’s music in video content, provided that the music is used in a transformative manner (i.e., not just an upload of a track with no other content). You also have permission to monetize video content about our games through various monetization methods, such as ads, subscriptions, donations, and any other means that may be provided by video/streaming platforms.",
+      "limitations": "Transformative editorial context and store link required; no soundtrack-only use."
+    },
+    {
+      "rights_holder": "Playstack Ltd / LocalThunk",
+      "games": [
+        "Balatro"
+      ],
+      "policy_url": "https://www.playstack.com/video-policy",
+      "policy_updated": null,
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": false,
+      "attribution": "Official Balatro link; no suggestion of sponsorship or approval.",
+      "evidence": "You may create, upload, livestream and monetise videos on online live streaming websites using our Gaming Content, but only using the authorised Monetization Methods (including advertising and partner programs of live streaming services and available to the public for free). You may only use our Gaming Content which has been officially released to the public, or from promotional materials officially released (such as product trailers). You should include your own creative input and commentary.",
+      "limitations": "Free public viewing; no paid access or clip licensing for a fee; no progression spoilers. Music disabled because third-party music clearance varies by game."
+    },
+    {
+      "rights_holder": "ConcernedApe",
+      "games": [
+        "Stardew Valley"
+      ],
+      "policy_url": "https://www.stardewvalley.net/stardew-monetization-policy-for-twitch-streamers-youtubers-etc/",
+      "policy_updated": null,
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": false,
+      "attribution": "Official Stardew Valley link.",
+      "evidence": "Official developer page titled 'Stardew monetization policy for Twitch Streamers/Youtubers/etc.' states: 'You can feel free to play Stardew Valley on your streams and videos and also to monetize them.' The visible page was inspected directly on 2026-11-08.",
+      "limitations": "Music disabled because soundtrack permission was not documented separately."
+    },
+    {
+      "rights_holder": "Maddy Makes Games Inc.",
+      "games": [
+        "Celeste"
+      ],
+      "policy_url": "https://www.celestegame.com/letsplay.html",
+      "policy_updated": null,
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "music_allowed": false,
+      "attribution": "Official Celeste link.",
+      "evidence": "Maddy Makes Games Inc. gives permission to any user to monetize their videos when doing Let's Plays, Speedruns, and Reviews of Celeste. However, videos and uploads of the Celeste Original Soundtrack and Celeste B-Sides albums are not permitted. Maddy Makes Games Inc. retains the right to revoke this license at any time.",
+      "limitations": "Music disabled conservatively; license is revocable, so recheck before publishing."
+    }
+  ],
+  "rejected_or_unverified": [
+    {
+      "game": "Dead Cells",
+      "reason": "No explicit official monetized-video permission was located; search-engine AI summary is not evidence."
+    },
+    {
+      "game": "Vampire Survivors",
+      "reason": "No explicit official policy verified; vampiresurvivors.com currently resolves to a parked domain."
+    },
+    {
+      "game": "Terraria",
+      "reason": "Re-Logic website license only covers personal noncommercial viewing; not used as gameplay permission."
+    }
+  ],
+  "clips": [
+    {
+      "game": "Hades II",
+      "app_id": 1145350,
+      "store_url": "https://store.steampowered.com/app/1145350/",
+      "clip_url": "https://store.steampowered.com/app/1145350/?movie=257206304",
+      "clip_title": "Hades II – v1.0 Showcase ",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/1145350/1078171228/d92eb59e06a0bc11acbab62a2fcc3981383b80fa/1758820310/hls_264_master.m3u8?t=1758942440",
+      "local_path": "clips/1145350-257206304.mp4",
+      "duration_seconds": 159.904362,
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": true,
+      "attribution": "Hades II official game page",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/1145350/1078171228/d92eb59e06a0bc11acbab62a2fcc3981383b80fa/1758820310/hls_264_master.m3u8?t=1758942440",
+        "transport": "official_steam_hls_h264",
+        "bytes": 119262917
+      },
+      "sha256": "edff5816dfaf592f8fdcb7211e2a3cd2931a1f241dea39a05dc6b61fde8d7cca",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 257204779,
+          "name": "Hades II – v1.0 Launch Trailer",
+          "highlight": true
+        },
+        {
+          "id": 257206304,
+          "name": "Hades II – v1.0 Showcase ",
+          "highlight": true
+        },
+        {
+          "id": 256919374,
+          "name": "Hades II Coming Soon",
+          "highlight": true
+        },
+        {
+          "id": 257099837,
+          "name": "Hades II Warsong Update",
+          "highlight": false
+        },
+        {
+          "id": 257065656,
+          "name": "Hades II Olympic Update",
+          "highlight": false
+        },
+        {
+          "id": 257020788,
+          "name": "Hades II Early Access Showcase",
+          "highlight": false
+        }
+      ]
+    },
+    {
+      "game": "Hollow Knight: Silksong",
+      "app_id": 1030300,
+      "store_url": "https://store.steampowered.com/app/1030300/",
+      "clip_url": "https://store.steampowered.com/app/1030300/?movie=257186996",
+      "clip_title": "Release Trailer English",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/1030300/970174968/f2c514c96548048dd1dca6ef500877916b75fe5a/1755841475/hls_264_master.m3u8?t=1764916585",
+      "local_path": "clips/1030300-257186996.mp4",
+      "duration_seconds": 95.371029,
+      "policy_url": "https://www.teamcherry.com.au/faq",
+      "rights_holder": "Team Cherry",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": false,
+      "attribution": "Hollow Knight: Silksong official game page",
+      "rights_evidence": "Official FAQ grants a free license to game owners and press to create and publish original reviews and gameplay videos and to monetize them.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/1030300/970174968/f2c514c96548048dd1dca6ef500877916b75fe5a/1755841475/hls_264_master.m3u8?t=1764916585",
+        "transport": "official_steam_hls_h264",
+        "bytes": 70887838
+      },
+      "sha256": "78f5462262269f271be4ee55ed05dd690bbc7dd78ea5153a0eb588ba02444735",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 257186996,
+          "name": "Release Trailer English",
+          "highlight": true
+        },
+        {
+          "id": 256742997,
+          "name": "Reveal Trailer",
+          "highlight": false
+        }
+      ]
+    },
+    {
+      "game": "Balatro",
+      "app_id": 2379780,
+      "store_url": "https://store.steampowered.com/app/2379780/",
+      "clip_url": "https://store.steampowered.com/app/2379780/?movie=257198110",
+      "clip_title": "Accolades Gameplay Video",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/2379780/581550014/e9a47276c1efe4165c2e25e35a06d417d78e1724/1758033766/hls_264_master.m3u8?t=1759138871",
+      "local_path": "clips/2379780-257198110.mp4",
+      "duration_seconds": 38.687696,
+      "policy_url": "https://www.playstack.com/video-policy",
+      "rights_holder": "Playstack Ltd / LocalThunk",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": false,
+      "attribution": "Balatro official game page",
+      "rights_evidence": "Official video policy permits free, publicly available monetized videos with original creative input and commentary using released Gaming Content or official promotional trailers.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/2379780/581550014/e9a47276c1efe4165c2e25e35a06d417d78e1724/1758033766/hls_264_master.m3u8?t=1759138871",
+        "transport": "official_steam_hls_h264",
+        "bytes": 28678459
+      },
+      "sha256": "f30e93409d97d85ec2d6afea9d692bd72abd979bddb054073455fb11b76271c5",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 257198110,
+          "name": "Accolades Gameplay Video",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Stardew Valley",
+      "app_id": 413150,
+      "store_url": "https://store.steampowered.com/app/413150/",
+      "clip_url": "https://store.steampowered.com/app/413150/?movie=256815967",
+      "clip_title": "Stardew Valley Trailer 1080p",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/413150/336433/0058de516bf7c46986ba1e81172ffd3c2ca6cad7/1750527541/hls_264_master.m3u8?t=1754692862",
+      "local_path": "clips/413150-256815967.mp4",
+      "duration_seconds": 182.101333,
+      "policy_url": "https://www.stardewvalley.net/stardew-monetization-policy-for-twitch-streamers-youtubers-etc/",
+      "rights_holder": "ConcernedApe",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": false,
+      "attribution": "Stardew Valley official game page",
+      "rights_evidence": "Official developer monetization policy permits playing Stardew Valley in videos and monetizing those videos.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/413150/336433/0058de516bf7c46986ba1e81172ffd3c2ca6cad7/1750527541/hls_264_master.m3u8?t=1754692862",
+        "transport": "official_steam_hls_h264",
+        "bytes": 126331659
+      },
+      "sha256": "734b58fe1979753e1eba153e8841e039b2f2bedc338f6fe33a4e0c6de12ec151",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 256815967,
+          "name": "Stardew Valley Trailer 1080p",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Slay the Spire 2",
+      "app_id": 2868840,
+      "store_url": "https://store.steampowered.com/app/2868840/",
+      "clip_url": "https://store.steampowered.com/app/2868840/?movie=257081846",
+      "clip_title": "Slay the Spire 2 - Gameplay Trailer",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/2868840/640808763/5e2d60a7b2b5b59366ac22b2450aa134ee2b822a/1770238477/hls_264_master.m3u8?t=1770241819",
+      "local_path": "clips/2868840-257081846.mp4",
+      "duration_seconds": 71.904362,
+      "policy_url": "https://www.megacrit.com/content-policy/",
+      "rights_holder": "Mega Crit Games, LLC",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": true,
+      "attribution": "Slay the Spire 2 official Steam page",
+      "rights_evidence": "Official content policy permits monetized gameplay videos and music used transformatively; link to respective store page requested.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/2868840/640808763/5e2d60a7b2b5b59366ac22b2450aa134ee2b822a/1770238477/hls_264_master.m3u8?t=1770241819",
+        "transport": "official_steam_hls_h264",
+        "bytes": 50364974
+      },
+      "sha256": "b6d4a22c41f8fecea928f0c76bd356264e25c5cee8cebbe44cdc7ee24ca6cdff",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 257289785,
+          "name": "Slay the Spire 2 - Early Access Trailer",
+          "highlight": true
+        },
+        {
+          "id": 257081846,
+          "name": "Slay the Spire 2 - Gameplay Trailer",
+          "highlight": true
+        },
+        {
+          "id": 257015112,
+          "name": "Slay the Spire 2 - Reveal Trailer",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Hades",
+      "app_id": 1145360,
+      "store_url": "https://store.steampowered.com/app/1145360/",
+      "clip_url": "https://store.steampowered.com/app/1145360/?movie=256801288",
+      "clip_title": "Hades - v1.0 Gameplay Showcase",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/1145360/312747/37b96035b5c9c7b12455eadc7bbc7d2b3afbd2fd/1750627553/hls_264_master.m3u8?t=1600353474",
+      "local_path": "clips/1145360-256801288.mp4",
+      "duration_seconds": 152.064,
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": true,
+      "attribution": "Hades official game page",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/1145360/312747/37b96035b5c9c7b12455eadc7bbc7d2b3afbd2fd/1750627553/hls_264_master.m3u8?t=1600353474",
+        "transport": "official_steam_hls_h264",
+        "bytes": 112054639
+      },
+      "sha256": "d88f9e381e6f405d6b3e7217cead77eb3e7e72e92742c9cb7683c149a4cba377",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 256801252,
+          "name": "Hades - v1.0 Launch Trailer",
+          "highlight": true
+        },
+        {
+          "id": 256801288,
+          "name": "Hades - v1.0 Gameplay Showcase",
+          "highlight": true
+        },
+        {
+          "id": 256759357,
+          "name": "Hades - Early Access Trailer",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Hollow Knight",
+      "app_id": 367520,
+      "store_url": "https://store.steampowered.com/app/367520/",
+      "clip_url": "https://store.steampowered.com/app/367520/?movie=256679401",
+      "clip_title": "Release Trailer",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/367520/89922/b71b6a50e9aa2334fddca8fa2197cb26a3640832/1750517691/hls_264_master.m3u8?t=1497589417",
+      "local_path": "clips/367520-256679401.mp4",
+      "duration_seconds": 123.413333,
+      "policy_url": "https://www.teamcherry.com.au/faq",
+      "rights_holder": "Team Cherry",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": false,
+      "attribution": "Hollow Knight official game page",
+      "rights_evidence": "Official FAQ grants a free license to game owners and press to create and publish original reviews and gameplay videos and to monetize them.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/367520/89922/b71b6a50e9aa2334fddca8fa2197cb26a3640832/1750517691/hls_264_master.m3u8?t=1497589417",
+        "transport": "official_steam_hls_h264",
+        "bytes": 87509845
+      },
+      "sha256": "305a6a20a0bdbcab425c55c9ad8940a68a5221044748f5f3a4a706aab6ac682e",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 256679401,
+          "name": "Release Trailer",
+          "highlight": true
+        },
+        {
+          "id": 256695695,
+          "name": "The Grimm Troupe Free Content Pack 02",
+          "highlight": true
+        },
+        {
+          "id": 256686950,
+          "name": "Hidden Dreams Free Content Pack 01",
+          "highlight": true
+        },
+        {
+          "id": 256674838,
+          "name": "Ferocious Foes",
+          "highlight": true
+        },
+        {
+          "id": 256674834,
+          "name": "Beneath and Beyond",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Slay the Spire",
+      "app_id": 646570,
+      "store_url": "https://store.steampowered.com/app/646570/",
+      "clip_url": "https://store.steampowered.com/app/646570/?movie=256740869",
+      "clip_title": "Launch Trailer",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/646570/205320/640196deb3169b2a1667340ab45f229af73caba7/1750566635/hls_264_master.m3u8?t=1548258737",
+      "local_path": "clips/646570-256740869.mp4",
+      "duration_seconds": 96.017969,
+      "policy_url": "https://www.megacrit.com/content-policy/",
+      "rights_holder": "Mega Crit Games, LLC",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": true,
+      "attribution": "Slay the Spire official Steam page",
+      "rights_evidence": "Official content policy permits monetized gameplay videos and music used transformatively; link to respective store page requested.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/646570/205320/640196deb3169b2a1667340ab45f229af73caba7/1750566635/hls_264_master.m3u8?t=1548258737",
+        "transport": "official_steam_hls_h264",
+        "bytes": 70269786
+      },
+      "sha256": "61691ea612b4a93028dd994870744f437fffaa0f08f869534bd3acec8e22c395",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 256740869,
+          "name": "Launch Trailer",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Celeste",
+      "app_id": 504230,
+      "store_url": "https://store.steampowered.com/app/504230/",
+      "clip_url": "https://store.steampowered.com/app/504230/?movie=256706951",
+      "clip_title": "Launch",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/504230/143846/608cb7d60c10278f3107baf57a528e483a7cbc7b/1750539057/hls_264_master.m3u8?t=1516898311",
+      "local_path": "clips/504230-256706951.mp4",
+      "duration_seconds": 84.017969,
+      "policy_url": "https://www.celestegame.com/letsplay.html",
+      "rights_holder": "Maddy Makes Games Inc.",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": false,
+      "attribution": "Celeste official game page",
+      "rights_evidence": "Official Celeste page permits monetized Let's Plays, speedruns and reviews; separate soundtrack uploads prohibited.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/504230/143846/608cb7d60c10278f3107baf57a528e483a7cbc7b/1750539057/hls_264_master.m3u8?t=1516898311",
+        "transport": "official_steam_hls_h264",
+        "bytes": 61744970
+      },
+      "sha256": "017355284a333a863e1b21590338d2c235f7f3c8778ea447b5788e0027c1f100",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 256706951,
+          "name": "Launch",
+          "highlight": true
+        }
+      ]
+    },
+    {
+      "game": "Transistor",
+      "app_id": 237930,
+      "store_url": "https://store.steampowered.com/app/237930/",
+      "clip_url": "https://store.steampowered.com/app/237930/?movie=2032455",
+      "clip_title": "Transistor - Launch Trailer",
+      "download_page": "https://video.akamai.steamstatic.com/store_trailers/237930/20996/8b1943f7505da5232c4f37f167006e1a2b9f80f7/1750483205/hls_264_master.m3u8?t=1447361955",
+      "local_path": "clips/237930-2032455.mp4",
+      "duration_seconds": 110.09025,
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "commercial_allowed": true,
+      "derivative_allowed": true,
+      "platforms": [
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "music_allowed": true,
+      "attribution": "Transistor official game page",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "evidence_date": "2026-11-08",
+      "download": {
+        "source_url": "https://video.akamai.steamstatic.com/store_trailers/237930/20996/8b1943f7505da5232c4f37f167006e1a2b9f80f7/1750483205/hls_264_master.m3u8?t=1447361955",
+        "transport": "official_steam_hls_h264",
+        "bytes": 74054365
+      },
+      "sha256": "5b066c91ed5704d93abc2461d6f35321d0e4c5c756bb291151c81cb781888524",
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264"
+      },
+      "official_movies": [
+        {
+          "id": 2032455,
+          "name": "Transistor - Launch Trailer",
+          "highlight": true
+        },
+        {
+          "id": 2032056,
+          "name": "Transistor - Reveal Trailer",
+          "highlight": true
+        }
+      ]
+    }
+  ]
+}

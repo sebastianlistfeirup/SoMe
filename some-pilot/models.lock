@@ -4,10 +4,11 @@ models:
     device: cpu
     compute_type: int8
     source: https://huggingface.co/Systran/faster-whisper-small
-    revision: null
-    checksum: null
+    revision: 536b0662742c02347bc0e980a01041f333bce120
+    model_bin_sha256: 3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671
+    model_bin_bytes: 483546902
     license: MIT
-    status: pin_revision_and_record_checksums_after_first_verified_download
+    status: downloaded_and_transcription_verified_on_cpu
   kokoro:
     status: not_installed_pending_language_compatibility_license_and_quality_test
   tts_demo:

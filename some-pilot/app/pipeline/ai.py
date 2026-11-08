@@ -72,12 +72,16 @@ def demo_draft(topic: Topic) -> ScriptDraft:
     )
 
 
-def build_clip_plan(segments: list[dict], asset_id: int, audio_duration_seconds: float, valid_claim_ids: list[str]) -> ClipPlan:
+def build_clip_plan(segments: list[dict], asset_ids: int | list[int], audio_duration_seconds: float, valid_claim_ids: list[str]) -> ClipPlan:
+    asset_ids = [asset_ids] if isinstance(asset_ids, int) else asset_ids
+    if not asset_ids:
+        raise ValueError("scene_asset_required")
     scenes = []
     for index, segment in enumerate(segments, 1):
         if segment["end"] > audio_duration_seconds + 0.5:
             raise ValueError("caption_exceeds_audio")
         claim_ids = [claim_id for claim_id in segment.get("claim_ids", []) if claim_id in valid_claim_ids]
+        asset_id = asset_ids[min(index - 1, len(asset_ids) - 1)]
         scenes.append(Scene(scene_id=f"scene-{index}", asset_id=asset_id, start_ms=round(segment["start"] * 1000), end_ms=round(segment["end"] * 1000), narration=segment["text"], overlay=segment["text"][:300], claim_ids=claim_ids))
     return ClipPlan(scenes=scenes)
 
