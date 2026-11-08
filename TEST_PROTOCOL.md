@@ -2,7 +2,7 @@
 
 Dato: 2026-11-08
 Miljø: Windows-vært, Docker Engine 29.9.2, container Python 3.11, SQLite, FFmpeg, espeak-ng
-Releasehash: registreres efter endeligt commit
+Releasehash for testet kode: d396b8996b13779e6ae05b8112e25ea35324da52 (efterfølgende commit opdaterer kun denne protokol)
 Formål: Adskille faktisk udførte tests fra ikke-verificerede eksterne integrationer.
 
 ## Automatiserede tests
