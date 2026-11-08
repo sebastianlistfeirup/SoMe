@@ -10,7 +10,19 @@ models:
     license: MIT
     status: downloaded_and_transcription_verified_on_cpu
   kokoro:
-    status: not_installed_pending_language_compatibility_license_and_quality_test
+    model: Kokoro-82M v1.0 full precision ONNX
+    device: cpu
+    runtime: kokoro-onnx 0.6.1
+    source: https://huggingface.co/hexgrad/Kokoro-82M
+    release: https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1
+    model_bin_sha256: beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a
+    model_bin_bytes: 325505369
+    voices_bin_sha256: bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d
+    voices_bin_bytes: 28214398
+    license: Apache-2.0
+    runtime_license: MIT
+    voice: af_bella
+    status: downloaded_and_english_synthesis_verified_on_cpu
   tts_demo:
     engine: espeak-ng
     note: Functional CPU demo voice, not owner-approved production quality

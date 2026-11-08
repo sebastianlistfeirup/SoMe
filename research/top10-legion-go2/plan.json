@@ -1,8 +1,8 @@
 {
   "title": "10 games worth your time on Legion Go 2",
-  "hook": "Ten genuinely great games for your Legion Go two, ranked for handheld play. Number one is a modern classic.",
-  "post_text": "Our editorial top 10 handheld games for Legion Go 2: controller-first design, readable gameplay and great short-session experiences. Not an FPS benchmark. Which game would be your number one? Follow for more handheld picks. All gameplay belongs to the respective publishers; this independent editorial video is not sponsored or endorsed. Sources and official game links are in the rights manifest.",
-  "voice_dir": "voice-final",
+  "hook": "Handheld gamers, this is the list. Ten incredible games for your Legion Go two, and our number one absolutely earns the crown.",
+  "post_text": "Save this handheld gaming top 10 and share it with someone who needs a new game. Which title is your number one? Editorial ranking, not an FPS benchmark. Independent and unsponsored; game footage belongs to the respective publishers.",
+  "voice_dir": "voice-kokoro",
   "scenes": [
     {
       "rank": 10,
@@ -154,5 +154,6 @@
       "music_allowed": true,
       "attribution": "Hades II official game page"
     }
-  ]
+  ],
+  "voice_model": "Kokoro-82M/af_bella/speed-1.08"
 }

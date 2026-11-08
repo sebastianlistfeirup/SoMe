@@ -89,3 +89,25 @@ def test_non_demo_requires_licensed_internet_assets(db):
     db.commit()
     with pytest.raises(ValueError, match="licensed_internet_assets_required"):
         produce(db, topic.id, False)
+
+
+def test_vertical_crop_fills_the_entire_frame():
+    from app.pipeline.ranking import _crop_filter, get_platform
+    result = _crop_filter(RankingScene.model_validate(scene()), 1920, 1080, get_platform("tiktok"))
+    assert result == "[0:v]crop=608:1080:656.000:0.000,scale=1080:1920,setsar=1[composite];"
+    assert "gblur" not in result
+
+
+def test_platform_safe_areas_and_landscape_are_distinct():
+    from app.pipeline.ranking import _crop_filter, get_platform
+    assert get_platform("tiktok").caption_bottom != get_platform("reels").caption_bottom
+    result = _crop_filter(RankingScene.model_validate(scene()), 1920, 1080, get_platform("youtube"))
+    assert "scale=1920:1080" in result
+    assert "crop=608" not in result
+
+
+def test_youtube_uses_reviewed_tempo_without_scene_truncation():
+    from app.pipeline.ranking import get_platform
+    assert get_platform("youtube").tempo == 1.07
+    assert get_platform("tiktok").tempo == 1.0
+    assert get_platform("reels").tempo == 1.0

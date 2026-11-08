@@ -101,6 +101,7 @@ def build_parser() -> argparse.ArgumentParser:
     ranking_parser = sub.add_parser("ranking")
     ranking_parser.add_argument("--plan", required=True)
     ranking_parser.add_argument("--output", required=True)
+    ranking_parser.add_argument("--platform", choices=["tiktok", "reels", "youtube"], default="reels")
     metrics = sub.add_parser("metrics")
     metrics.add_argument("--due", action="store_true")
     metrics.add_argument("--import-csv")
@@ -170,7 +171,7 @@ def main() -> int:
             payload = {"video_id": video.id, "status": video.status, "output_dir": video.output_dir, "demo": args.dry_run}
         elif args.command == "ranking":
             from app.pipeline.production_ranking import produce_ranking
-            payload = produce_ranking(db, Path(args.plan), Path(args.output))
+            payload = produce_ranking(db, Path(args.plan), Path(args.output), args.platform)
         elif args.command == "metrics":
             payload = import_csv_result(db, args)
         elif args.command == "learn":

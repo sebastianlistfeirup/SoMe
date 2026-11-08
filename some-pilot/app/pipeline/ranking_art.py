@@ -52,8 +52,39 @@ def make_thumbnail(plan_path: Path, output: Path) -> Path:
     return target
 
 
-def make_storyboard(video: Path, output: Path, duration: float) -> Path:
+def make_landscape_thumbnail(plan_path: Path, output: Path) -> Path:
+    plan = RankingPlan.model_validate_json(plan_path.read_text(encoding="utf-8"))
+    work = output / "thumbnail-frames-landscape"
+    work.mkdir(parents=True, exist_ok=True)
+    top = sorted(plan.scenes, key=lambda scene: scene.rank)[:3]
+    canvas = Image.new("RGB", (1920, 1080), "#07101f")
+    draw = ImageDraw.Draw(canvas)
+    draw.rectangle((0, 0, 1920, 14), fill="#58efff")
+    draw.text((90, 75), "THE HANDHELD HIT LIST", font=ImageFont.truetype(BOLD, 43), fill="#58efff")
+    draw.text((82, 172), "TOP 10", font=ImageFont.truetype(BOLD, 172), fill="#ffffff")
+    draw.text((90, 385), "LEGION GO 2", font=ImageFont.truetype(BOLD, 83), fill="#ffd54f")
+    draw.text((90, 505), "GAMES", font=ImageFont.truetype(BOLD, 126), fill="#ffffff")
+    draw.text((90, 910), "REAL GAMES. ZERO FILLER.", font=ImageFont.truetype(BOLD, 40), fill="#58efff")
+    for index, scene in enumerate(top):
+        frame = work / f"rank-{scene.rank}.jpg"
+        run(["ffmpeg", "-y", "-ss", f"{scene.start_seconds + 1:.3f}", "-i", str(plan_path.parent / scene.source_path), "-frames:v", "1", "-q:v", "2", str(frame)])
+        image = _cover(Image.open(frame).convert("RGB"), (850, 280))
+        x, y = 990, 110 + index * 305
+        canvas.paste(image, (x, y))
+        draw.rectangle((x, y, x + 850, y + 280), outline="#58efff" if index == 0 else "#263b59", width=5)
+        draw.rounded_rectangle((x + 20, y + 18, x + 138, y + 90), radius=14, fill="#07101f")
+        draw.text((x + 31, y + 24), f"#{scene.rank}", font=ImageFont.truetype(BOLD, 43), fill="#ffd54f")
+        draw.rounded_rectangle((x + 18, y + 208, x + 832, y + 266), radius=12, fill="#07101f")
+        size = 33 if len(scene.game) < 25 else 27
+        draw.text((x + 34, y + 220), scene.game.upper(), font=ImageFont.truetype(BOLD, size), fill="#ffffff")
+    target = output / "thumbnail.jpg"
+    canvas.save(target, quality=94, subsampling=0)
+    return target
+
+
+def make_storyboard(video: Path, output: Path, duration: float, landscape: bool = False) -> Path:
     interval = max(duration / 7, 0.1)
     target = output / "storyboard.jpg"
-    run(["ffmpeg", "-y", "-i", str(video), "-vf", f"fps=1/{interval:.6f},scale=270:480,tile=7x1", "-frames:v", "1", "-q:v", "2", str(target)])
+    layout = "scale=480:270,tile=3x2" if landscape else "scale=270:480,tile=7x1"
+    run(["ffmpeg", "-y", "-i", str(video), "-vf", f"fps=1/{interval:.6f},{layout}", "-frames:v", "1", "-q:v", "2", str(target)])
     return target

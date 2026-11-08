@@ -1,0 +1,25 @@
+{
+  "updated": "2026-11-08",
+  "editorial_focus": "Handheld gaming, controller-first experiences, readable gameplay and useful purchase guidance",
+  "rules": [
+    "Every production clip requires documented commercial and derivative-use permission before rendering.",
+    "Vertical versions use full-screen action crops, not a small landscape window with empty space.",
+    "Each platform gets its own edit, narration, CTA, safe areas and thumbnail.",
+    "No FPS, battery-life, compatibility or performance claims without current source evidence or real measurement.",
+    "Every final video requires owner review before publication."
+  ],
+  "items": [
+    {"id": "handheld-001", "title": "10 games worth your time on Legion Go 2", "formats": ["tiktok", "reels", "youtube"], "status": "AWAITING_OWNER", "outputs": ["handheld-tiktok-v2", "handheld-reels-v2", "handheld-youtube-v4"]},
+    {"id": "handheld-002", "title": "Hades or Hades II: which should you play first on a handheld?", "formats": ["reels", "youtube"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Hades", "Hades II"]},
+    {"id": "handheld-003", "title": "Three brilliant deck builders for short handheld sessions", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Slay the Spire", "Slay the Spire 2", "Balatro"]},
+    {"id": "handheld-004", "title": "Why Balatro makes you say just one more run", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Balatro"]},
+    {"id": "handheld-005", "title": "Three precision platformers that feel great on a handheld", "formats": ["reels", "youtube"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Celeste", "Hollow Knight", "Hollow Knight: Silksong"]},
+    {"id": "handheld-006", "title": "The cozy handheld playlist for winding down", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Stardew Valley"]},
+    {"id": "handheld-007", "title": "Best action games to keep on your handheld", "formats": ["tiktok", "reels", "youtube"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Hades", "Hades II", "Hollow Knight: Silksong", "Transistor"]},
+    {"id": "handheld-008", "title": "Five games that work in ten-minute sessions", "formats": ["tiktok", "reels"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Balatro", "Slay the Spire", "Stardew Valley", "Hades"]},
+    {"id": "handheld-009", "title": "Handheld screen text: which games are actually easy to read?", "formats": ["reels", "youtube"], "status": "MEASUREMENT_REQUIRED", "candidate_assets": ["Hades II", "Balatro", "Slay the Spire", "Celeste"]},
+    {"id": "handheld-010", "title": "What to check before buying your next gaming handheld", "formats": ["reels", "youtube"], "status": "RESEARCH_AND_STOCK_LICENSE_REQUIRED", "candidate_assets": []},
+    {"id": "handheld-011", "title": "Handheld settings that can change how a game feels", "formats": ["reels", "youtube"], "status": "HARDWARE_MEASUREMENT_REQUIRED", "candidate_assets": []},
+    {"id": "handheld-012", "title": "The first five games to install on a new handheld", "formats": ["tiktok", "reels", "youtube"], "status": "RESEARCH_REQUIRED", "candidate_assets": ["Hades II", "Balatro", "Stardew Valley", "Celeste", "Slay the Spire"]}
+  ]
+}

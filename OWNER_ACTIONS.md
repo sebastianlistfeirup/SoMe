@@ -2,9 +2,9 @@
 
 Der er ikke foretaget køb, login, OAuth, betalte API-kald eller offentlig publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
-## 0. Se den færdige top-10-video
+## 0. Gennemse den nye platformpakke
 
-Åbn `some-pilot/data/versions/legion-go2-top10-v6/video.mp4` og se hele videoen på 96,2 sekunder. Kontrollér alle ti spil, rækkefølgen, speak, undertekster, klip og thumbnail. Sig derefter kun, om denne konkrete version er godkendt, eller hvad der skal ændres. Den står i `AWAITING_OWNER` og er ikke publiceret. Diskstatus er løst: doctor viser 85,69 % brugt, ca. 572 GB fri og `stop_render=false`.
+Start med `some-pilot/data/versions/handheld-reels-v2/video.mp4` på 102,2 sekunder. Lyt til den nye Kokoro-stemme og kontrollér fuldskærms-actionen. Se derefter `handheld-tiktok-v2/video.mp4` på 49,2 sekunder og `handheld-youtube-v4/video.mp4` på 171,4 sekunder i samme mappe. Sig om stemme og billedstil er godkendt, eller hvad der skal justeres. Alle tre står i `AWAITING_OWNER` og er ikke publiceret.
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
@@ -71,7 +71,7 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## 6. Kvalitet, rettigheder og kommerciel lancering
 
-- Den engelske top-10 bruger lokal Microsoft Zira-speak. Espeak-ng er kun fallback; Kokoro/dansk TTS er ikke antaget understøttet.
+- Den nye engelske platformpakke bruger lokal Kokoro `af_bella`. Espeak-ng og Microsoft Zira er kun fallbacks; dansk TTS er ikke kvalitetsgodkendt.
 - Godkend hver færdig version i dashboardet efter at have set hele videoen. Ingen automatisk publicering af DEMO eller AWAITING_OWNER-versioner.
 - Kontrollér konkrete stock-, gameplay-, musik- og personrettigheder pr. asset. Der findes ingen 10-sekundersregel.
 - Vælg et faktisk affiliateprogram, dokumentér vilkår, provision og reklamemarkering. Ingen RPM, købsrate eller indtjening antages.
@@ -80,4 +80,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Udfør kun punkt 0 nu: se hele `some-pilot/data/versions/legion-go2-top10-v6/video.mp4` og giv konkret feedback eller godkend versionen. Kontopunkterne kommer først bagefter.
+Udfør kun punkt 0 nu: gennemse den nye platformpakke, start med `some-pilot/data/versions/handheld-reels-v2/video.mp4`, og giv konkret feedback om stemme og billedstil. Kontopunkterne kommer først bagefter.

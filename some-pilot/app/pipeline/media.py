@@ -149,7 +149,7 @@ def storyboard(video: Path, output: Path) -> None:
     run(["ffmpeg", "-y", "-i", str(video), "-vf", f"fps=1/{interval:.6f},scale=216:384,tile=6x1", "-frames:v", "1", str(output)])
 
 
-def technical_checks(video: Path, captions: Path, expected_max_lines: int = 2) -> dict:
+def technical_checks(video: Path, captions: Path, expected_max_lines: int = 2, expected_dimensions: tuple[int, int] = (1080, 1920)) -> dict:
     metadata = probe(video)
     streams = metadata.get("streams", [])
     visual = next((stream for stream in streams if stream.get("codec_type") == "video"), {})
@@ -163,7 +163,7 @@ def technical_checks(video: Path, captions: Path, expected_max_lines: int = 2) -
     integrated = _last_float(loudness.stderr, "I:")
     peak = _last_float(loudness.stderr, "Peak:")
     reasons = []
-    if (visual.get("width"), visual.get("height")) != (1080, 1920):
+    if (visual.get("width"), visual.get("height")) != expected_dimensions:
         reasons.append("dimensions")
     if visual.get("codec_name") != "h264" or visual.get("pix_fmt") != "yuv420p":
         reasons.append("video_codec_or_pixel_format")
