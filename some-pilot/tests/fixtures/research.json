@@ -1,0 +1,1 @@
+{"observations":[{"source_url":"fixture://demo-handheld","platform":"fixture","collected_at_utc":"2026-01-01T00:00:00+00:00","published_at":null,"country":null,"language":"en","topic":"demo:handheld","metric_name":"views","metric_value":100,"unit":"views","method":"DEMO synthetic fixture","confidence":"demo","limitations":"Not real research or performance.","is_demo":true}]}

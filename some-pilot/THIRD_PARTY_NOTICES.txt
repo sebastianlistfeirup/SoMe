@@ -1,0 +1,9 @@
+Third-party component register — 2026-11-08
+
+HTMX 2.0.4
+Source: https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js
+Project/license: https://github.com/bigskysoftware/htmx — MIT
+Bundled file: app/static/htmx.min.js
+SHA-256: e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447
+
+Python and OS dependencies are pinned in requirements.lock. Their upstream licenses must be reviewed before commercial distribution. FFmpeg, espeak-ng, faster-whisper and model sources are registered in Dockerfile/models.lock. No third-party media or music is bundled.

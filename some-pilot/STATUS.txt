@@ -1,0 +1,1 @@
+Se ../STATUS.txt for den samlede, autoritative projektstatus. Denne mappe indeholder applikationen; lokale runtime-data og secrets er udelukket fra Git.

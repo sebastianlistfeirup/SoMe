@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ topic.title }}</h1>
+<p><span class="status">{{ video.status }}</span> <span class="tag">{{ 'DEMO' if video.features_json.get('is_demo') else 'PRODUKTION' }}</span></p>
+<div class="review">
+  <div>
+    <video controls preload="metadata" src="/media/{{ video.id }}/video.mp4"></video>
+    <p><a href="/media/{{ video.id }}/captions.srt">Undertekster</a> · <a href="/media/{{ video.id }}/storyboard.jpg">Storyboard</a></p>
+  </div>
+  <section>
+    <h2>Opslag</h2><p>{{ video.post_json.get('text','') }}</p>
+    <h2>Links</h2><ul>{% for link in video.post_json.get('links',[]) %}<li>{{ link }}</li>{% endfor %}</ul>
+    <h2>Påstande og kilder</h2><pre>{{ evidence.get('claims.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
+    <h2>Rettighedsbevis</h2><pre>{{ evidence.get('rights.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
+    <h2>Teknisk og redaktionel kontrol</h2><pre>{{ evidence.get('checks.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
+    <h2>Versionsmanifest</h2><pre>{{ video.manifest_json | tojson(indent=2) }}</pre>
+    <p><a class="button secondary" href="/export/{{ video.id }}/youtube">YouTube ZIP</a> <a class="button secondary" href="/export/{{ video.id }}/instagram">Instagram ZIP</a></p>
+    {% if video.status == 'AWAITING_OWNER' %}
+    <form method="post" action="/review/{{ video.id }}/approve" class="approval">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <h2>Ejergodkendelse</h2>
+      <label>Platform<select name="platform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option></select></label>
+      <label>Målkonto<input name="account" required placeholder="Kanal-/konto-id"></label>
+      <label class="check"><input type="checkbox" name="watched" value="true" required> Jeg har set hele videoen og kontrolleret alle beviser.</label>
+      <button>Godkend denne version</button>
+    </form>
+    <form method="post" action="/review/{{ video.id }}/reject">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Note<input name="note"></label><button class="danger">Afvis</button>
+    </form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

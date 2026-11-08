@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ app_name }}</title><link rel="stylesheet" href="/static/style.css"><script defer src="/static/htmx.min.js"></script></head>
+<body><header><a class="brand" href="/opportunities">{{ app_name }}</a><nav><a href="/opportunities">Muligheder</a><a href="/queue">Produktionskø</a><a href="/review">Gennemgang</a><a href="/calendar">Kalender</a><a href="/results">Resultater</a><a href="/economy">Økonomi</a><a href="/settings">Indstillinger</a></nav><form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="link">Log ud</button></form></header>
+{% if paused %}<div class="alarm">NØDSTOP AKTIVT — nye jobs og publiceringer er blokeret.</div>{% endif %}<main>{% block content %}{% endblock %}</main></body></html>

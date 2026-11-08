@@ -1,0 +1,11 @@
+services:
+  web:
+    env_file: /opt/some/secrets/app.env
+    volumes:
+      - /opt/some/data:/data
+      - /opt/some/models:/models
+  worker:
+    env_file: /opt/some/secrets/app.env
+    volumes:
+      - /opt/some/data:/data
+      - /opt/some/models:/models

@@ -1,0 +1,50 @@
+services:
+  web:
+    build: .
+    image: some-pilot:local
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    user: "10001:10001"
+    env_file: .env.example
+    environment:
+      DATABASE_URL: sqlite:////data/some.db
+      DATA_DIR: /data
+      MODEL_CACHE_DIR: /models
+    ports: ["127.0.0.1:8000:8000"]
+    volumes:
+      - ./data:/data
+      - ./models:/models
+    restart: unless-stopped
+    mem_limit: 1g
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+  worker:
+    image: some-pilot:local
+    command: python -m app.worker
+    user: "10001:10001"
+    env_file: .env.example
+    environment:
+      DATABASE_URL: sqlite:////data/some.db
+      DATA_DIR: /data
+      MODEL_CACHE_DIR: /models
+    volumes:
+      - ./data:/data
+      - ./models:/models
+    restart: unless-stopped
+    mem_limit: 5g
+    cpus: "3.0"
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    healthcheck:
+      test: ["CMD", "python", "scripts/worker_health.py"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      options: {max-size: "10m", max-file: "3"}

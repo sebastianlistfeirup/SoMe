@@ -1,0 +1,23 @@
+owner_controls_required: true
+accounts:
+  youtube:
+    public_channel_id: null
+    google_cloud_project: null
+    status: not_created_or_connected
+    oauth_verified: false
+    private_upload_tested: false
+    public_publishing_verified: false
+  instagram:
+    professional_account_id: null
+    meta_app_id: null
+    status: not_created_or_connected
+    oauth_verified: false
+    private_upload_tested: false
+    public_publishing_verified: false
+  cloud:
+    provider: null
+    project: some-pilot
+    status: not_purchased
+  backup:
+    provider: null
+    status: not_configured

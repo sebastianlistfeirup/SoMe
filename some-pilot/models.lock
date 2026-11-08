@@ -1,0 +1,15 @@
+models:
+  faster-whisper:
+    model: small
+    device: cpu
+    compute_type: int8
+    source: https://huggingface.co/Systran/faster-whisper-small
+    revision: null
+    checksum: null
+    license: MIT
+    status: pin_revision_and_record_checksums_after_first_verified_download
+  kokoro:
+    status: not_installed_pending_language_compatibility_license_and_quality_test
+  tts_demo:
+    engine: espeak-ng
+    note: Functional CPU demo voice, not owner-approved production quality

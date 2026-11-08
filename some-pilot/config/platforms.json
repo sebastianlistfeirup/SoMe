@@ -1,0 +1,6 @@
+{
+  "defaults": {"width": 1080, "height": 1920, "fps": 30, "video_codec": "h264", "pixel_format": "yuv420p", "audio_codec": "aac", "crf": 22, "integrated_lufs": -16, "true_peak_dbtp": -1},
+  "youtube": {"safe_areas_px": {"top": 160, "right": 80, "bottom": 320, "left": 60}, "manual_export": true},
+  "instagram": {"safe_areas_px": {"top": 220, "right": 100, "bottom": 360, "left": 60}, "manual_export": true},
+  "note": "Internal starting values, not universal platform requirements; verify current platform documentation before production."
+}

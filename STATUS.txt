@@ -1,0 +1,61 @@
+SoMe-maskinen — STATUS
+Opdateret: 2026-11-08T10:44:33Z
+Repository: https://github.com/sebastianlistfeirup/SoMe
+
+UDFØRT
+- Hele mini-biblen er implementeret som en nøglefri pilot med tydelige eksterne blokeringer.
+- Dateret research 2026-11-08: 43 reelle observationer, JSON + CSV, 14 niche-/sprogscores, metode og ti videoidéer.
+- Foreløbig hovedniche: EN pc-hardware/handheld købsvejledning. Reserve: EN gaming-explainers. Platforme: YouTube + Instagram.
+- Python/FastAPI/Jinja2/HTMX-dashboard med syv visninger, Argon2-login, server-side sessions, udløb, ratebegrænsning, CSRF og beskyttede medier.
+- SQLAlchemy/Alembic, SQLite WAL/foreign keys/busy timeout, alle kontrakttabeller og revisionshistorik.
+- Persistent jobkø med atomisk claim, leases, idempotens, retryloft, heartbeat og planlagte research/metrics/læring/backup/oprydningsjobs.
+- Vertikal pipeline: emne -> originalt demo-/Claude-manuskript -> separat påstandskontrol -> rettighedsryddet syntetisk asset -> speak -> Whisper -> valideret klippeplan -> FFmpeg -> tekniske/sikkerheds-/kvalitetschecks -> AWAITING_OWNER.
+- Versionsoutput: video.mp4, captions.srt, thumbnail.jpg, post.json, claims.json, rights.json, checks.json, clip_plan.json, storyboard.jpg og manifest.json.
+- Central godkendelse med fuld video-visning og SHA-256-binding af video, thumbnail, tekst, links, platform og konto.
+- Manuel ZIP-eksport, YouTube resumable upload med eksplicit privacy, Meta containerflow, TikTok-manual-only interface og RECONCILE_REQUIRED ved usikkert resultat.
+- Tidsbegrænsede HMAC-signerede medielinks til godkendte versioner; signatur, udløb og aktuel hash kontrolleres.
+- Metrics CSV og YouTube Analytics-flade med metric definitionsversion og NULL for ukendte værdier.
+- Lærende hjerne med features før publicering, aldersmatchede metrics, median/spredning/sample size, eksterne signalsammenligninger, 80/20-eksperimenter og afdæmpede prioritetsmultiplikatorer.
+- Versionsstyrede promptændringer med begrundelse og rollback. Demo-læring kan ikke overskrive eller påvirke produktionslæring. Ingen selvændrende kode/politikker eller automatisk fine-tuning.
+- Budgetreservation med atomisk månedlig grænse, jobgrænse, faktiske tokens/omkostninger og usikre timeoutomkostninger.
+- SSRF-sikker downloader med HTTPS, DNS/IP-filter, redirectgrænse, størrelsesgrænse, content-type, filsignatur og karantæne.
+- Docker Compose web/worker som uid/gid 10001, loopback-only webport, mem/cpu-grænser, cap_drop, no-new-privileges, logrotation og healthchecks.
+- Python base-image-digest og samtlige direkte/transitive Python-versioner fastlåst.
+- Ubuntu/Docker-installation, deploy, backup, restore og drift dokumenteret.
+- Lokal backup via SQLite Online Backup API med integritets-/hashcheck; retention og midlertidig oprydning implementeret.
+
+VERIFICERET
+- 30 automatiserede tests bestod i den låste Docker-container (2,73 s).
+- Research JSON/CSV er parsebare og indeholder samme 43 observationer.
+- Alembic revision 0001 er anvendt; doctor viser korrekt migrationsstatus.
+- Reel researchimport: 43 observationer og 14 scores.
+- Demo-research, ugentlig demo-læring uden falske konklusioner og metrics --due er kørt.
+- Lokal backup er verificeret; separat restore gav integrity=ok med publicering/betalte jobs slået fra.
+- Web og worker blev begge rapporteret `healthy`; /healthz svarede OK og /login HTTP 200.
+- Diskstop er testet både automatiseret og gennem faktisk CLI-kald.
+- Ingen betalte API-kald, køb, OAuth, privat/offentlig upload eller publicering er foretaget.
+
+MANGLER / BLOKERET
+- Lokal disk: 99,13 % brugt, ca. 34,9 GB fri. Faktisk render/Whisper/storyboard er blokeret af den krævede 90 %-grænse. Mediekoden er implementeret, men IKKE medieverificeret.
+- VPS-pris/køb/identitet/2FA/SSH og faktisk CPU-RAM/tid benchmark kræver ejeren. Konkret 4-vCPU/8-GB-pris er ikke godkendt.
+- Claude API-nøgle, betaling, DKK-pris/valutakurs og modelevaluering. PAID_JOBS_ENABLED forbliver false.
+- YouTube/Meta OAuth, kanal/konto, appgodkendelse, privat upload og virkelige platformmetrics er ikke verificeret.
+- PUBLIC_BASE_URL og aktuel META_GRAPH_VERSION mangler til signeret Meta-medieflow.
+- Offsite backup-leverandør og BACKUP_KEY mangler; lokal testbackup er ukrypteret og ikke offsite.
+- Produktionsspeak skal kvalitetsgodkendes. Espeak-ng er kun demo; Kokoro/dansk TTS er ikke antaget.
+- Affiliateprogram, reklamemarkering, skat/moms, platformmonetisering og juridisk gennemgang er ikke antaget.
+- Google Trends-manuel eksport og officielle YouTube API-researchprøver skal validere den foreløbige nicheanbefaling.
+
+SIKKERHEDSTILSTAND
+DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false.
+Nødstop og diskgrænser må ikke omgås. Ukendte rettigheder/alder/sikkerhed blokerer.
+Demo er altid mærket og blandes ikke med produktion.
+
+EJERHANDLINGER
+Se OWNER_ACTIONS.md for samlet liste med direkte links, sikker secret-metode og rækkefølge.
+
+PRÆCIS NÆSTE HANDLING
+Frigør diskplads eller godkend en prisdokumenteret VPS. Kør derefter demo --produce og mediebenchmark; når medieflowet er verificeret, klargøres konti/OAuth samlet via OWNER_ACTIONS.md.
+
+TESTBEVIS
+Se TEST_PROTOCOL.md for kommandoer, resultater, dækning og ikke-verificerede punkter. Ingen 100 % fejlfriheds-, indtægts- eller performancegaranti gives.
