@@ -18,7 +18,7 @@ Link: https://www.hetzner.com/cloud/ og https://console.hetzner.cloud/
 - Vælg backup og beslut IPv4. Inkludér moms, timepris, trafik, lager og backup i den samlede pris.
 - Mål: højst 375 DKK/måned eksklusive Claude, men det er endnu ikke en autorisation.
 
-**Prisstatus 2026-11-08:** Hetzners side viste CPX02 til €5,99/måned ekskl. moms, men den er for lille. En gyldig total for den valgte 4-vCPU/8-GB-server kunne ikke dokumenteres uden konto/token. Der må derfor ikke købes på baggrund af tredjepartspriser. Udfyld den konkrete konsole-pris og godkend den før bestilling.
+**Prisstatus 2026-11-10:** Hetzners officielle prisberegner viser CPX32 med 4 vCPU AMD til €29,99/måned ekskl. moms. Backup er 20 % (ca. €6,00), og valgt IPv4 vises som €0,00. Forventet total er €35,99/måned ekskl. moms og €44,99/måned inkl. 25 % moms, cirka 336 DKK. Prisen skal kontrolleres igen i konsollen før køb. Der er ikke købt eller oprettet noget endnu.
 
 Alternativer hvis pris/tilgængelighed er dårlig: https://www.scaleway.com/en/pricing/ og https://www.digitalocean.com/pricing
 
@@ -83,4 +83,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Udfør kun punkt 0 nu: start med `some-pilot/data/versions/handheld-voiceover-v1/video.mp4`, og sig om den nye voiceover uden avatar er godkendt kreativt, eller hvad der skal justeres. Kontopunkterne kommer først bagefter.
+Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Hetzner-konto med 2FA, vælg CPX32 med Ubuntu 24.04, backup og IPv4, og kontrollér at konsollens total stemmer med det dokumenterede tilbud før du godkender køb.

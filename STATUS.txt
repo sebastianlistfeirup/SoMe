@@ -44,7 +44,7 @@ Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
 Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Se og lyt til `some-pilot/data/versions/handheld-voiceover-v1/video.mp4`. Sig om den nye Kokoro-voiceover uden avatar er godkendt kreativt, eller hvad der skal justeres. Konto- og integrationspunkterne kommer først bagefter.
+Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er at oprette Hetzner-konto med 2FA og kontrollere CPX32/backup/IPv4 mod tilbuddet i OWNER_ACTIONS.md før køb godkendes.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.
