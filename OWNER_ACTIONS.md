@@ -10,15 +10,16 @@ De to versioner er kreative referenceversioner. Den nye endelige kandidat er `so
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
-Link: https://www.hetzner.com/cloud/ og https://console.hetzner.cloud/
+Primær kandidat: https://contabo.com/en/vps/ (Cloud VPS 4). Hetzner CPX32 er fravalgt på grund af prisen.
 
 - Opret ejerstyret konto, betalingsmiddel, eventuel identitetskontrol og 2FA.
 - Projekt: `some-pilot`; EU-lokation; Ubuntu 24.04 LTS.
-- Vælg shared x86-64 med ca. 4 vCPU, 8 GB RAM og mindst 80 GB SSD. CPX32 er kun et udgangspunkt; brug aktuel tilgængelighed.
-- Vælg backup og beslut IPv4. Inkludér moms, timepris, trafik, lager og backup i den samlede pris.
-- Mål: højst 375 DKK/måned eksklusive Claude, men det er endnu ikke en autorisation.
+- Konfiguration: 4 vCPU, 8 GB RAM, 100 GB SSD, ét snapshot, IPv4/IPv6 og ubegrænset trafik. Ingen setup fee er oplyst.
+- Vælg kortest mulig bindingsperiode først, så rendering og drift kan verificeres før eventuel 24-måneders binding. Auto Backup er en betalt tilføjelse og er ikke inkluderet i prisen.
 
-**Prisstatus 2026-11-10:** Hetzners officielle prisberegner viser CPX32 med 4 vCPU AMD til €29,99/måned ekskl. moms. Backup er 20 % (ca. €6,00), og valgt IPv4 vises som €0,00. Forventet total er €35,99/måned ekskl. moms og €44,99/måned inkl. 25 % moms, cirka 336 DKK. Prisen skal kontrolleres igen i konsollen før køb. Der er ikke købt eller oprettet noget endnu.
+**Prisstatus 2026-11-10:** Contabos officielle side viser €5,50/måned inkl. moms for de første 24 måneder, cirka 41 DKK. Budgetloftet er nu højst **150 DKK/måned** eksklusive valgfrie AI API'er. Pris og bindingsperiode skal kontrolleres igen i checkout før køb. Der er ikke købt eller oprettet noget endnu.
+
+Kokoro, Whisper og rendering kræver ikke Claude/OpenAI. Betalte AI API'er er valgfri forbedringer af manuskripter, claims og research, ikke en forudsætning for publicering. `PAID_JOBS_ENABLED` forbliver `false`, indtil en konkret leverandør, model og pris godkendes særskilt.
 
 Alternativer hvis pris/tilgængelighed er dårlig: https://www.scaleway.com/en/pricing/ og https://www.digitalocean.com/pricing
 
@@ -83,4 +84,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Hetzner-konto med 2FA, vælg CPX32 med Ubuntu 24.04, backup og IPv4, og kontrollér at konsollens total stemmer med det dokumenterede tilbud før du godkender køb.
+Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode, og kontrollér at totalen er højst 150 DKK/måned før du godkender køb.

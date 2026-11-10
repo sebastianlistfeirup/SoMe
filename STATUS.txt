@@ -44,7 +44,7 @@ Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
 Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er at oprette Hetzner-konto med 2FA og kontrollere CPX32/backup/IPv4 mod tilbuddet i OWNER_ACTIONS.md før køb godkendes.
+Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er at oprette Contabo-konto med 2FA, vælg Cloud VPS 4 med kortest mulig bindingsperiode og kontrollere at totalen er højst 150 DKK/måned før køb godkendes. Ingen betalt Claude/OpenAI er nødvendig.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.
