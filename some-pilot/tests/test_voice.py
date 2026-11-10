@@ -62,6 +62,7 @@ def test_new_kokoro_generates_all_segments_without_network(tmp_path, monkeypatch
 
 
 def test_elevenlabs_blocks_paid_calls_and_missing_price_without_network(tmp_path, monkeypatch):
+    monkeypatch.setattr(get_settings(), "paid_jobs_enabled", False)
     monkeypatch.setattr("app.pipeline.voice.httpx.post", lambda *_args, **_kwargs: pytest.fail("blocked ElevenLabs call reached network"))
     result = prepare_voice([VoiceSegment("hook", "Premium voice.")], "elevenlabs", tmp_path / "generated")
     assert result["decision"] == "BLOCK"
