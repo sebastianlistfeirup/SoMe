@@ -118,3 +118,24 @@ def test_claude_reads_text_after_thinking_block(db, monkeypatch):
     cost = db.query(Cost).one()
     assert cost.status == "SETTLED"
     assert cost.actual_amount == pytest.approx(0.000129)
+
+
+def test_claude_prompt_defines_exact_claim_schema_and_version(db, monkeypatch):
+    from app.pipeline.ai import current_prompt_version
+
+    topic = Topic(niche="test", language="en", title="Schema test")
+    captured = {}
+
+    def fake_call(_db, _model, prompt, *_args, **_kwargs):
+        captured["prompt"] = prompt
+        return demo_draft(topic)
+
+    monkeypatch.setattr("app.pipeline.ai._call_json", fake_call)
+    claude_draft(db, topic, [], "schema-prompt-test")
+
+    assert '"id":"c1"' in captured["prompt"]
+    assert '"text":"..."' in captured["prompt"]
+    assert '"source_url":"https://..."' in captured["prompt"]
+    assert '"verified":true' in captured["prompt"]
+    assert "claims=[]" in captured["prompt"]
+    assert current_prompt_version(db) == "claude-json-v3-controlled"
