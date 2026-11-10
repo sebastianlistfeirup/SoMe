@@ -20,9 +20,19 @@ MSYS_NO_PATHCONV=1 docker compose build
 MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps worker pytest -q
 ```
 
-Resultat: **62 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
+Resultat: **69 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
 
-Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs, budget, downloads/SSRF, backup/restore, ZIP path traversal, idempotent metricsimport, demo/produktionsadskillelse, SAFE, ZOOM, claim control, voice providers, teksthash, WAV/lydstream, sample rate, segmentdækning, ElevenLabs paid-/pris-/rettighedsblokering, PCM-konvertering, ranking til approval, testpost-timing, doctor og dashboardruter.
+Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs, budget, downloads/SSRF, backup/restore, ZIP path traversal, idempotent metricsimport, demo/produktionsadskillelse, SAFE, ZOOM, claim control, voice providers, teksthash, WAV/lydstream, sample rate, segmentdækning, ElevenLabs paid-/pris-/rettighedsblokering, PCM-konvertering, ranking til approval, testpost-timing, Claude-modelrouting og modelpriser, doctor og dashboardruter.
+
+## Claude-modelrouting og omkostninger
+
+- `claude_draft` kalder `claude-sonnet-5-5`; `review_draft` kalder `claude-haiku-5-5` via research-ruten.
+- En mocktest med 1.000 input- og 100 outputtokens pr. model bekræfter Sonnet-pris 0,01935 DKK og Haiku-pris 0,0009675 DKK med de særskilt konfigurerede testtakster.
+- Paid jobs slået fra, tom API-nøgle og manglende input-/outputpris for hver rute blokerer før `Anthropic` instantieres. Ingen costreservation eller netværkskald opstår i disse seks negative testtilfælde.
+- Standard er `MONTHLY_AI_BUDGET_DKK=50`, `MAX_JOB_AI_COST_DKK=5` og `PAID_JOBS_ENABLED=false`.
+- Doctor rapporterer script-/researchmodel og om nøgle og DKK-priser er konfigureret, men aldrig selve nøglen.
+- Tests bruger udelukkende mocks. Claude API, faktisk leverandørfaktura og produktionskvalitet er ikke eksternt verificeret.
+- Budgetestimatet ved 30 videoer/måned er cirka 41 DKK for Contabo + 6,30 DKK for Claude. Dobbelt API-forbrugslager giver cirka 54 DKK samlet. Det er et estimat med vejledende valutakurser, ikke en prisgaranti; se OWNER_ACTIONS.md for tokenantagelser og kilder.
 
 ## Voiceover og approval
 
@@ -66,15 +76,15 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - `python -m app.cli restore --input ... --target /data/restore-verification-20261110`: integrity=ok. Den midlertidige restoremappe er ryddet.
 - Negativtest med `../outside.txt` i ZIP blokeres både ved verify og restore; ingen fil skrives uden for målmappen.
 - Web og worker er genstartet med nyeste build. `GET http://127.0.0.1:8000/healthz` returnerer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=false`.
-- `python -m app.cli doctor`: migration 0001, FFmpeg/ffprobe/espeak-ng, modelcache og sikre defaults bekræftet. Diskforbrug var 87,03 % (alarm, men under 90 % renderstop).
+- `python -m app.cli doctor`: migration 0001, FFmpeg/ffprobe/espeak-ng og modelcache bekræftet. Budget 50 DKK, forbrug 0 DKK, Sonnet/Haiku-modelnavne samt paid_jobs_enabled=false blev rapporteret uden secrets. Diskforbrug var 87,68 % (alarm, men under 90 % renderstop).
 
 ## Ikke verificeret / blokeret
 
-- Ejerens fulde visning og lytning af de nye videoer afventer.
+- Kokoro-stemmen er kreativt godkendt; platformsspecifik approval efter ejerens fulde visning afventer fortsat.
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
-- Claude API og paid jobs er ikke kaldt.
+- Claude API og paid jobs er ikke kaldt. Der findes ingen API-nøgle eller bekræftet leverandørfaktura, og produktions-DKK-priser afhænger af valutakursen på konfigurationsdagen.
 - YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
-- VPS-deploy, offsite krypteret backup og produktionsdeploy er ikke verificeret.
+- VPS-deploy, offsite krypteret backup og produktionsdeploy er ikke verificeret. Contabos checkout, binding, Auto Backup-pris samt faktisk FFmpeg/Kokoro-performance er ikke testet.
 - Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.
 - Dansk TTS er ikke kvalitetsgodkendt.
 - FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.

@@ -32,6 +32,8 @@ Konti og secrets
 ----------------
 Kopiér aldrig .env eller secrets ind i Git. Lokalt bruges den hemmelighedsfrie .env.example. På serveren oprettes /opt/some/secrets/app.env manuelt med chmod 600 og ejer, som deployprocessen kan læse. compose.production.yaml peger på den fil. Direkte konto-/nøglebehov står samlet i ../OWNER_ACTIONS.md.
 
+Claude er rutet med Sonnet til manuskripter og Haiku til research/claimkontrol. Modellerne har separate DKK-tokenpriser i konfigurationen. Standardbudgettet er 50 DKK/måned og 5 DKK/job. Paid jobs er slået fra, og kald blokeres før netværk uden API-nøgle og verificerede priser for den valgte rute. Kokoro, Whisper og FFmpeg kræver ingen betalt AI API.
+
 CLI-kontrakt
 ------------
   python -m app.cli doctor

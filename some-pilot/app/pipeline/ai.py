@@ -86,11 +86,19 @@ def build_clip_plan(segments: list[dict], asset_ids: int | list[int], audio_dura
     return ClipPlan(scenes=scenes)
 
 
-def _call_json(db: Session, model_class: type[T], prompt: str, job_id: str, kind: str, max_tokens: int) -> T:
+def _call_json(db: Session, model_class: type[T], prompt: str, job_id: str, kind: str, max_tokens: int, route: Literal["text", "research"] = "text") -> T:
     settings = get_settings()
-    if not settings.paid_jobs_enabled or not settings.anthropic_api_key or not settings.claude_model_text:
+    if route == "research":
+        model = settings.claude_model_research
+        input_price = settings.claude_research_input_dkk_per_million
+        output_price = settings.claude_research_output_dkk_per_million
+    else:
+        model = settings.claude_model_text
+        input_price = settings.claude_input_dkk_per_million
+        output_price = settings.claude_output_dkk_per_million
+    if not settings.paid_jobs_enabled or not settings.anthropic_api_key or not model:
         raise RuntimeError("claude_not_configured_or_disabled")
-    if settings.claude_input_dkk_per_million <= 0 or settings.claude_output_dkk_per_million <= 0:
+    if input_price <= 0 or output_price <= 0:
         raise RuntimeError("verified_model_pricing_required")
     estimate = settings.max_job_ai_cost_dkk
     reservation = reserve(db, job_id, kind, estimate)
@@ -98,8 +106,8 @@ def _call_json(db: Session, model_class: type[T], prompt: str, job_id: str, kind
 
     client = Anthropic(api_key=settings.anthropic_api_key, timeout=45, max_retries=0)
     try:
-        reply = client.messages.create(model=settings.claude_model_text, max_tokens=max_tokens, messages=[{"role": "user", "content": prompt}])
-        actual = (reply.usage.input_tokens * settings.claude_input_dkk_per_million + reply.usage.output_tokens * settings.claude_output_dkk_per_million) / 1_000_000
+        reply = client.messages.create(model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": prompt}])
+        actual = (reply.usage.input_tokens * input_price + reply.usage.output_tokens * output_price) / 1_000_000
         settle(db, reservation, actual, reply.usage.input_tokens, reply.usage.output_tokens)
         try:
             return model_class.model_validate(json.loads(reply.content[0].text))
@@ -147,7 +155,7 @@ def review_draft(db: Session, draft: ScriptDraft, source_excerpts: list[dict], j
         "Check numbers, names, quotations, implied personal experience, financial hype and originality.\n"
         f"<untrusted_review>{payload}</untrusted_review>"
     )
-    result = _call_json(db, ControlResult, prompt, job_id, "claude_claim_review", 700)
+    result = _call_json(db, ControlResult, prompt, job_id, "claude_claim_review", 700, route="research")
     if result.decision != "ALLOW":
         raise RuntimeError("claim_review_not_allowed:" + ",".join(result.issues))
     return result

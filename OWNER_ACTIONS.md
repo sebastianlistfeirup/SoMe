@@ -2,11 +2,9 @@
 
 Der er ikke foretaget køb, login, OAuth, betalte API-kald eller offentlig publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
-## 0. Gennemse de to nye mobilvarianter
+## 0. Kreativ status — voiceover godkendt
 
-Start med `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` på 102,1 sekunder. Kontrollér Kokoro-stemmen, gameplayklippene og at der ikke er nogen avatar eller tom PIP-flade. Se derefter gerne `handheld-zoom-v11/video.mp4` og `handheld-safe-v10/video.mp4` som kreative referencer. Sig om den nye voiceover er godkendt, eller hvad der skal justeres. Ingen version er publiceret.
-
-De to versioner er kreative referenceversioner. Den nye endelige kandidat er `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` med lokal Kokoro-voiceover uden avatar, komplet claim- og voice-kontrol samt ti hash-verificerede manifestfiler. Ingen af versionerne er publiceret.
+Kokoro-voiceover uden avatar er godkendt kreativt. Den aktuelle kandidat er `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` på 102,1 sekunder med komplet claim- og voice-kontrol samt ti hash-verificerede manifestfiler. `handheld-zoom-v11` og `handheld-safe-v10` er kreative referencer. Ingen version er publiceret.
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
@@ -17,30 +15,44 @@ Primær kandidat: https://contabo.com/en/vps/ (Cloud VPS 4). Hetzner CPX32 er fr
 - Konfiguration: 4 vCPU, 8 GB RAM, 100 GB SSD, ét snapshot, IPv4/IPv6 og ubegrænset trafik. Ingen setup fee er oplyst.
 - Vælg kortest mulig bindingsperiode først, så rendering og drift kan verificeres før eventuel 24-måneders binding. Auto Backup er en betalt tilføjelse og er ikke inkluderet i prisen.
 
-**Prisstatus 2026-11-10:** Contabos officielle side viser €5,50/måned inkl. moms for de første 24 måneder, cirka 41 DKK. Budgetloftet er nu højst **150 DKK/måned** eksklusive valgfrie AI API'er. Pris og bindingsperiode skal kontrolleres igen i checkout før køb. Der er ikke købt eller oprettet noget endnu.
+**Prisstatus 2026-11-10:** Contabos officielle side viser €5,50/måned inkl. moms for de første 24 måneder, cirka 41 DKK ved 7,45 DKK/EUR. Det samlede loft er **150 DKK/måned inklusive server og Claude API**. Pris, moms, tilgængelighed og bindingsperiode skal kontrolleres igen i checkout før køb. Prisen efter de første 24 måneder og prisen på Auto Backup er ikke verificeret. Der er ikke købt eller oprettet noget endnu.
 
-Kokoro, Whisper og rendering kræver ikke Claude/OpenAI. Betalte AI API'er er valgfri forbedringer af manuskripter, claims og research, ikke en forudsætning for publicering. `PAID_JOBS_ENABLED` forbliver `false`, indtil en konkret leverandør, model og pris godkendes særskilt.
+Kokoro, Whisper og rendering kører lokalt på serveren og kræver ikke Claude/OpenAI. Claude API er valgt til research, manuskripter og claimkontrol; det bruges ikke til selve renderingen. `PAID_JOBS_ENABLED` forbliver `false`, indtil nøgle, verificerede DKK-priser og API-budget er konfigureret.
 
 Alternativer hvis pris/tilgængelighed er dårlig: https://www.scaleway.com/en/pricing/ og https://www.digitalocean.com/pricing
 
 Efter godkendelse: opret separat SSH-nøgle lokalt, upload kun `.pub`, kontrollér hostfingerprint og brug `some-pilot/scripts/install.sh`. Verificér nyt `deploy`-login før SSH root/password-login deaktiveres. Angiv `ADMIN_IP` og konfigurér både cloudfirewall og UFW.
 
-## 2. Claude Console — separat API-budget
+## 2. Claude Console — samlet server- og API-budget
 
 Links: https://platform.claude.com/docs/en/api/overview og https://console.anthropic.com/
 
 - Opret ejerstyret organisation/projekt og aktivér API-betaling. Et Claude-chatabonnement er ikke API-forbrug.
-- Sæt appens foreslåede loft til 150 DKK/måned og maksimalt 5 DKK/job; konfigurér også udbyderens alarms/grænser.
-- Opret projektspecifik nøgle og indsæt den direkte i `/opt/some/secrets/app.env` med sikker editor/secret-manager.
+- Appens standard er **50 DKK/måned** og maksimalt **5 DKK/job**. Konfigurér også udbyderens alarms/grænser, hvor de understøttes. Server + appens API-loft er dermed cirka 91 DKK/måned.
+- Opret først en projektspecifik nøgle efter accept af API-loftet. Indsæt den direkte i `/opt/some/secrets/app.env` med sikker editor/secret-manager — aldrig i chat eller Git.
 
-Modelkandidater kontrolleret i officiel dokumentation 2026-11-08:
+Modelrouting kontrolleret i officiel dokumentation 2026-11-10:
 
-- `claude-haiku-5-5`: $0,10 input / $0,50 output pr. million tokens for prompts op til 100.000. Kandidat til klassifikation/ekstraktion.
-- `claude-sonnet-5-5`: $2 input / $10 output pr. million tokens. Kandidat til bedre manuskriptkvalitet.
+- `claude-sonnet-5-5` til manuskripter: $2 input / $10 output pr. million tokens.
+- `claude-haiku-5-5` til research og claimkontrol: $0,10 input / $0,50 output pr. million tokens ved prompts op til 100.000 tokens. Over 100.000 tokens er priserne $0,50 input / $2,50 output.
 
-Kilder: https://platform.claude.com/docs/en/models/overview og https://platform.claude.com/docs/en/about-claude/pricing
+Kilder: https://platform.claude.com/docs/en/about-claude/pricing og https://contabo.com/en/vps/
 
-Appen kræver verificerede DKK-priser i `CLAUDE_INPUT_DKK_PER_MILLION` og `CLAUDE_OUTPUT_DKK_PER_MILLION`. Omregn med en dokumenteret valutakurs på konfigurationsdagen. Start med små evals, og vælg den billigste model der består. Betalte jobs forbliver `false`, indtil dette er godkendt.
+### Estimat ved 30 videoer/måned
+
+| Del | Forbrugsantagelse | USD/måned | Ca. DKK/måned |
+|---|---|---:|---:|
+| Contabo Cloud VPS 4 | €5,50 inkl. moms de første 24 måneder | — | 41,00 |
+| Haiku research | 20.000 input + 2.000 output pr. dag | $0,09 | 0,58 |
+| Sonnet manuskripter | 8.000 input + 1.200 output pr. video | $0,84 | 5,42 |
+| Haiku claimkontrol | 12.000 input + 700 output pr. video | $0,0465 | 0,30 |
+| **API i alt** | | **$0,9765** | **6,30** |
+| **Server + API** | | | **ca. 47** |
+| **Med dobbelt API-forbrugslager** | retries og ekstra research | | **ca. 54** |
+
+DKK-beregningen bruger vejledende 7,45 DKK/EUR og 6,45 DKK/USD. Det er et forbrugsestimat, ikke en prisgaranti; faktisk pris afhænger af tokens, valutakurs, moms og checkout. Selv med appens API-loft på 50 DKK bliver den samlede pris cirka 91 DKK/måned.
+
+Appen kræver separat verificerede DKK-priser for hver modelrute: `CLAUDE_INPUT_DKK_PER_MILLION`, `CLAUDE_OUTPUT_DKK_PER_MILLION`, `CLAUDE_RESEARCH_INPUT_DKK_PER_MILLION` og `CLAUDE_RESEARCH_OUTPUT_DKK_PER_MILLION`. Omregn med en dokumenteret valutakurs på konfigurationsdagen. Start med små evals. Betalte jobs forbliver `false`, indtil dette er godkendt.
 
 ## 3. YouTube/Google — research, OAuth og privat test
 
@@ -84,4 +96,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode, og kontrollér at totalen er højst 150 DKK/måned før du godkender køb.
+Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode. Kontrollér checkout-totalen mod den oplyste pris på cirka 41 DKK/måned, og godkend kun købet, hvis pris og binding er acceptabel. Claude-nøgle og API-loft på 50 DKK/måned konfigureres som den næste separate opgave; samlet server + API estimeres til 47–54 DKK/måned.

@@ -1,5 +1,5 @@
 SoMe-maskinen — STATUS
-Opdateret: 2026-11-10T16:17:16Z
+Opdateret: 2026-11-10
 Repository: https://github.com/sebastianlistfeirup/SoMe
 Baseline før arbejdet: 2b601349cfffdc332ef9b348bdf0498331b45c5b. Arbejdstræet indeholdt værdifuldt WIP fra andre spor og er bevaret.
 
@@ -12,13 +12,17 @@ UDFØRT
 - ElevenLabs bruger det dokumenterede `/v1/text-to-speech/{voice_id}` med PCM 24 kHz og lokal WAV-konvertering. Paid jobs, API-nøgle, voice-ID, stemmerettigheder og dateret pris kræves før netværk. Ingen paid call er foretaget.
 - CLI har `--voice-provider kokoro|elevenlabs`. De gamle `--avatar-dir` og `avatar-request` kommandoer er fjernet fra aktiv brug.
 - Doctor og settings viser voice-provider, pris-/rettighedsstatus og avatar_required=false uden secrets.
+- Claude-routering er implementeret: `claude-sonnet-5-5` til manuskripter og `claude-haiku-5-5` til research/claimkontrol. Hver rute har separate verificerede DKK-priser og korrekt tokenregnskab. Doctor viser model- og konfigurationsstatus uden nøgler.
+- API-standardbudgettet er 50 DKK/måned og 5 DKK/job. Manglende paid enablement, API-nøgle eller modelpris blokerer før Anthropic instantieres eller netværk bruges.
+- Det samlede vedvarende forbrug er estimeret til cirka 47 DKK/måned for Contabo + Claude ved 30 videoer, cirka 54 DKK med dobbelt API-forbrugslager. Se OWNER_ACTIONS.md for antagelser og kilder. Estimatet er ikke en leverandørfaktura eller prisgaranti.
 - Backup og restore validerer arkivstier mod path traversal og links. En ondsindet ZIP testes og blokeres.
 - Metrics-CSV-import er idempotent pr. publikation, metrik, tidspunkt, definition og demo-status. Gentagen import kan ikke skabe dubletter.
 - De to testpost-buildere bruger versionsstyrede `test_post_scripts.json`, nye Kokoro-timingdata og kun gameplay/produktmateriale. Gamle HeyGen-masterfiler genbruges ikke.
 - Backend-sider for kontrolpanel, kladder og læringer fra det eksisterende WIP er bevaret.
 
 VERIFICERET LOKALT
-- Endelig Docker-build og **62 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
+- Endelig Docker-build og **69 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
+- Syv nye testtilfælde bekræfter Sonnet/Haiku-routing, separate prisregnskaber og blokering før netværk ved manglende paid enablement, API-nøgle eller DKK-pris. Alle leverandørsvar er mocks; ingen paid calls er foretaget.
 - `handheld-voiceover-v1`: video_id=33, 102,1 sekunder, 1080×1920, Kokoro uden avatar, speakmatch 99,51 %, −16,5 LUFS, −0,9 dBTP. Rights/technical/layout/safety/quality/claim_control/voice er ALLOW. Alle ti manifesthashes er kontrolleret. Status AWAITING_OWNER.
 - Almindelig demo `topic-49-v1`: video_id=34, espeak-ng som teknisk fallback, voice control ALLOW og ti manifestfiler. Status AWAITING_OWNER.
 - Gaming testpost: syv Kokoro-segmenter; YouTube, TikTok, Reels, ZOOM og SAFE produceret og visuelt kontrolleret uden avatar.
@@ -30,9 +34,10 @@ VERIFICERET LOKALT
 - Ingen social publicering, privat upload, OAuth, betalt API-forbrug eller server/hardwarekøb er foretaget.
 
 MANGLER / BLOKERET EKSTERNT
-- Ejerens fulde visning og kreative godkendelse af nye videoer afventer. Automatiske billedserier og Whisper erstatter ikke ejerens visning og lytning.
+- Kokoro-voiceover er godkendt kreativt. Platformsspecifik ejergodkendelse efter fuld visning afventer fortsat; automatiske billedserier og Whisper erstatter ikke ejerens visning og lytning.
 - YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
-- VPS-deploy, Claude API, offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret.
+- VPS-deploy, offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret. Contabos endelige checkout-pris, binding og Auto Backup-pris er ikke verificeret; faktisk FFmpeg/Kokoro-performance på VPS er ikke testet.
+- Der er ingen Claude API-nøgle eller bekræftet leverandørfaktura. Paid API er ikke kaldt. DKK/USD-kurs og alle fire DKK-tokenpriser skal fastsættes på konfigurationsdagen.
 - Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
 - Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
 - Rangeringen er redaktionel, ikke en FPS- eller batteritest. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
@@ -44,7 +49,7 @@ Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
 Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er at oprette Contabo-konto med 2FA, vælg Cloud VPS 4 med kortest mulig bindingsperiode og kontrollere at totalen er højst 150 DKK/måned før køb godkendes. Ingen betalt Claude/OpenAI er nødvendig.
+Opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode. Kontrollér checkout mod cirka 41 DKK/måned, og godkend kun hvis pris og binding er acceptable. Claude API-nøgle og separat loft på 50 DKK/måned er næste opgave. Samlet estimat er 47–54 DKK/måned; rendering kræver ikke betalt AI.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.

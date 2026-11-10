@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     dry_run: bool = True
     publish_enabled: bool = False
     paid_jobs_enabled: bool = False
-    monthly_ai_budget_dkk: float = Field(default=150, gt=0)
+    monthly_ai_budget_dkk: float = Field(default=50, gt=0)
     max_job_ai_cost_dkk: float = Field(default=5, gt=0)
     worker_concurrency: int = Field(default=1, ge=1, le=1)
     worker_poll_seconds: float = 2.0
@@ -26,10 +26,13 @@ class Settings(BaseSettings):
     download_max_bytes: int = 200_000_000
     download_timeout_seconds: int = 20
     anthropic_api_key: str = ""
-    claude_model_text: str = ""
+    claude_model_text: str = "claude-sonnet-5-5"
+    claude_model_research: str = "claude-haiku-5-5"
     claude_model_vision: str = ""
     claude_input_dkk_per_million: float = Field(default=0, ge=0)
     claude_output_dkk_per_million: float = Field(default=0, ge=0)
+    claude_research_input_dkk_per_million: float = Field(default=0, ge=0)
+    claude_research_output_dkk_per_million: float = Field(default=0, ge=0)
     youtube_api_key: str = ""
     youtube_client_id: str = ""
     youtube_client_secret: str = ""
