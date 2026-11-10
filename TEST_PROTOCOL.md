@@ -20,19 +20,19 @@ MSYS_NO_PATHCONV=1 docker compose build
 MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps worker pytest -q
 ```
 
-Resultat: **70 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
+Resultat: **73 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
 
 Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs, budget, downloads/SSRF, backup/restore, ZIP path traversal, idempotent metricsimport, demo/produktionsadskillelse, SAFE, ZOOM, claim control, voice providers, teksthash, WAV/lydstream, sample rate, segmentdækning, ElevenLabs paid-/pris-/rettighedsblokering, PCM-konvertering, ranking til approval, testpost-timing, Claude-modelrouting og modelpriser, doctor og dashboardruter.
 
 ## Claude-modelrouting og omkostninger
 
-- `claude_draft` kalder `claude-sonnet-5-5`; `review_draft` kalder `claude-haiku-5-5` via research-ruten.
-- En mocktest med 1.000 input- og 100 outputtokens pr. model bekræfter Sonnet-pris 0,01935 DKK og Haiku-pris 0,0009675 DKK med de særskilt konfigurerede testtakster.
-- Paid jobs slået fra, tom API-nøgle og manglende input-/outputpris for hver rute blokerer før `Anthropic` instantieres. Ingen costreservation eller netværkskald opstår i disse seks negative testtilfælde.
-- Standard er `MONTHLY_AI_BUDGET_DKK=50`, `MAX_JOB_AI_COST_DKK=5` og `PAID_JOBS_ENABLED=false`.
+- `claude_draft` kalder `claude-sonnet-5-5`; `review_draft` kalder `claude-haiku-5-5` via research-ruten med 2.000 outputtokens.
+- Mocktests dækker separate modelpriser, thinking-blok efterfulgt af tekst, præcise claim- og review-skemaer og outputgrænsen. Promptversion er `claude-json-v3-controlled`.
+- Paid jobs slået fra, tom API-nøgle og manglende input-/outputpris for hver rute blokerer før `Anthropic` instantieres. Ingen costreservation eller netværkskald opstår i disse negative testtilfælde.
+- Sikker standard er `MONTHLY_AI_BUDGET_DKK=50` og `MAX_JOB_AI_COST_DKK=5`. Produktion har paid jobs aktiveret efter ejerens nøgle og budgetaccept; publishing forbliver fra.
 - Doctor rapporterer script-/researchmodel og om nøgle og DKK-priser er konfigureret, men aldrig selve nøglen.
-- Tests bruger udelukkende mocks. Claude API, faktisk leverandørfaktura og produktionskvalitet er ikke eksternt verificeret.
-- Den købte Contabo Cloud VPS Plus 6 har skærmpris €23,75/måned, cirka 177 DKK. Ved 30 videoer/måned er Claude-estimatet 6,30 DKK og totalen cirka 183 DKK. Dobbelt API-forbrugslager giver cirka 190 DKK samlet. Det er et estimat med vejledende valutakurser, ikke en verificeret faktura; se OWNER_ACTIONS.md for tokenantagelser og kilder.
+- Automatiske tests bruger mocks. Separat live Sonnet-/Haiku-healthcheck og syntetisk manuskript → claimkontrol er verificeret på VPS; se Contabo-afsnittet.
+- Den købte Contabo Cloud VPS Plus 6 har skærmpris €23,75/måned, cirka 177 DKK. Ved 30 videoer/måned er Claude-estimatet 6,51 DKK og totalen cirka 183,45 DKK. Dobbelt API-forbrugslager giver cirka 189,96 DKK samlet. Det er et estimat, ikke en verificeret faktura; se OWNER_ACTIONS.md.
 
 ## Voiceover og approval
 
@@ -80,22 +80,27 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 
 ## Contabo-produktion 2026-11-10
 
-- Cloud VPS Plus 6: 6 vCPU, 12 GB RAM, 300 GB NVMe, Ubuntu 24.04. Commit `ec6312a` er deployet med `./scripts/deploy.sh` og **70/70 tests bestod** på serveren.
-- Den første serverkørsel gav 68 passed og 1 failed, fordi backup-testen arvede produktionens BACKUP_KEY. Testen er gjort miljøuafhængig, separat krypteret verify/restore er tilføjet, og både lokal og server-suite er derefter 70/70 grøn.
-- Executable-bit er rettet på alle fem shellscripts. Standarddeployment fungerer derefter uden Bash-workaround.
+- Cloud VPS Plus 6: 6 vCPU, 12 GB RAM, 300 GB NVMe, Ubuntu 24.04. Commit `9e194f3` er deployet med `./scripts/deploy.sh` og **73/73 tests bestod** på serveren.
+- Første serverkørsel gav 68 passed + 1 failed, fordi backup-testen arvede BACKUP_KEY. Testen er isoleret, separat krypteret verify/restore er tilføjet, og paid-konfigurationen er også dækket. Slutresultatet er 73/73 lokalt og på serveren.
+- Executable-bit er rettet på alle fem shellscripts. Standarddeployment fungerer uden Bash-workaround.
 - SSH: verificeret ED25519-hostfingerprint, separat deploynøgle, `PermitRootLogin no`, `PasswordAuthentication no`, `KbdInteractiveAuthentication no`. UFW er aktiv med default deny og kun ejerens admin-IP på port 22.
-- Web/worker er healthy. `/healthz` svarer ok med publishing og paid jobs fra. Kun 127.0.0.1:8000 er åbent for web; ingen offentlig webport.
+- Web/worker er healthy. `/healthz` svarer ok med publishing=false og paid_jobs=true. Kun 127.0.0.1:8000 er åbent for web; ingen offentlig webport.
 - En demokørsel i web-containeren stoppede med exit 137 på grund af 1 GB-grænsen. Den korrekte worker-service med 5 GB gennemførte `topic-2-v1`, video_id=1: 17,533 sekunder, 1080×1920, H.264 + AAC, AWAITING_OWNER, 10/10 manifesthashes og alle syv kontroller ALLOW.
 - Kokoro `af_bella` genereret på VPS: 3,679 sekunder, 24 kHz mono, kontrol ALLOW, paid_call=false og cost_dkk=0.
 - Krypteret backup `/data/backups/some-backup-20261110T211132Z.zip.enc`: encrypted=true og verified=true. Restore integrity=ok; midlertidig restoremappe er fjernet. Offsite=false.
 - Dashboard-ejer `owner` er oprettet uden at vise adgangskoden. Initialkoden er kun i serverens root-beskyttede secret-mappe.
-- Claude-prissætning er konfigureret med Frankfurter/ECB-kurs 2026-11-10, 1 USD=6,6661 DKK. Sonnet: 13,3322 input og 66,661 output DKK/million. Haiku: 0,66661 input og 3,33305 output DKK/million. Doctor viser begge prisruter=true, API-nøgle=false, paid=false og forbrug=0.
+- Claude-prissætning: Frankfurter/ECB-kurs 2026-11-10, 1 USD=6,6661 DKK. Sonnet 13,3322/66,661 og Haiku 0,66661/3,33305 DKK pr. million input/output. API-nøgle er konfigureret uden at være vist.
+- Sonnet-healthcheck: reply OK, 16 input + 4 outputtokens, 0,000480 DKK. Haiku-healthcheck: valid JSON, 33 input + 97 outputtokens, 0,000345 DKK.
+- Live Haiku afslørede thinking-blokke; parseren vælger nu tekstblokke. En 50-token probe var for lille, mens 700 tokens virkede. Claimreview bruger nu 2.000 tokens for at undgå afkortet JSON.
+- Live manuskriptevaluering afslørede manglende præcision i claim-skemaet. Promptversion v3 kræver nu id/text/source_url/verified. Reviewprompten kræver en flad issues-liste af strenge. Regressionstests dækker alle tre kontrakter.
+- Komplet syntetisk eval: Sonnet skrev validt manuskript og claim; Haiku svarede ALLOW, issues=[]. Manuskript: 354 input + 402 outputtokens, 0,031517 DKK. Review: 707 input + 387 outputtokens, 0,001761 DKK.
+- Samlet månedligt API-forbrug inklusive alle sundheds-, fejl- og evalkald: **0,142267 DKK** af 50 DKK. Alle costs er SETTLED; paid jobs er aktiveret. Ingen eval er publiceret eller gemt som socialt opslag.
 
 ## Ikke verificeret / blokeret
 
 - Kokoro-stemmen er kreativt godkendt; platformsspecifik approval efter ejerens fulde visning afventer fortsat.
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
-- Claude API og paid jobs er ikke kaldt. Der findes ingen API-nøgle eller bekræftet leverandørfaktura. Faktisk bankkurs og eventuel moms kan afvige fra den dokumenterede referencekurs.
+- Claude er verificeret med syntetisk eval, men faktisk leverandørfaktura og produktionskvalitet på rigtige researchkilder er ikke verificeret. Bankkurs og eventuel moms kan afvige.
 - YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
 - Contabos cloudfirewall og offsite backup er ikke konfigureret. Endelig faktura og moms er ikke verificeret; kontrolpanelet viser én måneds kontrakt.
 - Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.

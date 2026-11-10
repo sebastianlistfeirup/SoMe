@@ -1,6 +1,6 @@
 # Ejerhandlinger — integrationer og sikker drift
 
-Contabo-serveren er købt og den grundlæggende backend er installeret. Der er ikke foretaget OAuth, betalte API-kald eller social publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
+Contabo-serveren og Claude API er installeret og verificeret. Der er ikke foretaget OAuth eller social publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
 ## 0. Kreativ status — voiceover godkendt
 
@@ -12,12 +12,12 @@ Kokoro-voiceover uden avatar er godkendt kreativt. Den aktuelle kandidat er `som
 
 - 6 vCPU, 12 GB RAM, 300 GB NVMe, fem snapshots, 500 Mbit/s-port og ubegrænset trafik. Kontrolpanelet viser én måneds kontrakt og €23,75/måned, cirka 177 DKK. Endelig faktura og moms er ikke verificeret.
 - Serveren overstiger det tidligere 150 DKK-loft. Efter ejerens besked om at fortsætte bruges den købte server; der skal ikke købes flere servere eller større API-pakker.
-- Commit `ec6312a` er deployet, 70/70 tests bestod på serveren, web/worker er healthy, og en reel demovideo samt Kokoro-lyd er produceret og kontrolleret.
+- Commit `9e194f3` er deployet, 73/73 tests bestod på serveren, web/worker er healthy, og en reel demovideo samt Kokoro-lyd er produceret og kontrolleret.
 - SSH bruger separat ED25519-nøgle med fingeraftryk `SHA256:JlwDFKo3YXhjG1DAkgEgbY8B8otWKuiJEgT12w1kF4A`. Root- og passwordlogin over SSH er slået fra. UFW tillader kun SSH fra ejerens aktuelle admin-IP.
 - Dashboardet er kun tilgængeligt via SSH-tunnel på `http://127.0.0.1:8000`. Bruger er `owner`; den tilfældige initialadgangskode ligger i root-beskyttet `/opt/some/secrets/initial-admin-password` på serveren.
 - Krypteret backup og restore er verificeret. Contabos cloudfirewall og offsite backup mangler; der skal ikke købes Auto Backup uden ny prisafklaring.
 
-Kokoro, Whisper og rendering kører lokalt på serveren og kræver ikke Claude/OpenAI. Claude API er valgt til research, manuskripter og claimkontrol; det bruges ikke til selve renderingen. `PAID_JOBS_ENABLED` forbliver `false`, indtil API-nøglen er indsat og det minimale betalte healthcheck er godkendt.
+Kokoro, Whisper og rendering kører lokalt på serveren. Claude API er verificeret til manuskripter og claimkontrol med Sonnet/Haiku og 50 DKK-loft. `PAID_JOBS_ENABLED=true`; `DRY_RUN=true` og `PUBLISH_ENABLED=false` ændres ikke uden separat privat uploadtest og ejergodkendelse.
 
 ## 2. Claude Console — samlet server- og API-budget
 
@@ -48,7 +48,7 @@ Kilder: https://platform.claude.com/docs/en/about-claude/pricing og https://cont
 
 DKK-beregningen bruger 7,45 DKK/EUR og referencekursen 6,6661 DKK/USD fra https://api.frankfurter.app/latest?from=USD&to=DKK (2026-11-10). Det er et forbrugsestimat, ikke en verificeret faktura eller prisgaranti; faktisk pris afhænger af tokens, bankkurs, moms og fakturering. Selv med appens API-loft på 50 DKK bliver den samlede pris cirka 227 DKK/måned.
 
-Produktionens fire DKK-priser er konfigureret: Sonnet `13.3322` input / `66.661` output og Haiku `0.66661` input / `3.33305` output pr. million tokens. API-nøglen mangler, og `PAID_JOBS_ENABLED=false`. Start med et minimalt paid healthcheck og små evals, når nøglen er indsat.
+Produktionens fire DKK-priser er konfigureret: Sonnet `13.3322` input / `66.661` output og Haiku `0.66661` input / `3.33305` output pr. million tokens. API-nøglen er indsat uden at være vist, `PAID_JOBS_ENABLED=true`, og både healthchecks og komplet syntetisk manuskript → claimkontrol er bestået. Samlet testforbrug er 0,142267 DKK af 50 DKK.
 
 ## 3. YouTube/Google — research, OAuth og privat test
 
@@ -87,9 +87,9 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 - Kontrollér konkrete stock-, gameplay-, musik- og personrettigheder pr. asset. Der findes ingen 10-sekundersregel.
 - Vælg et faktisk affiliateprogram, dokumentér vilkår, provision og reklamemarkering. Ingen RPM, købsrate eller indtjening antages.
 - Afklar reklamemarkering, skat/moms og juridiske fortolkninger med relevante fagpersoner før kommerciel lancering.
-- Aktivér først `PAID_JOBS_ENABLED=true` efter budgettest. Aktivér `PUBLISH_ENABLED=true` og `DRY_RUN=false` først efter verificeret privat upload og konkret ejergodkendelse.
+- `PAID_JOBS_ENABLED=true` er aktiveret efter budgettest. Aktivér `PUBLISH_ENABLED=true` og `DRY_RUN=false` først efter verificeret privat upload og konkret ejergodkendelse.
 - HeyGen og synlige avatarer er udfaset. Kokoro er den lokale standardstemme. ElevenLabs er kun en valgfri provider og kræver særskilt ejeraccept af voice, kommercielle vilkår og pris før paid jobs aktiveres.
 
 ## Præcis næste handling
 
-Næste enlige opgave er Claude API-nøglen: opret et ejerstyret projekt i https://console.anthropic.com/, aktivér API-betaling, behold appens loft på 50 DKK/måned og opret en projektspecifik nøgle. Indsæt den som `ANTHROPIC_API_KEY=...` direkte i `/opt/some/secrets/app.env` via sikker SSH-editor. Del den ikke i chat eller Git. Derefter aktiveres paid jobs og et minimalt tokenmålt healthcheck før rigtige produktionsjobs.
+Claude API er verificeret. Næste enlige opgave er YouTube/Google: opret/vælg ejerens kanal og Google Cloud-projekt, aktivér YouTube Data API v3 og YouTube Analytics API og konfigurér ejerstyret OAuth med mindst mulige scopes. Første upload skal være PRIVATE med separat godkendelse. Indtil da bruges manuel eksport.

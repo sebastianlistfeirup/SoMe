@@ -21,38 +21,36 @@ UDFØRT
 - Backend-sider for kontrolpanel, kladder og læringer fra det eksisterende WIP er bevaret.
 
 VERIFICERET LOKALT
-- Endelig Docker-build og **70 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
-- Syv testtilfælde bekræfter Sonnet/Haiku-routing, separate prisregnskaber og blokering før netværk ved manglende paid enablement, API-nøgle eller DKK-pris. Alle leverandørsvar er mocks; ingen paid calls er foretaget.
-- Backup-tests er uafhængige af miljøet og dækker både ukrypteret og Fernet-krypteret backup med verify og restore.
-- `handheld-voiceover-v1`: video_id=33, 102,1 sekunder, 1080×1920, Kokoro uden avatar, speakmatch 99,51 %, −16,5 LUFS, −0,9 dBTP. Rights/technical/layout/safety/quality/claim_control/voice er ALLOW. Alle ti manifesthashes er kontrolleret. Status AWAITING_OWNER.
-- Almindelig demo `topic-49-v1`: video_id=34, espeak-ng som teknisk fallback, voice control ALLOW og ti manifestfiler. Status AWAITING_OWNER.
-- Gaming og lokal AI testposts er produceret i fem formater uden avatar; alle ti videoer og thumbnails er kontrolleret.
-- En komplet integrationstest producerer ranking, når AWAITING_OWNER og passerer den rigtige approvalfunktion med gyldig hash.
-- Lokal backup og restore samt live health er verificeret. Ingen social publicering, privat upload, OAuth eller betalt API-forbrug er foretaget.
+- Endelig Docker-build og **73 automatiske tests** bestod, også med PAID_JOBS_ENABLED=true. Kun en ekstern Starlette TestClient-deprecationwarning.
+- Tests dækker Sonnet/Haiku-routing, separate priser, thinking-blokke, præcise claim-/review-skemaer, 2.000-token reviewgrænse og blokering før netværk uden paid enablement, nøgle eller DKK-pris.
+- Backup-tests er miljøuafhængige og dækker både ukrypteret og Fernet-krypteret backup med verify og restore. ElevenLabs-blokeringstesten styrer selv paid-tilstanden.
+- Lokale voiceover-, ranking-, testpost-, approval-, backup- og healthresultater er bevaret. Ingen social publicering, privat upload eller OAuth er foretaget.
 
 VERIFICERET PÅ CONTABO VPS
-- Commit `ec6312a` er deployet via standardscriptet. Docker-build og **70/70 tests** bestod på selve VPS’en. Web og worker er healthy; migration 0001 og doctor er ok.
+- Commit `9e194f3` er deployet via standardscriptet. Docker-build og **73/73 tests** bestod på selve VPS’en. Web og worker er healthy; migration 0001 og doctor er ok.
 - SSH er nøglebaseret med effektiv `PermitRootLogin no`, `PasswordAuthentication no` og UFW default deny. SSH tillades kun fra ejerens aktuelle admin-IP. Web lytter kun på 127.0.0.1:8000.
 - Serverdemo `topic-2-v1`, video_id=1: 17,533 sekunder, 1080×1920, H.264 + AAC, AWAITING_OWNER, syv kontroller ALLOW og 10/10 manifesthashes korrekte.
-- Kokoro `af_bella` er genereret lokalt på VPS: 3,679 sekunder, 24 kHz mono, voice control ALLOW, paid_call=false og cost_dkk=0.
+- Kokoro `af_bella`: 3,679 sekunder, 24 kHz mono, voice control ALLOW, paid_call=false og cost_dkk=0.
 - Krypteret backup `/data/backups/some-backup-20261110T211132Z.zip.enc` er verificeret. Restore gav integrity=ok, og midlertidige restoredata er fjernet. Offsite er ikke konfigureret.
-- Dashboard-ejer `owner` er oprettet. Den tilfældige initialadgangskode ligger kun i root-beskyttet `/opt/some/secrets/initial-admin-password` på serveren.
-- Claude-priser er konfigureret med 2026-11-10-kurs 6,6661 DKK/USD: Sonnet 13,3322/66,661 og Haiku 0,66661/3,33305 DKK pr. million input/output. API-nøgle og paid jobs er stadig fra; forbrug 0 DKK.
+- Dashboard-ejer `owner` er oprettet. Initialadgangskoden ligger kun i root-beskyttet `/opt/some/secrets/initial-admin-password`.
+- Claude API-nøgle er konfigureret uden at være vist. Sonnet-healthcheck svarede OK med 16 input + 4 outputtokens. Haiku returnerede valid JSON efter håndtering af thinking-blokke.
+- Komplet syntetisk evaluering bestod: Sonnet-manuskript med 354 input + 402 outputtokens, derefter Haiku-claimkontrol med 707 input + 387 outputtokens og `ALLOW`, issues=[].
+- De sidste eval-kald kostede 0,031517 DKK for manuskript og 0,001761 DKK for review. Samlet forbrug inklusive alle fejlrettende probes er **0,142267 DKK** af 50 DKK. Paid jobs er aktiveret; publishing er stadig fra.
+- De fire DKK-priser bruger 2026-11-10-kurs 6,6661 DKK/USD: Sonnet 13,3322/66,661 og Haiku 0,66661/3,33305 pr. million input/output. Faktisk bankkurs og moms kan afvige.
 
 MANGLER / BLOKERET EKSTERNT
 - Platformsspecifik ejergodkendelse efter fuld visning afventer. YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
-- Contabos cloudfirewall er ikke konfigureret; UFW på selve serveren er aktiv. Endelig faktura og moms er ikke verificeret; kontrolpanelet viser én måneds kontrakt. Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret.
-- Der er ingen Claude API-nøgle eller bekræftet leverandørfaktura. Paid API er ikke kaldt. De fire DKK-tokenpriser er konfigureret med dokumenteret kurs, men faktisk bank-/valutakurs og eventuel moms kan afvige.
+- Contabos cloudfirewall er ikke konfigureret; UFW er aktiv. Endelig Contabo- og Claude-faktura/moms er ikke verificeret. Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret.
 - Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
 - Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
 - Rangeringen er redaktionel, ikke en FPS- eller batteritest. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
 
 SIKKERHEDSTILSTAND
-DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false; WORKER_CONCURRENCY=1.
+DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=true; WORKER_CONCURRENCY=1; MONTHLY_AI_BUDGET_DKK=50; MAX_JOB_AI_COST_DKK=5.
 Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås. Demo og produktion holdes adskilt.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Opret en projektspecifik Claude API-nøgle med API-loftet 50 DKK/måned og indsæt den direkte i `/opt/some/secrets/app.env` på serveren. Del den ikke i chat eller Git. Derefter aktiveres et minimalt paid healthcheck, og faktiske tokenomkostninger kontrolleres før produktionsjobs.
+Claude er verificeret. Næste integration er YouTube/Google: opret/vælg kanal og Google Cloud-projekt, aktivér YouTube Data API v3 og YouTube Analytics API og konfigurér ejerstyret OAuth. Første upload skal være PRIVATE med separat godkendelse. Indtil da bruges manuel eksport.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.
