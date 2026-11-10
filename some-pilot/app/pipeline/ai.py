@@ -86,6 +86,14 @@ def build_clip_plan(segments: list[dict], asset_ids: int | list[int], audio_dura
     return ClipPlan(scenes=scenes)
 
 
+def claude_reply_text(reply) -> str:
+    for block in reply.content:
+        text = getattr(block, "text", None)
+        if isinstance(text, str):
+            return text
+    raise RuntimeError("claude_text_content_missing")
+
+
 def _call_json(db: Session, model_class: type[T], prompt: str, job_id: str, kind: str, max_tokens: int, route: Literal["text", "research"] = "text") -> T:
     settings = get_settings()
     if route == "research":
@@ -110,7 +118,7 @@ def _call_json(db: Session, model_class: type[T], prompt: str, job_id: str, kind
         actual = (reply.usage.input_tokens * input_price + reply.usage.output_tokens * output_price) / 1_000_000
         settle(db, reservation, actual, reply.usage.input_tokens, reply.usage.output_tokens)
         try:
-            return model_class.model_validate(json.loads(reply.content[0].text))
+            return model_class.model_validate(json.loads(claude_reply_text(reply)))
         except (ValidationError, json.JSONDecodeError) as exc:
             raise RuntimeError("claude_output_validation_failed") from exc
     except (APITimeoutError, httpx.TimeoutException):

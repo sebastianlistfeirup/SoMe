@@ -17,6 +17,7 @@ from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
 from app.db.models import AuthUser, Topic
 from app.db.session import SessionLocal, init_database
+from app.pipeline.ai import claude_reply_text
 from app.pipeline.approvals import approve, set_pause
 from app.pipeline.backup import create_backup, restore_to_directory
 from app.pipeline.costs import monthly_total, reserve, settle
@@ -79,7 +80,7 @@ def doctor(db, paid_check: bool = False) -> dict:
             raise
         actual = (reply.usage.input_tokens * settings.claude_input_dkk_per_million + reply.usage.output_tokens * settings.claude_output_dkk_per_million) / 1_000_000
         settle(db, reservation, actual, reply.usage.input_tokens, reply.usage.output_tokens)
-        checks["paid_api_test"] = {"reply": reply.content[0].text, "input_tokens": reply.usage.input_tokens, "output_tokens": reply.usage.output_tokens}
+        checks["paid_api_test"] = {"reply": claude_reply_text(reply), "input_tokens": reply.usage.input_tokens, "output_tokens": reply.usage.output_tokens}
     return checks
 
 

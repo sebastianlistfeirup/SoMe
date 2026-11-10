@@ -102,3 +102,19 @@ def test_claude_research_blocks_before_network_without_verified_prices(db, monke
     with pytest.raises(RuntimeError, match="verified_model_pricing_required"):
         _call_json(db, ControlResult, "Return JSON", f"blocked-{field}", "claude_test", 100, route="research")
     assert db.query(Cost).count() == 0
+
+
+def test_claude_reads_text_after_thinking_block(db, monkeypatch):
+    configure_claude(monkeypatch)
+    reply = SimpleNamespace(
+        content=[SimpleNamespace(type="thinking", thinking="private reasoning"), SimpleNamespace(type="text", text=ControlResult(decision="ALLOW").model_dump_json())],
+        usage=SimpleNamespace(input_tokens=100, output_tokens=20),
+    )
+    monkeypatch.setattr(anthropic, "Anthropic", lambda **_kwargs: SimpleNamespace(messages=SimpleNamespace(create=lambda **_kwargs: reply)))
+
+    result = _call_json(db, ControlResult, "Return JSON", "thinking-block-test", "claude_test", 100, route="research")
+
+    assert result.decision == "ALLOW"
+    cost = db.query(Cost).one()
+    assert cost.status == "SETTLED"
+    assert cost.actual_amount == pytest.approx(0.000129)
