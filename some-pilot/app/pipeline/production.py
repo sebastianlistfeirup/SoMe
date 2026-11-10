@@ -13,6 +13,7 @@ from app.pipeline.approvals import paused, sha256_file, transition
 from app.pipeline.media import probe, render, require_tools, storyboard, synthesize, technical_checks, thumbnail, transcribe
 from app.pipeline.scenes import make_scene_assets
 from app.pipeline.policy import content_policy, rights_policy
+from app.pipeline.voice import VoiceSegment, voice_asset_report
 
 
 def transcription_quality(script: str, transcription: dict) -> dict:
@@ -87,6 +88,12 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, allow_synthetic_fa
         transition(video, "SCRIPTED")
         narration = output / "narration.wav"
         synthesize(draft.narration, narration, topic.language)
+        voice = voice_asset_report(VoiceSegment("full", draft.narration), narration, "espeak-ng", voice="espeak-ng", reused=False)
+        (output / "voice_assets.json").write_text(json.dumps(voice, indent=2, ensure_ascii=False), encoding="utf-8")
+        if voice["decision"] != "ALLOW":
+            transition(video, "BLOCKED")
+            db.commit()
+            raise ValueError("voice_assets_blocked:" + ",".join(voice["reasons"]))
         captions = output / "captions.srt"
         transcription = transcribe(narration, captions)
         audio_duration = float(probe(narration)["format"]["duration"])
@@ -109,7 +116,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, allow_synthetic_fa
         transition(video, "TECH_CHECKED")
         safety = content_policy(draft.narration + "\n" + draft.post_text, contains_people=False, ages_verified=False)
         quality = transcription_quality(draft.narration, transcription)
-        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "transcription": transcription, "owner_review_required": True}
+        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "voice": voice, "transcription": transcription, "owner_review_required": True}
         (output / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
         if safety.decision != "ALLOW" or quality["decision"] != "ALLOW":
             transition(video, "BLOCKED")
@@ -131,7 +138,9 @@ def _write_deliverables(output: Path, video: VideoVersion, script: Script, asset
     (output / "rights.json").write_text(json.dumps(rights, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "post.json").write_text(json.dumps(video.post_json, indent=2, ensure_ascii=False), encoding="utf-8")
     files = {}
-    for name in ("video.mp4", "captions.srt", "thumbnail.jpg", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg"):
+    deliverable_names = ["video.mp4", "captions.srt", "thumbnail.jpg", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg"]
+    deliverable_names.append("voice_assets.json")
+    for name in deliverable_names:
         files[name] = sha256_file(str(output / name))
     manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id for asset in assets], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "files_sha256": files}
     video.manifest_json = manifest

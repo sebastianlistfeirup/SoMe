@@ -60,7 +60,7 @@ def doctor(db, paid_check: bool = False) -> dict:
         "model_cache": {"path": str(settings.model_cache_dir), "whisper_small_cached": (settings.model_cache_dir / "whisper").exists()},
         "budget": {"monthly_limit_dkk": settings.monthly_ai_budget_dkk, "monthly_reserved_or_actual_dkk": monthly_total(db), "paid_jobs_enabled": settings.paid_jobs_enabled},
         "safety": {"dry_run": settings.dry_run, "publish_enabled": settings.publish_enabled, "paid_jobs_enabled": settings.paid_jobs_enabled},
-        "integrations": {"youtube": YouTubePublisher().capabilities(), "instagram": InstagramPublisher().capabilities(), "youtube_research": YouTubeAdapter().capabilities()},
+        "integrations": {"youtube": YouTubePublisher().capabilities(), "instagram": InstagramPublisher().capabilities(), "youtube_research": YouTubeAdapter().capabilities(), "voice": {"provider": settings.voice_provider, "local_available": settings.voice_provider == "kokoro", "elevenlabs_configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id and settings.elevenlabs_cost_per_1000_chars_dkk > 0 and settings.elevenlabs_pricing_verified_at and settings.elevenlabs_voice_rights_confirmed), "avatar_required": False}},
         "paid_api_test": "not_run",
     }
     checks["overall"] = "render_blocked_disk" if checks["disk"]["stop_render"] else "ok_demo" if all(tools.values()) else "setup_required"
@@ -103,6 +103,7 @@ def build_parser() -> argparse.ArgumentParser:
     ranking_parser.add_argument("--output", required=True)
     ranking_parser.add_argument("--platform", choices=["tiktok", "reels", "youtube"], default="reels")
     ranking_parser.add_argument("--mobile-style", choices=["zoom", "safe"], default="zoom")
+    ranking_parser.add_argument("--voice-provider", choices=["kokoro", "elevenlabs"], default="kokoro")
     metrics = sub.add_parser("metrics")
     metrics.add_argument("--due", action="store_true")
     metrics.add_argument("--import-csv")
@@ -172,7 +173,7 @@ def main() -> int:
             payload = {"video_id": video.id, "status": video.status, "output_dir": video.output_dir, "demo": args.dry_run}
         elif args.command == "ranking":
             from app.pipeline.production_ranking import produce_ranking
-            payload = produce_ranking(db, Path(args.plan), Path(args.output), args.platform, args.mobile_style)
+            payload = produce_ranking(db, Path(args.plan), Path(args.output), args.platform, args.mobile_style, args.voice_provider)
         elif args.command == "metrics":
             payload = import_csv_result(db, args)
         elif args.command == "learn":

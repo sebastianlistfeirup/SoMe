@@ -1,0 +1,28 @@
+{
+  "brand": "Pixel & Parameters",
+  "timezone": "Europe/Copenhagen",
+  "approval_status": "pending",
+  "auto_publish": false,
+  "suggested_schedule": {
+    "gaming": "Tuesday 19:30",
+    "ai": "Thursday 19:30"
+  },
+  "posts": [
+    {
+      "id": "gaming-handheld-nostalgia",
+      "host": "Kivo Rook",
+      "youtube_title": "5 Nostalgic Games That Belong on Every Handheld",
+      "tiktok_hook": "5 HANDHELD GAMES",
+      "instagram_hook": "5 HANDHELD GAMES",
+      "approval_status": "pending"
+    },
+    {
+      "id": "local-ai-buyers-guide",
+      "host": "Elian Quill",
+      "youtube_title": "Stop Buying TOPS: The 3 Specs That Actually Matter for Local AI",
+      "tiktok_hook": "3 SPECS THAT MATTER",
+      "instagram_hook": "3 SPECS THAT MATTER",
+      "approval_status": "pending"
+    }
+  ]
+}

@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
-from app.db.models import AuthSession, AuthUser, Cost, MetricSnapshot, Publication, Review, Topic, VideoVersion
+from app.db.models import AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
 from app.pipeline.approvals import ApprovalError, approve, paused, set_pause, transition
 from app.pipeline.platforms import InstagramPublisher, YouTubePublisher, manual_export
@@ -131,13 +131,33 @@ def logout(request: Request, db: Session = Depends(get_db), auth=Depends(csrf_ch
 
 @app.get("/")
 def home():
-    return RedirectResponse("/opportunities")
+    return RedirectResponse("/dashboard")
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
+    status_counts = {status: count for status, count in db.query(VideoVersion.status, func.count(VideoVersion.id)).group_by(VideoVersion.status).all()}
+    metric_totals = {name: value for name, value in db.query(MetricSnapshot.metric_name, func.sum(MetricSnapshot.metric_value)).filter(MetricSnapshot.is_demo.is_(False), MetricSnapshot.metric_name.in_(["views", "likes", "comments", "shares"])).group_by(MetricSnapshot.metric_name).all()}
+    latest_jobs = db.query(Job).order_by(Job.updated_at.desc()).limit(8).all()
+    latest_learning = db.get(Setting, "learning_model")
+    return render(request, "dashboard.html", db, auth, status_counts=status_counts, metric_totals=metric_totals, latest_jobs=latest_jobs, latest_learning=latest_learning)
 
 
 @app.get("/opportunities", response_class=HTMLResponse)
 def opportunities(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
     topics = db.query(Topic).order_by(Topic.created_at.desc()).all()
     return render(request, "opportunities.html", db, auth, topics=topics)
+
+
+@app.get("/drafts", response_class=HTMLResponse)
+def drafts(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
+    scripts = db.query(Script).order_by(Script.created_at.desc()).limit(200).all()
+    topics = {topic.id: topic for topic in db.query(Topic).filter(Topic.id.in_([script.topic_id for script in scripts])).all()} if scripts else {}
+    videos = db.query(VideoVersion).order_by(VideoVersion.created_at.desc()).all()
+    latest_video_by_script = {}
+    for video in videos:
+        latest_video_by_script.setdefault(video.script_id, video)
+    return render(request, "drafts.html", db, auth, scripts=scripts, topics=topics, latest_video_by_script=latest_video_by_script)
 
 
 @app.get("/queue", response_class=HTMLResponse)
@@ -249,6 +269,20 @@ def results(request: Request, db: Session = Depends(get_db), auth=Depends(requir
     return render(request, "results.html", db, auth, metrics=metrics)
 
 
+@app.get("/learnings", response_class=HTMLResponse)
+def learnings(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
+    models = [item for item in (db.get(Setting, "learning_model"), db.get(Setting, "learning_model_demo")) if item]
+    reports = []
+    report_dir = settings.data_dir / "reports"
+    if report_dir.is_dir():
+        for path in sorted(report_dir.glob("learning-*.json"), key=lambda item: item.stat().st_mtime, reverse=True)[:20]:
+            try:
+                reports.append({"name": path.name, "data": json.loads(path.read_text(encoding="utf-8"))})
+            except (json.JSONDecodeError, OSError):
+                reports.append({"name": path.name, "data": {"error": "unreadable_or_invalid_report"}})
+    return render(request, "learnings.html", db, auth, models=models, reports=reports)
+
+
 @app.get("/economy", response_class=HTMLResponse)
 def economy(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
     costs = db.query(Cost).order_by(Cost.created_at.desc()).all()
@@ -259,7 +293,11 @@ def economy(request: Request, db: Session = Depends(get_db), auth=Depends(requir
 def settings_page(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
     safe = {"DRY_RUN": settings.dry_run, "PUBLISH_ENABLED": settings.publish_enabled, "PAID_JOBS_ENABLED": settings.paid_jobs_enabled, "APP_TIMEZONE": settings.app_timezone, "MONTHLY_AI_BUDGET_DKK": settings.monthly_ai_budget_dkk, "MAX_JOB_AI_COST_DKK": settings.max_job_ai_cost_dkk}
     capabilities = {"youtube_publish": YouTubePublisher().capabilities(), "instagram_publish": InstagramPublisher().capabilities(), "youtube_research": YouTubeAdapter().capabilities()}
-    return render(request, "settings.html", db, auth, safe_settings=safe, capabilities=capabilities)
+    voice_profiles = {
+        "active": {"provider": settings.voice_provider, "preset": settings.voice_preset, "speed": settings.voice_speed, "avatar_required": False},
+        "elevenlabs": {"configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id), "voice_id_configured": bool(settings.elevenlabs_voice_id), "verified_price_configured": settings.elevenlabs_cost_per_1000_chars_dkk > 0 and bool(settings.elevenlabs_pricing_verified_at), "voice_rights_confirmed": settings.elevenlabs_voice_rights_confirmed, "paid_jobs_enabled": settings.paid_jobs_enabled},
+    }
+    return render(request, "settings.html", db, auth, safe_settings=safe, capabilities=capabilities, voice_profiles=voice_profiles)
 
 
 @app.post("/pause")

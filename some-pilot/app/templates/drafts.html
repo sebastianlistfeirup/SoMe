@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Kladder</h1>
+<p>Manuskripter og deres seneste videoversion. En kladde er ikke godkendt til publicering.</p>
+<table><tr><th>Script</th><th>Emne</th><th>Model</th><th>Påstande</th><th>Seneste status</th><th></th></tr>
+{% for script in scripts %}{% set video = latest_video_by_script.get(script.id) %}<tr><td>v{{ script.version }}<br><small>{{ script.created_at }}</small></td><td>{{ topics.get(script.topic_id).title if topics.get(script.topic_id) else 'Ukendt emne' }}</td><td>{{ script.model }}</td><td>{{ script.claims_json | length }}</td><td>{{ video.status if video else 'SCRIPT_ONLY' }}</td><td>{% if video %}<a href="/review/{{ video.id }}">Åbn</a>{% endif %}</td></tr>{% else %}<tr><td colspan="6">Ingen kladder endnu.</td></tr>{% endfor %}
+</table>
+{% endblock %}

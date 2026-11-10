@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Kontrolpanel</h1>
+<p>Samlet status for kladder, godkendelser, publiceringer og læring. Ingen publicering sker uden en gyldig ejergodkendelse.</p>
+<div class="stats">
+  <article class="metric"><span>Afventer ejer</span><strong>{{ status_counts.get('AWAITING_OWNER', 0) }}</strong></article>
+  <article class="metric"><span>Godkendt</span><strong>{{ status_counts.get('APPROVED', 0) }}</strong></article>
+  <article class="metric"><span>Planlagt</span><strong>{{ status_counts.get('SCHEDULED', 0) }}</strong></article>
+  <article class="metric"><span>Publiceret</span><strong>{{ status_counts.get('PUBLISHED', 0) }}</strong></article>
+</div>
+<h2>Reelle resultater</h2>
+<div class="stats">
+  {% for name in ['views', 'likes', 'comments', 'shares'] %}<article class="metric"><span>{{ name }}</span><strong>{{ metric_totals.get(name, 0) or 0 }}</strong></article>{% endfor %}
+</div>
+<div class="two-column">
+  <section><h2>Seneste jobs</h2><table><tr><th>Type</th><th>Status</th><th>Opdateret</th></tr>{% for job in latest_jobs %}<tr><td>{{ job.kind }}</td><td>{{ job.status }}</td><td>{{ job.updated_at }}</td></tr>{% else %}<tr><td colspan="3">Ingen jobs endnu.</td></tr>{% endfor %}</table></section>
+  <section><h2>Seneste læringsmodel</h2>{% if latest_learning %}<p>Version {{ latest_learning.value_json.get('version') }}</p><pre>{{ latest_learning.value_json | tojson(indent=2) }}</pre>{% else %}<p>Ingen reel læring endnu. Modellen opdateres først, når der findes sammenlignelige publiceringsdata.</p>{% endif %}</section>
+</div>
+{% endblock %}

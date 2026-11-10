@@ -72,6 +72,17 @@ def test_watch_requirement_and_invalid_transition(db, awaiting_video):
         transition(awaiting_video, "PUBLISHED")
 
 
+def test_voice_check_is_required_for_approval(db, awaiting_video):
+    import json
+    from pathlib import Path
+    checks_path = Path(awaiting_video.output_dir) / "checks.json"
+    checks = json.loads(checks_path.read_text())
+    checks.pop("voice")
+    checks_path.write_text(json.dumps(checks))
+    with pytest.raises(ApprovalError, match="check_not_allowed:voice"):
+        approve(db, awaiting_video, "owner", "youtube", "channel-1", True)
+
+
 def test_global_publish_flag_and_pause_block_every_route(db, awaiting_video, monkeypatch):
     settings = get_settings()
     monkeypatch.setattr(settings, "dry_run", True)

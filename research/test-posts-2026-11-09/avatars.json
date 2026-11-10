@@ -1,0 +1,16 @@
+{
+  "gaming": {
+    "confirmed_avatar_name": "Placeholder Gaming",
+    "confirmed_by_owner": true,
+    "voice_id": "dc5370c68baa4905be87f702758df4b0",
+    "look_id": null,
+    "look_id_status": "pending_authenticated_browser_resolution"
+  },
+  "ai": {
+    "confirmed_avatar_name": "Placeholder",
+    "confirmed_by_owner": true,
+    "voice_id": "5d4b765209dc42ddb52e043040679569",
+    "look_id": null,
+    "look_id_status": "pending_authenticated_browser_resolution"
+  }
+}

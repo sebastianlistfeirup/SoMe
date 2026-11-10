@@ -1,44 +1,50 @@
 SoMe-maskinen — STATUS
-Opdateret: 2026-11-08T20:28:21Z
+Opdateret: 2026-11-10T16:17:16Z
 Repository: https://github.com/sebastianlistfeirup/SoMe
+Baseline før arbejdet: 2b601349cfffdc332ef9b348bdf0498331b45c5b. Arbejdstræet indeholdt værdifuldt WIP fra andre spor og er bevaret.
 
 UDFØRT
-- Piloten har research, dashboard, database/jobs, rettigheds- og godkendelsesflow, manuel/API-publicering, metrics, versionsstyret læring, budgetloft, backup og sikker downloader.
-- Mini-bibel v1.3 beskriver rigtige licensede internetklip, separate platformvarianter, ZOOM med to præcise fuldskærmsfaser pr. spil og SAFE uden beskåret spilindhold.
-- Ni officielle Steam-gameplayklip og Playstacks officielle Balatro-trailer fra YouTube har kilde- og politikbeviser. Alle ti SHA-256 matcher de lokale filer. Ingen tilfældige streamerklip eller uafklarede musikvalg.
-- Balatro bruger launch traileren i 640×360; HD er ikke påstået. Produktionsmetadata linker til den konkrete udgiver-URL for hvert klip.
-- Celeste bruger reel platform-action fra 32 sekunder. Slay the Spire, Slay the Spire 2 og Balatro er flyttet væk fra review-citater og store tekstkort i zoom.
-- `handheld-safe-v10`: video_id=31, 102,1 sekunder, 1080×1920, komplet spilbredde og tekst over dæmpet baggrund.
-- `handheld-zoom-v11`: video_id=32, 102,1 sekunder, 1080×1920 og to præcise fuldskærms-zooms pr. spil. Hades II bruger 77-sekundersklippet i zoom for at undgå titelkort.
-- Tidligere versioner er beholdt: TikTok 49,2 sekunder, Reels 102,2 sekunder og YouTube 171,4 sekunder med hver deres manuskript, format og CTA.
-- `research/handheld-trend-ideas-2026-11-08.json` indeholder 10 nye idéer med Valves aktuelle Deck-rankinger og direkte målte YouTube-formatsignaler.
-- `research/local-ai-hardware-2026-11-08.md` sammenligner Framework 192 GB, DGX Spark, RTX 5090 og Mac Studio M5 Max/Ultra med priser, modelkapacitet, strøm og manglende benchmarkdata.
-- `research/channel-name-candidates.md` indeholder 10 navne; Pixel & Parameters er anbefalet. Navneledighed er ikke kontrolleret.
+- Backend er migreret til voiceover uden avatar. Ingen HeyGen-konto, avatar-MP4, PIP eller avatar-request er nødvendig for ranking eller almindelig produktion.
+- `app/pipeline/voice.py` indeholder providerkontrakt med Kokoro og valgfri ElevenLabs. Alle segmenter får WAV-/lydstreamkontrol, teksthash, varighed, sample rate og SHA-256.
+- Eksisterende Kokoro-assets genbruges kun når metadata og manuskripttekst matcher. Ændret manuskript kræver nye lydassets.
+- Ranking bruger `editorial-ranking-v4-voiceover` med claim control og voice control. Almindelig produktion har samme voice-provenance. Approval kræver begge kontroller og gyldig approvalhash.
+- `voice_assets.json` er et obligatorisk artefakt i manifestet. Nye versioner har ti hash-verificerede manifestfiler.
+- ElevenLabs bruger det dokumenterede `/v1/text-to-speech/{voice_id}` med PCM 24 kHz og lokal WAV-konvertering. Paid jobs, API-nøgle, voice-ID, stemmerettigheder og dateret pris kræves før netværk. Ingen paid call er foretaget.
+- CLI har `--voice-provider kokoro|elevenlabs`. De gamle `--avatar-dir` og `avatar-request` kommandoer er fjernet fra aktiv brug.
+- Doctor og settings viser voice-provider, pris-/rettighedsstatus og avatar_required=false uden secrets.
+- Backup og restore validerer arkivstier mod path traversal og links. En ondsindet ZIP testes og blokeres.
+- Metrics-CSV-import er idempotent pr. publikation, metrik, tidspunkt, definition og demo-status. Gentagen import kan ikke skabe dubletter.
+- De to testpost-buildere bruger versionsstyrede `test_post_scripts.json`, nye Kokoro-timingdata og kun gameplay/produktmateriale. Gamle HeyGen-masterfiler genbruges ikke.
+- Backend-sider for kontrolpanel, kladder og læringer fra det eksisterende WIP er bevaret.
 
-VERIFICERET
-- Endelig Docker-build og 45 automatiske tests bestod. Testene dækker også safe-layout, to zoom-faser og eksakt fasevarighed.
-- Zoom-v11: rights, technical, safety og quality ALLOW; speakmatch 99,51 %; −16,5 LUFS og −0,9 dBTP; AWAITING_OWNER.
-- Safe-v10: rights, technical, safety og quality ALLOW; speakmatch 99,51 %; −16,4 LUFS og −1,0 dBTP; AWAITING_OWNER.
-- Zoom-v11 er kontrolleret ved fire præcise tidspunkter for hvert af de ti spil: bred visning, zoom 1, bred visning og zoom 2. Safe-v10 er kontrolleret som storyboard og billedserie for hvert sekund.
-- Alle 18 manifestfiler i de to nye versioner er SHA-256-verificeret. De ældre tre platformversioner har 27 verificerede manifestfiler.
-- Mini-bibel v1.3 PDF er bygget med 29 sider; forsiden og de nye mobilregler på side 17-18 er visuelt kontrolleret med korrekte danske tegn.
-- Ingen betalte API-kald, køb, OAuth, privat/offentlig upload eller social publicering er foretaget.
+VERIFICERET LOKALT
+- Endelig Docker-build og **62 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
+- `handheld-voiceover-v1`: video_id=33, 102,1 sekunder, 1080×1920, Kokoro uden avatar, speakmatch 99,51 %, −16,5 LUFS, −0,9 dBTP. Rights/technical/layout/safety/quality/claim_control/voice er ALLOW. Alle ti manifesthashes er kontrolleret. Status AWAITING_OWNER.
+- Almindelig demo `topic-49-v1`: video_id=34, espeak-ng som teknisk fallback, voice control ALLOW og ti manifestfiler. Status AWAITING_OWNER.
+- Gaming testpost: syv Kokoro-segmenter; YouTube, TikTok, Reels, ZOOM og SAFE produceret og visuelt kontrolleret uden avatar.
+- Lokal AI testpost: otte Kokoro-segmenter; samme fem formater produceret og visuelt kontrolleret uden avatar.
+- Alle ti testpost-videoer er skrevet med rigtige filer. Thumbnails er kontrolleret. Testpostmanifestet markerer voice_only=true og avatar_present=false.
+- En komplet integrationstest producerer ranking, når AWAITING_OWNER og passerer den rigtige approvalfunktion med gyldig hash.
+- Rigtig backup `/data/backups/some-backup-20261110T161035Z.zip` er verificeret. Restore til separat mappe gav integrity=ok; testmappen er ryddet.
+- Web og worker er genstartet med nyeste build. `GET /healthz` svarer status=ok med publish_enabled=false og paid_jobs_enabled=false.
+- Ingen social publicering, privat upload, OAuth, betalt API-forbrug eller server/hardwarekøb er foretaget.
 
-MANGLER / BLOKERET
-- Ejeren skal se og lytte til de konkrete versioner før publicering; automatisk visuel kontrol erstatter ikke den fulde visning.
-- VPS-deploy, Claude API, YouTube/Meta OAuth, kanal/konto, privat upload og virkelige metrics er ikke verificeret.
-- Rangeringen er redaktionel; FPS og batteritid er ikke målt. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
-- Lokal AI-hardware er produktresearch, ikke uafhængige tokens/sekund-benchmarks. Ingen maskine er købt.
-- Krypteret offsite backup, BACKUP_KEY, affiliate, skat/moms og kontomonetisering mangler.
-- Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt.
+MANGLER / BLOKERET EKSTERNT
+- Ejerens fulde visning og kreative godkendelse af nye videoer afventer. Automatiske billedserier og Whisper erstatter ikke ejerens visning og lytning.
+- YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
+- VPS-deploy, Claude API, offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret.
+- Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
+- Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
+- Rangeringen er redaktionel, ikke en FPS- eller batteritest. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
+- Gamle databaseposter kan stadig beskrive forkastede prøveversioner. Brug kun konkrete leverancemapper; bulk-godkend eller slet ikke uden backup.
 
 SIKKERHEDSTILSTAND
-DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false.
-Nødstop og diskgrænser må ikke omgås. Ukendte rettigheder/alder/sikkerhed blokerer.
+DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false; WORKER_CONCURRENCY=1.
+Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
 Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Se `some-pilot/data/versions/handheld-zoom-v11/video.mp4`, og sig om du foretrækker zoom eller safe. Kontopunkterne kommer først bagefter.
+Se og lyt til `some-pilot/data/versions/handheld-voiceover-v1/video.mp4`. Sig om den nye Kokoro-voiceover uden avatar er godkendt kreativt, eller hvad der skal justeres. Konto- og integrationspunkterne kommer først bagefter.
 
 TESTBEVIS
-Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Der gives ingen 100 % fejlfriheds-, indtægts- eller performancegaranti.
+Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.

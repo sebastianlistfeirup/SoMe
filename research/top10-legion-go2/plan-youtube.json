@@ -1,8 +1,19 @@
 {
   "title": "10 games worth your time on Legion Go 2",
   "hook": "Handheld gamers, this is the list. Ten incredible games for your Legion Go two, chosen for controller-first play, readability and brilliant game design. Our number one absolutely earns the crown.",
-  "post_text": "Our editorial top 10 games for Legion Go 2, chosen for controller-first design, readability and great handheld sessions. This is not an FPS benchmark. Tell us your number one in the comments and subscribe for more handheld gaming. Independent and unsponsored; gameplay belongs to the respective publishers. Official sources and policies are linked below.",
+  "post_text": "Our editorial ranking of 10 games for Legion Go 2, chosen for controller-first design, readability and great handheld sessions. This is not an FPS benchmark. Tell us your number one in the comments and subscribe for more handheld gaming. Independent and unsponsored; gameplay belongs to the respective publishers. Official sources and policies are linked below.",
   "voice_dir": "voice-youtube",
+  "claims": [
+    {
+      "id": "hades-2-deck-verified",
+      "text": "Hades II is Steam Deck Verified.",
+      "source_url": "https://www.supergiantgames.com/blog/hades2-faq/",
+      "evidence_note": "Supergiant's official Hades II FAQ states that the game is Steam Deck Verified.",
+      "game": "Hades II",
+      "verified": true,
+      "verified_at": "2026-11-09"
+    }
+  ],
   "scenes": [
     {
       "rank": 10,

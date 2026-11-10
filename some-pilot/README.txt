@@ -10,10 +10,10 @@ Lokal Docker-demo (uden konti eller API-nøgler)
 Kør fra denne mappe:
 
   docker compose build
-  docker compose run --rm --no-deps web python -m app.cli migrate
-  docker compose run --rm --no-deps web python -m app.cli doctor
-  docker compose run --rm --no-deps web python -m app.cli research --demo --output /data/reports/demo
-  docker compose run --rm --no-deps web python -m app.cli demo --produce
+  docker compose run --rm --no-deps worker python -m app.cli migrate
+  docker compose run --rm --no-deps worker python -m app.cli doctor
+  docker compose run --rm --no-deps worker python -m app.cli research --demo --output /data/reports/demo
+  docker compose run --rm --no-deps worker python -m app.cli demo --produce
 
 Første produktionskørsel henter faster-whisper small fra den officielle Hugging Face-modelkilde. Det kræver net og disk, men ingen API-nøgle. Demovideoen er tydeligt mærket DEMO og stopper i AWAITING_OWNER. Output findes under data/versions.
 
@@ -21,7 +21,7 @@ Opret dashboard-ejer (brug et langt, unikt password; del det ikke i chat):
 
   Linux/macOS: export APP_ADMIN_PASSWORD='INDSÆT LOKALT STærKT PASSWORD'
   Windows PowerShell: $env:APP_ADMIN_PASSWORD='INDSÆT LOKALT STÆRKT PASSWORD'
-  docker compose run --rm --no-deps -e APP_ADMIN_PASSWORD web python -m app.cli init-user --username owner
+  docker compose run --rm --no-deps -e APP_ADMIN_PASSWORD worker python -m app.cli init-user --username owner
   docker compose up -d
 
 Åbn http://127.0.0.1:8000. På serveren bruges i stedet SSH-tunnel:
@@ -62,13 +62,21 @@ Standard er Ubuntu 24.04 LTS, 4 delte x86-vCPU, 8 GB RAM og mindst 80 GB SSD. In
 
 Tests
 -----
-  docker compose run --rm --no-deps web pytest -q
+  docker compose run --rm --no-deps worker pytest -q
 
 Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
-Gameplay-ranking (internetklip som standard)
--------------------------------------------
-Produktionen af top-10-videoer bruger `python -m app.cli ranking --plan /research/plan.json --platform reels --output /data/versions/handheld-reels-v2`. Planen skal indeholde præcis ti unikke spil, et lokalt videoklip til hvert spil, officiel clip-URL og politik-URL, rettighedshaver, bevis, kreditering og musikvalg. Manglende eller ugyldige videofiler stopper produktionen. Den gamle Pillow-demo er tydeligt mærket DEMO og er ikke standardproduktion. Almindelig ikke-demo-produktion uden licenserede internetassets blokeres med `licensed_internet_assets_required`.
+Gameplay-ranking (internetklip og lokal voiceover som standard)
+--------------------------------------------------------------
+Top-10-videoer bruger voiceover uden avatar. Kokoro er den lokale standardprovider. En eksisterende stemmemappe genbruges kun når alle 11 segmenter har matchende manuskriptmetadata, gyldig WAV, lydstream, varighed, sample rate, teksthash og SHA-256:
+
+  python -m app.cli ranking --plan /research/plan.json --platform reels --mobile-style zoom --voice-provider kokoro --output /data/versions/NY-VERSION
+
+Når `voice_dir` udelades, genereres nye segmenter lokalt i den nye versionsmappe. Ingen avatar-MP4, HeyGen-konto eller ekstern API er nødvendig. `voice_assets.json` dokumenterer provider, teksthash, varighed, sample rate, filhash og licens; filen indgår selv i manifestet sammen med de øvrige ni leverancefiler.
+
+ElevenLabs er en separat valgfri provider og kræver eksplicit `--voice-provider elevenlabs`, `PAID_JOBS_ENABLED=true`, API-nøgle, voice-ID og en dateret, verificeret tegnpris inden for jobbudgettet. Ellers blokeres kaldet før netværk. Der er ikke foretaget eller verificeret et betalt ElevenLabs-kald.
+
+Planen skal indeholde præcis ti unikke spil, et lokalt videoklip til hvert spil, officiel clip-URL og politik-URL, rettighedshaver, bevis, kreditering, musikvalg og strukturerede faktuelle claims. Manglende eller ugyldige filer stopper produktionen. Den gamle Pillow-demo er tydeligt mærket DEMO og er ikke standardproduktion. Almindelig ikke-demo-produktion uden licenserede internetassets blokeres med `licensed_internet_assets_required`.
 
 Platformvarianter: `tiktok` giver kortere/hurtigere kommentar og tæt 9:16-action, `reels` giver fuld 9:16-action med Reels-safe-area og gem/del-CTA, mens `youtube` giver 16:9 med længere kommentar og landskabsthumbnail. `scripts/build_platform_plans.py` laver de redaktionelle planer. `scripts/prepare_kokoro.py` henter den Apache-2.0-licenserede Kokoro-model og genererer neural lokal speak med dokumenteret SHA-256. Stemmehastighed vælges pr. platform. `scripts/New-RankingVoice.ps1` og espeak-ng er kun fallbacks.
 

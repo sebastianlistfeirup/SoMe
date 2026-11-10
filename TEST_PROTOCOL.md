@@ -1,60 +1,84 @@
 # Testprotokol — SoMe-maskinen
 
-Dato: 2026-11-08
-Miljø: Windows-vært, Docker Engine 29.9.2, container Python 3.11, SQLite, FFmpeg, faster-whisper small/int8, Kokoro-82M ONNX
-Testet build: lokal `some-pilot:local` med de nye mobilfiltre og kurateringsscripts. Endelig kodeidentitet dokumenteres af releasecommittet i Git-historikken.
-Formål: Adskille faktisk udførte tests fra ikke-verificerede eksterne integrationer.
+Dato: 2026-11-10
+Miljø: Windows-vært, Git Bash, Docker Desktop Linux containers, Python 3.11, SQLite/WAL, FFmpeg, faster-whisper small/int8, Kokoro-82M ONNX
+Formål: Skelne mellem faktisk udførte lokale kontroller og integrationer, der stadig kræver ejerens konti og godkendelser.
 
-## Automatiserede tests
+## Baseline og bevarelse af WIP
 
-Kommando: `docker compose run --rm --no-deps worker pytest -q`
-Forventning: Alle tests består uden konti eller betalte API-kald.
-Resultat: **45 passed** i den endelige låste Docker-build. Kun en ekstern Starlette TestClient-deprecationwarning.
+- Udgangspunkt: commit `2b601349cfffdc332ef9b348bdf0498331b45c5b` plus værdifuldt ikke-committed WIP.
+- Maskinlæsbart snapshot: `.codex_tmp/kimi-worktree-snapshot-2026-11-10.json` med 46 ændrede/untracked stier. Det er et lokalt checkpoint, ikke en Git-commit.
+- Ingen reset, checkout eller sletning af andres WIP er udført.
+- Docker var stoppet ved første testforsøg. Efter start af Docker Desktop blev build og tests kørt på den faktiske nye kode.
 
-Dækning: rettigheder, alder, godkendelser, publish-blokering, jobs, budget, downloads/SSRF, læring, klippeplaner, signerede links, login/CSRF, backup, diskstop, upload-afklaring, ti unikke spil, #1/#10-mapping, titelbredde, dynamiske storyboards, autojunk-fri transskription, internetkrav, fuldskærms-crop, safe-layout, to zoom-faser med eksakte varigheder og platformsspecifikke safe areas/tempoer.
+## Standardbuild og automatiske tests
 
-## Model- og klipkontrol
+Kørsel fra `some-pilot`:
 
-- Kokoro-82M v1.0 ONNX fra den officielle `model-files-v1.1`-release.
-- Model: 325.505.369 bytes; SHA-256 `beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a`.
-- Voices: 28.214.398 bytes; SHA-256 `bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d`.
-- Apache-2.0-model og MIT `kokoro-onnx 0.6.1`. Ingen betalt API eller stemmeefterligning.
-- Ni officielle Steam-gameplayklip er H.264/1080p. Balatro er Playstacks officielle launch trailer fra YouTube i H.264/640×360; en HD-download kunne ikke verificeres og er ikke påstået.
-- Alle ti lokale kildefilers SHA-256 matcher `research/top10-legion-go2/rights.json`. Kontaktark og konkrete klippunkter er visuelt gennemgået.
+```bash
+MSYS_NO_PATHCONV=1 docker compose build
+MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps worker pytest -q
+```
 
-## Færdige platformproduktioner
+Resultat: **62 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
 
-| Version | ID/varighed | Format og lyd | Kontrol |
-|---|---|---|---|
-| TikTok `handheld-tiktok-v2` | 15 / 49,2 s | 1080×1920, tæt action, hurtigere Kokoro | rights/technical/safety/quality ALLOW; speak 96,67 %; −16,8 LUFS; −1,0 dBTP |
-| Reels `handheld-reels-v2` | 14 / 102,2 s | 1080×1920, fuldskærms-action, gem/del-CTA | rights/technical/safety/quality ALLOW; speak 99,34 %; −16,5 LUFS; −1,0 dBTP |
-| YouTube `handheld-youtube-v4` | 18 / 171,4 s | 1920×1080, længere kommentar og landskabsthumbnail | rights/technical/safety/quality ALLOW; speak 99,55 %; −16,4 LUFS; −0,9 dBTP |
-| Safe `handheld-safe-v10` | 31 / 102,1 s | 1080×1920, fuld spilbredde og tekst uden beskæring | rights/technical/safety/quality ALLOW; speak 99,51 %; −16,4 LUFS; −1,0 dBTP |
-| Zoom `handheld-zoom-v11` | 32 / 102,1 s | 1080×1920, to præcise fuldskærms-zooms pr. spil | rights/technical/safety/quality ALLOW; speak 99,51 %; −16,5 LUFS; −0,9 dBTP |
+Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs, budget, downloads/SSRF, backup/restore, ZIP path traversal, idempotent metricsimport, demo/produktionsadskillelse, SAFE, ZOOM, claim control, voice providers, teksthash, WAV/lydstream, sample rate, segmentdækning, ElevenLabs paid-/pris-/rettighedsblokering, PCM-konvertering, ranking til approval, testpost-timing, doctor og dashboardruter.
 
-Alle er H.264 High/yuv420p, AAC 48 kHz og 30 fps med 1:1 pixels. Whisper bruger den faktisk afspillede narration med trim/tempo. Hver version har ni manifestfiler; de 18 nye SHA-256 er kontrolleret, og de tidligere 27 matcher også deres manifester. Alle står i `AWAITING_OWNER`.
+## Voiceover og approval
 
-Visuelle checks: Zoom-v11 er kontrolleret på fire præcise tidspunkter for hvert spil: bred visning, zoom 1, bred visning og zoom 2. Hades II har gameplay i begge zoom-faser. Safe-v10 er kontrolleret som storyboard og billedserie for hvert sekund; hele spilbredden og tekstkort bevares. Thumbnails er kontrolleret. Dette erstatter ikke ejerens fulde visning.
+- `app/pipeline/voice.py` tester lokal Kokoro og valgfri ElevenLabs uden betalt netværkskald.
+- Kokoro-genbrug kræver matchende manuskriptmetadata, alle 11 segmenter og gyldig WAV med lyd, varighed og sample rate.
+- ElevenLabs kræver paid jobs, API-nøgle, voice-ID, `ELEVENLABS_VOICE_RIGHTS_CONFIRMED=true` og dateret pris inden for budget. Mocktest bekræfter PCM 24 kHz og prisregistrering; det er ikke en ekstern leverandørtest.
+- Ranking når `AWAITING_OWNER` uden avatar og passerer den rigtige `approve()` med gyldige checks og approvalhash.
+- Almindelig produktion har samme voice-provenance som ranking. `voice_assets.json` er obligatorisk i manifestet, som dermed har ti filer.
 
-## Øvrige verificeringer
+## Rigtige videoproduktioner
 
-- Endelig Docker-build med låste afhængigheder bestået.
-- Mini-bibel v1.3 PDF/Markdown bygget; 29 sider; mobilregler og danske tegn visuelt kontrolleret på forsiden og side 17-18.
-- `research/handheld-content-calendar.json`: 12 oprindelige emner plus 10 nye idéer i `research/handheld-trend-ideas-2026-11-08.json`.
-- Trendsignaler: Valves Deck-liste 2.-8. november, 34.376 visninger/7 dage for Deck Wizards top-50 og 30.148/1 måned for HiTechKings Legion Go 2-test. Disse er snapshots, ikke prognoser.
-- Lokal AI- og navneresearch er gemt med kilder og tydelige mangler for benchmarks og navneledighed.
-- Tidligere fundament: research, Alembic 0001, demo-læring, backup/restore, healthchecks og >90 % diskstop.
+### Rankingreference
+
+`some-pilot/data/versions/handheld-voiceover-v1`:
+
+- video_id=33; 102,1 sekunder; 1080×1920; H.264 High/yuv420p; AAC 48 kHz; 30 fps.
+- Kokoro `af_bella`; voice_only=true; avatar_present=false.
+- Speakmatch 99,51 %; −16,5 LUFS; −0,9 dBTP.
+- Rights, technical, layout, safety, quality, claim_control og voice er ALLOW.
+- Alle ti manifestfiler er SHA-256-verificeret efter regenerering via den normale leverancefunktion.
+- Thumbnail og storyboard er visuelt kontrolleret. Status AWAITING_OWNER; ikke uploadet.
+
+### Almindelig demo
+
+`some-pilot/data/versions/topic-49-v1`:
+
+- video_id=34; espeak-ng som teknisk fallback; voice control ALLOW og ti manifestfiler.
+- Status AWAITING_OWNER; ikke uploadet.
+
+### Testpost-familier
+
+`some-pilot/data/outputs/test-posts-2026-11-09/manifest.json` bekræfter voice_only=true, avatar_present=false og provider=kokoro.
+
+- Gaming: syv godkendte voice-segmenter. YouTube, TikTok, Reels, ZOOM og SAFE er produceret. Thumbnail og TikTok-billedserie er visuelt kontrolleret.
+- Lokal AI: otte godkendte voice-segmenter og samme fem formater. Thumbnail og Reels-billedserie er visuelt kontrolleret.
+- Alle ti videoer findes som rigtige filer over 1 MB. Ingen HeyGen-master eller avatar-overlay bruges.
+
+## Backup, restore og live drift
+
+- `python -m app.cli backup --verify`: rigtig backup `/data/backups/some-backup-20261110T161035Z.zip` er verificeret, ukrypteret og ikke offsite.
+- `python -m app.cli restore --input ... --target /data/restore-verification-20261110`: integrity=ok. Den midlertidige restoremappe er ryddet.
+- Negativtest med `../outside.txt` i ZIP blokeres både ved verify og restore; ingen fil skrives uden for målmappen.
+- Web og worker er genstartet med nyeste build. `GET http://127.0.0.1:8000/healthz` returnerer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=false`.
+- `python -m app.cli doctor`: migration 0001, FFmpeg/ffprobe/espeak-ng, modelcache og sikre defaults bekræftet. Diskforbrug var 87,03 % (alarm, men under 90 % renderstop).
 
 ## Ikke verificeret / blokeret
 
-- Ejerens fulde visning og godkendelse af versionerne afventer.
-- VPS CPU/RAM/tid og deploy: ikke verificeret.
-- Claude API og betalte jobs: ikke kaldt.
-- YouTube/Meta OAuth, privat upload, publicering og virkelige metrics: ikke testet.
-- Krypteret offsite backup: ikke konfigureret.
-- Dansk TTS: ikke kvalitetsgodkendt.
-- FPS/batteritid på Legion Go 2: ikke målt; listen er redaktionel.
+- Ejerens fulde visning og lytning af de nye videoer afventer.
+- ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
+- Claude API og paid jobs er ikke kaldt.
+- YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
+- VPS-deploy, offsite krypteret backup og produktionsdeploy er ikke verificeret.
+- Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.
+- Dansk TTS er ikke kvalitetsgodkendt.
+- FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.
 
 ## Regel
 
-“Bestået” betyder udført i det angivne miljø. Der gives ingen 100 % fejlfriheds- eller performancegaranti. Manglende ekstern adgang og ejergodkendelse rapporteres som ikke verificeret, aldrig som succes.
+“Bestået” betyder udført i det angivne miljø. Der gives ingen 100 % fejlfriheds-, integrations- eller performancegaranti. Manglende ekstern adgang og ejergodkendelse rapporteres som åbne punkter, aldrig som succes.

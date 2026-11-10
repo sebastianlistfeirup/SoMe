@@ -29,8 +29,12 @@ def import_csv(db: Session, path: Path, is_demo: bool = False) -> int:
             video = db.get(VideoVersion, publication.video_version_id)
             if video is None or bool(video.features_json.get("is_demo")) != is_demo:
                 raise ValueError("demo_production_mixing_blocked")
+            collected_at = datetime.fromisoformat(row["collected_at"].replace("Z", "+00:00"))
+            existing = db.query(MetricSnapshot).filter(MetricSnapshot.publication_id == publication.id, MetricSnapshot.metric_name == row["metric_name"], MetricSnapshot.collected_at == collected_at, MetricSnapshot.metric_definition_version == row["metric_definition_version"], MetricSnapshot.is_demo.is_(is_demo)).first()
+            if existing:
+                continue
             value = float(row["metric_value"]) if row["metric_value"].strip() else None
-            snapshot = MetricSnapshot(publication_id=publication.id, collected_at=datetime.fromisoformat(row["collected_at"].replace("Z", "+00:00")), metric_definition_version=row["metric_definition_version"], metric_name=row["metric_name"], metric_value=value, unit=row.get("unit") or None, features_json={}, is_demo=is_demo)
+            snapshot = MetricSnapshot(publication_id=publication.id, collected_at=collected_at, metric_definition_version=row["metric_definition_version"], metric_name=row["metric_name"], metric_value=value, unit=row.get("unit") or None, features_json={}, is_demo=is_demo)
             db.add(snapshot)
             count += 1
     db.commit()

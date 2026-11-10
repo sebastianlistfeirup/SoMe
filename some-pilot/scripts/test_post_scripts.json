@@ -1,0 +1,130 @@
+{
+  "gaming": {
+    "paragraphs": [
+      {
+        "index": 0,
+        "start": 0,
+        "end": 10.751,
+        "duration": 10.751,
+        "text": "Nostalgia does not have to mean nineteen ninety-two. These five modern classics feel like pulling the perfect cartridge from a drawer — and every one belongs on a handheld.",
+        "word_count": 29
+      },
+      {
+        "index": 1,
+        "start": 10.751,
+        "end": 20.709,
+        "duration": 9.958,
+        "text": "At number five, Transistor. Its neon city, deliberate combat and dreamy atmosphere make every short session feel like a lost late-night memory.",
+        "word_count": 22
+      },
+      {
+        "index": 2,
+        "start": 20.709,
+        "end": 30.502,
+        "duration": 9.793,
+        "text": "Number four is Celeste. The controls are immediate, the rooms are compact, and every hard-earned checkpoint makes “one more try” impossible to resist.",
+        "word_count": 23
+      },
+      {
+        "index": 3,
+        "start": 30.502,
+        "end": 40.191,
+        "duration": 9.688,
+        "text": "At number three, Hollow Knight turns a small screen into a huge, mysterious world. Headphones on, lights down, disappear for an hour.",
+        "word_count": 22
+      },
+      {
+        "index": 4,
+        "start": 40.191,
+        "end": 49.81,
+        "duration": 9.62,
+        "text": "Number two is Stardew Valley: the ultimate comfort game. Water a few crops for ten minutes — or look up and discover the entire evening is gone.",
+        "word_count": 27
+      },
+      {
+        "index": 5,
+        "start": 49.81,
+        "end": 60.896,
+        "duration": 11.086,
+        "text": "And number one is Hades. Fast runs, sharp controls and a story that keeps unfolding make it the rare action game that works for both a quick break and a long trip.",
+        "word_count": 32
+      },
+      {
+        "index": 6,
+        "start": 60.896,
+        "end": 68.728,
+        "duration": 7.832,
+        "text": "The real test is not the release year. It is whether fifteen spare minutes can turn into a memory. Which one lives on your handheld?",
+        "word_count": 25
+      }
+    ]
+  },
+  "ai": {
+    "paragraphs": [
+      {
+        "index": 0,
+        "start": 0,
+        "end": 6.688,
+        "duration": 6.688,
+        "text": "If you are buying a machine for local AI, ignore the biggest TOPS number. Start with memory.",
+        "word_count": 17
+      },
+      {
+        "index": 1,
+        "start": 6.688,
+        "end": 22.365,
+        "duration": 15.677,
+        "text": "A four-bit model needs roughly half a byte per parameter before overhead and context. So a seventy-billion-parameter model starts around thirty-five gigabytes — too large to fit entirely inside the RTX 5090's thirty-two gigabytes of VRAM.",
+        "word_count": 36
+      },
+      {
+        "index": 2,
+        "start": 22.365,
+        "end": 42.769,
+        "duration": 20.404,
+        "text": "Three specs matter most. Usable accelerator memory decides what can load. Memory bandwidth strongly affects how quickly weights can move. And software decides whether your workflow runs at all: CUDA has the broadest support; Apple uses Metal and MLX; AMD depends heavily on your exact runtime.",
+        "word_count": 46
+      },
+      {
+        "index": 3,
+        "start": 42.769,
+        "end": 53.494,
+        "duration": 10.725,
+        "text": "For maximum CUDA speed when the model fits, build around an RTX 5090: thirty-two gigabytes of GDDR7 and 1.792 terabytes per second.",
+        "word_count": 22
+      },
+      {
+        "index": 4,
+        "start": 53.494,
+        "end": 70.71,
+        "duration": 17.216,
+        "text": "For the largest compact single-box capacity, Framework Desktop offers 192 gigabytes at 273 gigabytes per second. Framework claims 300-billion-class models at four-bit, but this configuration is Linux-focused and expensive.",
+        "word_count": 29
+      },
+      {
+        "index": 5,
+        "start": 70.71,
+        "end": 83.893,
+        "duration": 13.183,
+        "text": "For a quiet, turnkey workstation, Mac Studio scales from 128 gigabytes on M5 Max to 512 on M5 Ultra, with up to 1.2 terabytes per second.",
+        "word_count": 26
+      },
+      {
+        "index": 6,
+        "start": 83.893,
+        "end": 95.519,
+        "duration": 11.626,
+        "text": "For NVIDIA's integrated developer stack, DGX Spark has 128 gigabytes of unified memory; NVIDIA rates it for models up to 200 billion parameters.",
+        "word_count": 23
+      },
+      {
+        "index": 7,
+        "start": 95.519,
+        "end": 105.143,
+        "duration": 9.624,
+        "text": "The best machine is not the one with the largest TOPS badge. It is the one whose memory, bandwidth and software match the model you actually run.",
+        "word_count": 27
+      }
+    ]
+  }
+}

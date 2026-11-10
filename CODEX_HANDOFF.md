@@ -7,6 +7,22 @@
 
 ---
 
+## Overstyring 2026-11-10 — voiceover og backendstatus
+
+Den aktuelle produktionsretning er voiceover uden avatar. HeyGen, avatar-MP4, PIP, `--avatar-dir` og `avatar-request` er ikke længere en del af den aktive produktionsvej. Kokoro er lokal standardprovider; ElevenLabs er valgfri og kræver paid jobs, API-nøgle, voice-ID, stemmerettigheder og dateret pris før netværk.
+
+- `app/pipeline/voice.py` håndterer lydprovider, teksthash, WAV-/lydvalidering, varighed, sample rate og filhash.
+- Ranking og almindelig produktion skriver begge `voice_assets.json`, og filen indgår i manifestet som den tiende hash-verificerede fil.
+- Den tidligere åbne `claim_control`-blokering er rettet med `ranking_claims.py`. Approval kræver nu både `claim_control` og `voice` samt øvrige checks.
+- `handheld-voiceover-v1` er den aktuelle lokale reference: video_id=33, 102,1 sekunder, Kokoro, speakmatch 99,51 %, ti verificerede manifesthashes og status AWAITING_OWNER.
+- Gaming og lokal AI testposts er bygget i alle fem formater med nye Kokoro-timingdata og uden avatar.
+- 62 tests består. Backup/restore og live `/healthz` er også verificeret.
+- Eksterne konti, OAuth, privat upload, publicering, reelle metrics og paid API-kald er stadig ikke verificeret eller aktiveret.
+
+Læs den aktuelle `STATUS.txt`, `TEST_PROTOCOL.md` og `OWNER_ACTIONS.md` før nye opgaver. Resten af dette dokument er den historiske baseline og må ikke tolkes som et krav om avatar eller som en åben `claim_control`-fejl.
+
+---
+
 ## 1. Start her — instruktioner til Codex
 
 Læs hele dette dokument før du ændrer noget. Det er den aktuelle arbejdskontrakt og status, ikke et ønske om at genopbygge projektet fra bunden.

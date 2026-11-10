@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Læringer</h1>
+<p>Kun observerede sammenhænge vises. Små stikprøver og eksterne signaler er ikke kausale beviser.</p>
+<div class="grid">{% for model in models %}<article><h2>{{ model.key }}</h2><pre>{{ model.value_json | tojson(indent=2) }}</pre></article>{% else %}<p>Ingen læringsmodel er oprettet endnu.</p>{% endfor %}</div>
+<h2>Rapporter</h2>
+{% for report in reports %}<section><h3>{{ report.name }}</h3><pre>{{ report.data | tojson(indent=2) }}</pre></section>{% else %}<p>Ingen rapporter endnu.</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "status": "local_voiceover_production_ready",
+  "script_approved_at": "2026-11-09",
+  "voice_provider": "kokoro",
+  "voice_preset": "af_bella",
+  "voice_only": true,
+  "avatar_present": false,
+  "paid_generation_started": false,
+  "publish_authorized": false,
+  "jobs": [
+    {
+      "post": "gaming",
+      "script": "gaming/master-script.md",
+      "native_formats": ["9:16", "16:9"],
+      "derived_versions": ["tiktok", "instagram-reels", "youtube", "zoom-reference", "safe-reference"]
+    },
+    {
+      "post": "local-ai-hardware",
+      "script": "ai/master-script.md",
+      "native_formats": ["9:16", "16:9"],
+      "derived_versions": ["tiktok", "instagram-reels", "youtube", "zoom-reference", "safe-reference"]
+    }
+  ]
+}

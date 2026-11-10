@@ -4,7 +4,9 @@ Der er ikke foretaget køb, login, OAuth, betalte API-kald eller offentlig publi
 
 ## 0. Gennemse de to nye mobilvarianter
 
-Start med `some-pilot/data/versions/handheld-zoom-v11/video.mp4` på 102,1 sekunder. Kontrollér de to fuldskærms-zooms pr. spil, Celeste-actionen og at der ikke er beskårne review-citater eller store tekstkort. Se derefter `some-pilot/data/versions/handheld-safe-v10/video.mp4`, som bevarer hele spilbilledet og teksten over en dæmpet baggrund. Sig hvilken variant du foretrækker, eller hvad der konkret skal justeres. Begge står i `AWAITING_OWNER` og er ikke publiceret. De tidligere TikTok- og YouTube-versioner er beholdt som separate formater.
+Start med `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` på 102,1 sekunder. Kontrollér Kokoro-stemmen, gameplayklippene og at der ikke er nogen avatar eller tom PIP-flade. Se derefter gerne `handheld-zoom-v11/video.mp4` og `handheld-safe-v10/video.mp4` som kreative referencer. Sig om den nye voiceover er godkendt, eller hvad der skal justeres. Ingen version er publiceret.
+
+De to versioner er kreative referenceversioner. Den nye endelige kandidat er `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` med lokal Kokoro-voiceover uden avatar, komplet claim- og voice-kontrol samt ti hash-verificerede manifestfiler. Ingen af versionerne er publiceret.
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
@@ -77,7 +79,8 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 - Vælg et faktisk affiliateprogram, dokumentér vilkår, provision og reklamemarkering. Ingen RPM, købsrate eller indtjening antages.
 - Afklar reklamemarkering, skat/moms og juridiske fortolkninger med relevante fagpersoner før kommerciel lancering.
 - Aktivér først `PAID_JOBS_ENABLED=true` efter budgettest. Aktivér `PUBLISH_ENABLED=true` og `DRY_RUN=false` først efter verificeret privat upload og konkret ejergodkendelse.
+- HeyGen og synlige avatarer er udfaset. Kokoro er den lokale standardstemme. ElevenLabs er kun en valgfri provider og kræver særskilt ejeraccept af voice, kommercielle vilkår og pris før paid jobs aktiveres.
 
 ## Præcis næste handling
 
-Udfør kun punkt 0 nu: start med `some-pilot/data/versions/handheld-zoom-v11/video.mp4`, og sig om du foretrækker zoom eller safe. Kontopunkterne kommer først bagefter.
+Udfør kun punkt 0 nu: start med `some-pilot/data/versions/handheld-voiceover-v1/video.mp4`, og sig om den nye voiceover uden avatar er godkendt kreativt, eller hvad der skal justeres. Kontopunkterne kommer først bagefter.

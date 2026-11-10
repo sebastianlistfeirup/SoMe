@@ -1,6 +1,7 @@
 import hashlib
 import json
 import sqlite3
+import stat
 import tempfile
 import zipfile
 from datetime import datetime, timezone
@@ -11,6 +12,19 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.models import VideoVersion
+
+
+def _extract_safely(archive: zipfile.ZipFile, target: Path) -> None:
+    root = target.resolve()
+    for member in archive.infolist():
+        name = member.filename
+        path = Path(name)
+        if not name or name.startswith(("/", "\\")) or path.is_absolute() or path.drive or ".." in path.parts or "\\" in name or stat.S_ISLNK(member.external_attr >> 16):
+            raise ValueError("backup_unsafe_path")
+        destination = (root / path).resolve()
+        if root != destination and root not in destination.parents:
+            raise ValueError("backup_unsafe_path")
+    archive.extractall(root)
 
 
 def create_backup(db: Session, destination: Path | None = None, verify: bool = True) -> dict:
@@ -67,7 +81,7 @@ def verify_backup(path: Path) -> bool:
         with zipfile.ZipFile(archive_path) as archive:
             if archive.testzip() is not None:
                 raise ValueError("backup_zip_corrupt")
-            archive.extractall(temp)
+            _extract_safely(archive, Path(temp))
         connection = sqlite3.connect(Path(temp) / "some.db")
         try:
             if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
@@ -96,7 +110,7 @@ def restore_to_directory(path: Path, target: Path) -> dict:
         else:
             archive_path.write_bytes(path.read_bytes())
         with zipfile.ZipFile(archive_path) as archive:
-            archive.extractall(target)
+            _extract_safely(archive, target)
     connection = sqlite3.connect(target / "some.db")
     try:
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]

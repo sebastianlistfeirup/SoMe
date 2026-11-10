@@ -14,6 +14,13 @@ accounts:
     oauth_verified: false
     private_upload_tested: false
     public_publishing_verified: false
+  voice:
+    provider: kokoro
+    preset: af_bella
+    avatar_required: false
+    local_reference_verified: true
+    elevenlabs_configured: false
+    paid_calls_enabled: false
   cloud:
     provider: null
     project: some-pilot

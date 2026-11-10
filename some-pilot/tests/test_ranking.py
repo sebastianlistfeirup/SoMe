@@ -134,3 +134,33 @@ def test_zoom_mobile_layout_has_two_single_frame_zoom_phases():
     assert "trim=duration=2.000" in result
     assert result.count("trim=duration=3.400") == 1
     assert "concat=n=4:v=1:a=0" in result
+
+
+def test_ranking_claim_control_documents_names_ranks_and_hades_evidence():
+    from app.pipeline.ranking_claims import ranking_claim_control
+    payload = plan().model_dump(mode="json")
+    payload["post_text"] = "Editorial ranking, not an FPS benchmark. Independent and unsponsored."
+    for item in payload["scenes"]:
+        item["game"] = "Hades II" if item["rank"] == 1 else f"Game {item['rank']}"
+        word = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}[item["rank"]]
+        item["narration"] = f"At number {word}, {item['game']} is our editorial handheld pick."
+    payload["scenes"][0]["narration"] += " It has Steam Deck Verified status."
+    payload["claims"] = [{"id": "hades-2-deck-verified", "text": "Hades II is Steam Deck Verified.", "source_url": "https://publisher.example/hades-faq", "evidence_note": "Official publisher FAQ confirms the status.", "game": "Hades II", "verified": True, "verified_at": "2026-11-09"}]
+    result = ranking_claim_control(RankingPlan.model_validate(payload))
+    assert result["decision"] == "ALLOW"
+    assert result["checked_rank_order"][0] == {"rank": 1, "game": "Hades II"}
+
+
+def test_ranking_claim_control_blocks_unsupported_benchmarks_and_missing_evidence():
+    from app.pipeline.ranking_claims import ranking_claim_control
+    payload = plan().model_dump(mode="json")
+    payload["post_text"] = "Editorial ranking, not an FPS benchmark."
+    for item in payload["scenes"]:
+        item["game"] = "Hades II" if item["rank"] == 1 else f"Game {item['rank']}"
+        word = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}[item["rank"]]
+        item["narration"] = f"At number {word}, {item['game']} is our pick."
+    payload["scenes"][0]["narration"] += " It is Steam Deck Verified and we measured 90 FPS."
+    result = ranking_claim_control(RankingPlan.model_validate(payload))
+    assert result["decision"] == "BLOCK"
+    assert "unsupported_performance_claim:fps" in result["issues"]
+    assert "hades_ii_deck_verified_evidence_missing" in result["issues"]

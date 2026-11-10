@@ -3,6 +3,17 @@
   "hook": "Handheld gamers, this is the list. Ten incredible Legion Go two games. Wait for number one.",
   "post_text": "Ten incredible handheld games. Which one is your number one? Follow for more handheld gaming picks. Editorial ranking, not an FPS benchmark. Independent and unsponsored; game footage belongs to the respective publishers.",
   "voice_dir": "voice-tiktok",
+  "claims": [
+    {
+      "id": "hades-2-deck-verified",
+      "text": "Hades II is Steam Deck Verified.",
+      "source_url": "https://www.supergiantgames.com/blog/hades2-faq/",
+      "evidence_note": "Supergiant's official Hades II FAQ states that the game is Steam Deck Verified.",
+      "game": "Hades II",
+      "verified": true,
+      "verified_at": "2026-11-09"
+    }
+  ],
   "scenes": [
     {
       "rank": 10,
