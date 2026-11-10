@@ -139,3 +139,19 @@ def test_claude_prompt_defines_exact_claim_schema_and_version(db, monkeypatch):
     assert '"verified":true' in captured["prompt"]
     assert "claims=[]" in captured["prompt"]
     assert current_prompt_version(db) == "claude-json-v3-controlled"
+
+
+def test_review_uses_research_route_and_sufficient_output_budget(db, monkeypatch):
+    captured = {}
+
+    def fake_call(_db, _model, _prompt, _job_id, _kind, max_tokens, **kwargs):
+        captured.update({"max_tokens": max_tokens, **kwargs})
+        return ControlResult(decision="ALLOW")
+
+    monkeypatch.setattr("app.pipeline.ai._call_json", fake_call)
+    draft = demo_draft(Topic(niche="test", language="en", title="Review test"))
+    result = review_draft(db, draft, [], "review-budget-test")
+
+    assert result.decision == "ALLOW"
+    assert captured["max_tokens"] == 2000
+    assert captured["route"] == "research"

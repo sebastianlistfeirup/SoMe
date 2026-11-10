@@ -166,7 +166,7 @@ def review_draft(db: Session, draft: ScriptDraft, source_excerpts: list[dict], j
         "Check numbers, names, quotations, implied personal experience, financial hype and originality.\n"
         f"<untrusted_review>{payload}</untrusted_review>"
     )
-    result = _call_json(db, ControlResult, prompt, job_id, "claude_claim_review", 700, route="research")
+    result = _call_json(db, ControlResult, prompt, job_id, "claude_claim_review", 2000, route="research")
     if result.decision != "ALLOW":
         raise RuntimeError("claim_review_not_allowed:" + ",".join(result.issues))
     return result
