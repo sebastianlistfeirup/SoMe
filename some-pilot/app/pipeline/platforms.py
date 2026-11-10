@@ -8,7 +8,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.models import Publication, VideoVersion, utcnow
+from app.db.models import Publication, Setting, VideoVersion, utcnow
 from app.pipeline.approvals import transition, verify_approval
 from app.pipeline.signed_media import create_link
 
@@ -68,9 +68,11 @@ class YouTubePublisher:
     def __init__(self):
         self.settings = get_settings()
 
-    def capabilities(self) -> dict:
+    def capabilities(self, db: Session | None = None) -> dict:
         configured = bool(self.settings.youtube_client_id and self.settings.youtube_client_secret and self.settings.youtube_refresh_token)
-        return {"publishing_configured": configured, "oauth_verified": False, "private_upload_verified": False, "manual_export": True}
+        connection = db.get(Setting, "youtube_connection") if db is not None else None
+        state = connection.value_json if connection else {}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "private_upload_verified": bool(state.get("private_upload_verified")), "channel_id": state.get("channel_id"), "manual_export": True}
 
     def _access_token(self) -> str:
         response = httpx.post("https://oauth2.googleapis.com/token", data={"client_id": self.settings.youtube_client_id, "client_secret": self.settings.youtube_client_secret, "refresh_token": self.settings.youtube_refresh_token, "grant_type": "refresh_token"}, timeout=30)

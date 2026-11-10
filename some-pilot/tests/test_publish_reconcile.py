@@ -35,3 +35,17 @@ def test_upload_timeout_requires_reconciliation(db, awaiting_video, monkeypatch)
     assert awaiting_video.status == "RECONCILE_REQUIRED"
     with pytest.raises(PublishError, match="reconcile_required_before_retry"):
         publisher.publish(db, awaiting_video, "channel", "private")
+
+
+def test_youtube_capabilities_use_verified_connection_state(db):
+    from app.db.models import Setting
+
+    db.merge(Setting(key="youtube_connection", value_json={"oauth_verified": True, "private_upload_verified": True, "channel_id": "channel-1"}))
+    db.commit()
+
+    result = YouTubePublisher().capabilities(db)
+
+    assert result["oauth_verified"] is True
+    assert result["private_upload_verified"] is True
+    assert result["channel_id"] == "channel-1"
+    assert result["manual_export"] is True
