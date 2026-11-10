@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from cryptography.fernet import Fernet
 
 from app.config import get_settings
 from app.db.models import Publication
@@ -10,12 +11,27 @@ from app.pipeline.metrics import import_csv
 
 def test_backup_verify_and_restore(db, monkeypatch):
     settings = get_settings()
+    monkeypatch.setattr(settings, "backup_key", "")
     monkeypatch.setattr(settings, "database_url", f"sqlite:///{db.info['database_path']}")
     destination = db.info["tmp_path"] / "backups"
     result = create_backup(db, destination, verify=True)
     assert result["verified"] and not result["encrypted"]
     assert verify_backup(Path(result["path"]))
     restored = restore_to_directory(Path(result["path"]), db.info["tmp_path"] / "restored")
+    assert restored["integrity"] == "ok"
+    assert not restored["publish_enabled"] and not restored["paid_jobs_enabled"]
+
+
+def test_encrypted_backup_verify_and_restore(db, monkeypatch):
+    settings = get_settings()
+    monkeypatch.setattr(settings, "backup_key", Fernet.generate_key().decode())
+    monkeypatch.setattr(settings, "database_url", f"sqlite:///{db.info['database_path']}")
+    destination = db.info["tmp_path"] / "encrypted-backups"
+    result = create_backup(db, destination, verify=True)
+    assert result["verified"] and result["encrypted"]
+    assert Path(result["path"]).suffix == ".enc"
+    assert verify_backup(Path(result["path"]))
+    restored = restore_to_directory(Path(result["path"]), db.info["tmp_path"] / "restored-encrypted")
     assert restored["integrity"] == "ok"
     assert not restored["publish_enabled"] and not restored["paid_jobs_enabled"]
 
