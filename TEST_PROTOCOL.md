@@ -20,7 +20,7 @@ MSYS_NO_PATHCONV=1 docker compose build
 MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps worker pytest -q
 ```
 
-Resultat: **69 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
+Resultat: **70 passed**. Kun en ekstern Starlette TestClient-deprecationwarning.
 
 Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs, budget, downloads/SSRF, backup/restore, ZIP path traversal, idempotent metricsimport, demo/produktionsadskillelse, SAFE, ZOOM, claim control, voice providers, teksthash, WAV/lydstream, sample rate, segmentdækning, ElevenLabs paid-/pris-/rettighedsblokering, PCM-konvertering, ranking til approval, testpost-timing, Claude-modelrouting og modelpriser, doctor og dashboardruter.
 
@@ -78,13 +78,26 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Web og worker er genstartet med nyeste build. `GET http://127.0.0.1:8000/healthz` returnerer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=false`.
 - `python -m app.cli doctor`: migration 0001, FFmpeg/ffprobe/espeak-ng og modelcache bekræftet. Budget 50 DKK, forbrug 0 DKK, Sonnet/Haiku-modelnavne samt paid_jobs_enabled=false blev rapporteret uden secrets. Diskforbrug var 87,68 % (alarm, men under 90 % renderstop).
 
+## Contabo-produktion 2026-11-10
+
+- Cloud VPS Plus 6: 6 vCPU, 12 GB RAM, 300 GB NVMe, Ubuntu 24.04. Commit `ec6312a` er deployet med `./scripts/deploy.sh` og **70/70 tests bestod** på serveren.
+- Den første serverkørsel gav 68 passed og 1 failed, fordi backup-testen arvede produktionens BACKUP_KEY. Testen er gjort miljøuafhængig, separat krypteret verify/restore er tilføjet, og både lokal og server-suite er derefter 70/70 grøn.
+- Executable-bit er rettet på alle fem shellscripts. Standarddeployment fungerer derefter uden Bash-workaround.
+- SSH: verificeret ED25519-hostfingerprint, separat deploynøgle, `PermitRootLogin no`, `PasswordAuthentication no`, `KbdInteractiveAuthentication no`. UFW er aktiv med default deny og kun ejerens admin-IP på port 22.
+- Web/worker er healthy. `/healthz` svarer ok med publishing og paid jobs fra. Kun 127.0.0.1:8000 er åbent for web; ingen offentlig webport.
+- En demokørsel i web-containeren stoppede med exit 137 på grund af 1 GB-grænsen. Den korrekte worker-service med 5 GB gennemførte `topic-2-v1`, video_id=1: 17,533 sekunder, 1080×1920, H.264 + AAC, AWAITING_OWNER, 10/10 manifesthashes og alle syv kontroller ALLOW.
+- Kokoro `af_bella` genereret på VPS: 3,679 sekunder, 24 kHz mono, kontrol ALLOW, paid_call=false og cost_dkk=0.
+- Krypteret backup `/data/backups/some-backup-20261110T211132Z.zip.enc`: encrypted=true og verified=true. Restore integrity=ok; midlertidig restoremappe er fjernet. Offsite=false.
+- Dashboard-ejer `owner` er oprettet uden at vise adgangskoden. Initialkoden er kun i serverens root-beskyttede secret-mappe.
+- Claude-prissætning er konfigureret med Frankfurter/ECB-kurs 2026-11-10, 1 USD=6,6661 DKK. Sonnet: 13,3322 input og 66,661 output DKK/million. Haiku: 0,66661 input og 3,33305 output DKK/million. Doctor viser begge prisruter=true, API-nøgle=false, paid=false og forbrug=0.
+
 ## Ikke verificeret / blokeret
 
 - Kokoro-stemmen er kreativt godkendt; platformsspecifik approval efter ejerens fulde visning afventer fortsat.
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
-- Claude API og paid jobs er ikke kaldt. Der findes ingen API-nøgle eller bekræftet leverandørfaktura, og produktions-DKK-priser afhænger af valutakursen på konfigurationsdagen.
+- Claude API og paid jobs er ikke kaldt. Der findes ingen API-nøgle eller bekræftet leverandørfaktura. Faktisk bankkurs og eventuel moms kan afvige fra den dokumenterede referencekurs.
 - YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
-- VPS er købt, men SSH, installation, firewall, produktionsdeploy og faktisk FFmpeg/Kokoro-performance er ikke verificeret. Endelig faktura, moms og binding er ikke verificeret. Offsite krypteret backup er ikke konfigureret.
+- Contabos cloudfirewall og offsite backup er ikke konfigureret. Endelig faktura og moms er ikke verificeret; kontrolpanelet viser én måneds kontrakt.
 - Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.
 - Dansk TTS er ikke kvalitetsgodkendt.
 - FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.

@@ -21,35 +21,38 @@ UDFØRT
 - Backend-sider for kontrolpanel, kladder og læringer fra det eksisterende WIP er bevaret.
 
 VERIFICERET LOKALT
-- Endelig Docker-build og **69 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
-- Syv nye testtilfælde bekræfter Sonnet/Haiku-routing, separate prisregnskaber og blokering før netværk ved manglende paid enablement, API-nøgle eller DKK-pris. Alle leverandørsvar er mocks; ingen paid calls er foretaget.
+- Endelig Docker-build og **70 automatiske tests** bestod. Kun en ekstern Starlette TestClient-deprecationwarning.
+- Syv testtilfælde bekræfter Sonnet/Haiku-routing, separate prisregnskaber og blokering før netværk ved manglende paid enablement, API-nøgle eller DKK-pris. Alle leverandørsvar er mocks; ingen paid calls er foretaget.
+- Backup-tests er uafhængige af miljøet og dækker både ukrypteret og Fernet-krypteret backup med verify og restore.
 - `handheld-voiceover-v1`: video_id=33, 102,1 sekunder, 1080×1920, Kokoro uden avatar, speakmatch 99,51 %, −16,5 LUFS, −0,9 dBTP. Rights/technical/layout/safety/quality/claim_control/voice er ALLOW. Alle ti manifesthashes er kontrolleret. Status AWAITING_OWNER.
 - Almindelig demo `topic-49-v1`: video_id=34, espeak-ng som teknisk fallback, voice control ALLOW og ti manifestfiler. Status AWAITING_OWNER.
-- Gaming testpost: syv Kokoro-segmenter; YouTube, TikTok, Reels, ZOOM og SAFE produceret og visuelt kontrolleret uden avatar.
-- Lokal AI testpost: otte Kokoro-segmenter; samme fem formater produceret og visuelt kontrolleret uden avatar.
-- Alle ti testpost-videoer er skrevet med rigtige filer. Thumbnails er kontrolleret. Testpostmanifestet markerer voice_only=true og avatar_present=false.
+- Gaming og lokal AI testposts er produceret i fem formater uden avatar; alle ti videoer og thumbnails er kontrolleret.
 - En komplet integrationstest producerer ranking, når AWAITING_OWNER og passerer den rigtige approvalfunktion med gyldig hash.
-- Rigtig backup `/data/backups/some-backup-20261110T161035Z.zip` er verificeret. Restore til separat mappe gav integrity=ok; testmappen er ryddet.
-- Web og worker er genstartet med nyeste build. `GET /healthz` svarer status=ok med publish_enabled=false og paid_jobs_enabled=false.
-- Ingen social publicering, privat upload, OAuth, betalt API-forbrug eller server/hardwarekøb er foretaget.
+- Lokal backup og restore samt live health er verificeret. Ingen social publicering, privat upload, OAuth eller betalt API-forbrug er foretaget.
+
+VERIFICERET PÅ CONTABO VPS
+- Commit `ec6312a` er deployet via standardscriptet. Docker-build og **70/70 tests** bestod på selve VPS’en. Web og worker er healthy; migration 0001 og doctor er ok.
+- SSH er nøglebaseret med effektiv `PermitRootLogin no`, `PasswordAuthentication no` og UFW default deny. SSH tillades kun fra ejerens aktuelle admin-IP. Web lytter kun på 127.0.0.1:8000.
+- Serverdemo `topic-2-v1`, video_id=1: 17,533 sekunder, 1080×1920, H.264 + AAC, AWAITING_OWNER, syv kontroller ALLOW og 10/10 manifesthashes korrekte.
+- Kokoro `af_bella` er genereret lokalt på VPS: 3,679 sekunder, 24 kHz mono, voice control ALLOW, paid_call=false og cost_dkk=0.
+- Krypteret backup `/data/backups/some-backup-20261110T211132Z.zip.enc` er verificeret. Restore gav integrity=ok, og midlertidige restoredata er fjernet. Offsite er ikke konfigureret.
+- Dashboard-ejer `owner` er oprettet. Den tilfældige initialadgangskode ligger kun i root-beskyttet `/opt/some/secrets/initial-admin-password` på serveren.
+- Claude-priser er konfigureret med 2026-11-10-kurs 6,6661 DKK/USD: Sonnet 13,3322/66,661 og Haiku 0,66661/3,33305 DKK pr. million input/output. API-nøgle og paid jobs er stadig fra; forbrug 0 DKK.
 
 MANGLER / BLOKERET EKSTERNT
-- Kokoro-voiceover er godkendt kreativt. Platformsspecifik ejergodkendelse efter fuld visning afventer fortsat; automatiske billedserier og Whisper erstatter ikke ejerens visning og lytning.
-- YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
-- VPS er købt, men SSH-adgang, installation, firewall, deploy og faktisk FFmpeg/Kokoro-performance er ikke verificeret. Endelig faktura, moms og binding er ikke verificeret. Offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret.
-- Der er ingen Claude API-nøgle eller bekræftet leverandørfaktura. Paid API er ikke kaldt. DKK/USD-kurs og alle fire DKK-tokenpriser skal fastsættes på konfigurationsdagen.
+- Platformsspecifik ejergodkendelse efter fuld visning afventer. YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
+- Contabos cloudfirewall er ikke konfigureret; UFW på selve serveren er aktiv. Endelig faktura og moms er ikke verificeret; kontrolpanelet viser én måneds kontrakt. Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret.
+- Der er ingen Claude API-nøgle eller bekræftet leverandørfaktura. Paid API er ikke kaldt. De fire DKK-tokenpriser er konfigureret med dokumenteret kurs, men faktisk bank-/valutakurs og eventuel moms kan afvige.
 - Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
 - Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
 - Rangeringen er redaktionel, ikke en FPS- eller batteritest. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
-- Gamle databaseposter kan stadig beskrive forkastede prøveversioner. Brug kun konkrete leverancemapper; bulk-godkend eller slet ikke uden backup.
 
 SIKKERHEDSTILSTAND
 DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=false; WORKER_CONCURRENCY=1.
-Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
-Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
+Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås. Demo og produktion holdes adskilt.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Tilføj den genererede offentlige ED25519-deploymentsnøgle til `/root/.ssh/authorized_keys` via Contabos webkonsol, og angiv serverens offentlige IPv4-adresse. Del ikke root-adgangskode eller privatnøgle. Derefter fortsættes fingerprintkontrol, installation, firewall, deploy og driftstest. Claude API aktiveres først efter grundlæggende serverdrift er verificeret.
+Opret en projektspecifik Claude API-nøgle med API-loftet 50 DKK/måned og indsæt den direkte i `/opt/some/secrets/app.env` på serveren. Del den ikke i chat eller Git. Derefter aktiveres et minimalt paid healthcheck, og faktiske tokenomkostninger kontrolleres før produktionsjobs.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.
