@@ -145,7 +145,7 @@ def test_review_uses_research_route_and_sufficient_output_budget(db, monkeypatch
     captured = {}
 
     def fake_call(_db, _model, _prompt, _job_id, _kind, max_tokens, **kwargs):
-        captured.update({"max_tokens": max_tokens, **kwargs})
+        captured.update({"max_tokens": max_tokens, "prompt": _prompt, **kwargs})
         return ControlResult(decision="ALLOW")
 
     monkeypatch.setattr("app.pipeline.ai._call_json", fake_call)
@@ -155,3 +155,5 @@ def test_review_uses_research_route_and_sufficient_output_budget(db, monkeypatch
     assert result.decision == "ALLOW"
     assert captured["max_tokens"] == 2000
     assert captured["route"] == "research"
+    assert '"issues":["short plain-text issue"]' in captured["prompt"]
+    assert "flat array of short strings, never objects" in captured["prompt"]
