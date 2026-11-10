@@ -8,27 +8,23 @@ Kokoro-voiceover uden avatar er godkendt kreativt. Den aktuelle kandidat er `som
 
 ## 1. Cloudserver og pris — godkendelse før køb
 
-Primær kandidat: https://contabo.com/en/vps/ (Cloud VPS 4). Hetzner CPX32 er fravalgt på grund af prisen.
+**Købt og valgt til videre drift 2026-11-10:** Contabo Cloud VPS Plus 6 med EU-lokation og Ubuntu 24.04 LTS.
 
-- Opret ejerstyret konto, betalingsmiddel, eventuel identitetskontrol og 2FA.
-- Projekt: `some-pilot`; EU-lokation; Ubuntu 24.04 LTS.
-- Konfiguration: 4 vCPU, 8 GB RAM, 100 GB SSD, ét snapshot, IPv4/IPv6 og ubegrænset trafik. Ingen setup fee er oplyst.
-- Vælg kortest mulig bindingsperiode først, så rendering og drift kan verificeres før eventuel 24-måneders binding. Auto Backup er en betalt tilføjelse og er ikke inkluderet i prisen.
-
-**Prisstatus 2026-11-10:** Contabos officielle side viser €5,50/måned inkl. moms for de første 24 måneder, cirka 41 DKK ved 7,45 DKK/EUR. Det samlede loft er **150 DKK/måned inklusive server og Claude API**. Pris, moms, tilgængelighed og bindingsperiode skal kontrolleres igen i checkout før køb. Prisen efter de første 24 måneder og prisen på Auto Backup er ikke verificeret. Der er ikke købt eller oprettet noget endnu.
+- Konfiguration ifølge ejerens købsskærmbillede: 6 vCPU, 12 GB RAM, 300 GB NVMe, fem snapshots, 500 Mbit/s-port og ubegrænset trafik. Ingen setup fee er vist.
+- Pris på skærmbillede: **€23,75/måned**, cirka **177 DKK** ved 7,45 DKK/EUR. Den endelige faktura, moms og bindingsperiode er ikke verificeret.
+- Serveren alene overstiger det tidligere loft på 150 DKK/måned. Efter ejerens besked om at fortsætte bruges den købte server; der skal ikke købes flere servere eller større API-pakker.
+- Næste sikkerhedstrin er nøglebaseret SSH uden at dele root-adgangskoden i chat. En separat ED25519-deploymentsnøgle er oprettet lokalt uden for Git med offentlig fingeraftryk `SHA256:JlwDFKo3YXhjG1DAkgEgbY8B8otWKuiJEgT12w1kF4A`.
 
 Kokoro, Whisper og rendering kører lokalt på serveren og kræver ikke Claude/OpenAI. Claude API er valgt til research, manuskripter og claimkontrol; det bruges ikke til selve renderingen. `PAID_JOBS_ENABLED` forbliver `false`, indtil nøgle, verificerede DKK-priser og API-budget er konfigureret.
 
-Alternativer hvis pris/tilgængelighed er dårlig: https://www.scaleway.com/en/pricing/ og https://www.digitalocean.com/pricing
-
-Efter godkendelse: opret separat SSH-nøgle lokalt, upload kun `.pub`, kontrollér hostfingerprint og brug `some-pilot/scripts/install.sh`. Verificér nyt `deploy`-login før SSH root/password-login deaktiveres. Angiv `ADMIN_IP` og konfigurér både cloudfirewall og UFW.
+Efter SSH-adgang: kontrollér serverens hostfingerprint, kør `some-pilot/scripts/install.sh`, og verificér nyt `deploy`-login før root/password-login deaktiveres. Angiv `ADMIN_IP` og konfigurér både cloudfirewall og UFW. Installation og produktionsperformance er ikke verificeret endnu.
 
 ## 2. Claude Console — samlet server- og API-budget
 
 Links: https://platform.claude.com/docs/en/api/overview og https://console.anthropic.com/
 
 - Opret ejerstyret organisation/projekt og aktivér API-betaling. Et Claude-chatabonnement er ikke API-forbrug.
-- Appens standard er **50 DKK/måned** og maksimalt **5 DKK/job**. Konfigurér også udbyderens alarms/grænser, hvor de understøttes. Server + appens API-loft er dermed cirka 91 DKK/måned.
+- Appens standard er **50 DKK/måned** og maksimalt **5 DKK/job**. Konfigurér også udbyderens alarms/grænser, hvor de understøttes. Den købte server + appens API-loft er dermed cirka 227 DKK/måned.
 - Opret først en projektspecifik nøgle efter accept af API-loftet. Indsæt den direkte i `/opt/some/secrets/app.env` med sikker editor/secret-manager — aldrig i chat eller Git.
 
 Modelrouting kontrolleret i officiel dokumentation 2026-11-10:
@@ -42,15 +38,15 @@ Kilder: https://platform.claude.com/docs/en/about-claude/pricing og https://cont
 
 | Del | Forbrugsantagelse | USD/måned | Ca. DKK/måned |
 |---|---|---:|---:|
-| Contabo Cloud VPS 4 | €5,50 inkl. moms de første 24 måneder | — | 41,00 |
+| Købt Contabo Cloud VPS Plus 6 | €23,75 ifølge købsskærmbillede | — | 176,94 |
 | Haiku research | 20.000 input + 2.000 output pr. dag | $0,09 | 0,58 |
 | Sonnet manuskripter | 8.000 input + 1.200 output pr. video | $0,84 | 5,42 |
 | Haiku claimkontrol | 12.000 input + 700 output pr. video | $0,0465 | 0,30 |
 | **API i alt** | | **$0,9765** | **6,30** |
-| **Server + API** | | | **ca. 47** |
-| **Med dobbelt API-forbrugslager** | retries og ekstra research | | **ca. 54** |
+| **Server + API** | | | **ca. 183** |
+| **Med dobbelt API-forbrugslager** | retries og ekstra research | | **ca. 190** |
 
-DKK-beregningen bruger vejledende 7,45 DKK/EUR og 6,45 DKK/USD. Det er et forbrugsestimat, ikke en prisgaranti; faktisk pris afhænger af tokens, valutakurs, moms og checkout. Selv med appens API-loft på 50 DKK bliver den samlede pris cirka 91 DKK/måned.
+DKK-beregningen bruger vejledende 7,45 DKK/EUR og 6,45 DKK/USD. Det er et forbrugsestimat, ikke en verificeret faktura eller prisgaranti; faktisk pris afhænger af tokens, valutakurs, moms og fakturering. Selv med appens API-loft på 50 DKK bliver den samlede pris cirka 227 DKK/måned.
 
 Appen kræver separat verificerede DKK-priser for hver modelrute: `CLAUDE_INPUT_DKK_PER_MILLION`, `CLAUDE_OUTPUT_DKK_PER_MILLION`, `CLAUDE_RESEARCH_INPUT_DKK_PER_MILLION` og `CLAUDE_RESEARCH_OUTPUT_DKK_PER_MILLION`. Omregn med en dokumenteret valutakurs på konfigurationsdagen. Start med små evals. Betalte jobs forbliver `false`, indtil dette er godkendt.
 
@@ -96,4 +92,4 @@ Links: https://developers.facebook.com/docs/instagram-platform/ og https://devel
 
 ## Præcis næste handling
 
-Kokoro-voiceover er godkendt kreativt. Næste enlige opgave er punkt 1: opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode. Kontrollér checkout-totalen mod den oplyste pris på cirka 41 DKK/måned, og godkend kun købet, hvis pris og binding er acceptabel. Claude-nøgle og API-loft på 50 DKK/måned konfigureres som den næste separate opgave; samlet server + API estimeres til 47–54 DKK/måned.
+Næste enlige opgave er sikker SSH-adgang: tilføj den lokalt genererede offentlige deploymentsnøgle til `/root/.ssh/authorized_keys` via Contabos webkonsol, og angiv serverens offentlige IPv4-adresse til fortsat installation. Del aldrig root-adgangskode eller privatnøgle. Claude API-nøgle og separat loft på 50 DKK/måned konfigureres først efter serverens grundlæggende drift er verificeret.

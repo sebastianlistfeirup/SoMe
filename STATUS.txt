@@ -14,7 +14,7 @@ UDFØRT
 - Doctor og settings viser voice-provider, pris-/rettighedsstatus og avatar_required=false uden secrets.
 - Claude-routering er implementeret: `claude-sonnet-5-5` til manuskripter og `claude-haiku-5-5` til research/claimkontrol. Hver rute har separate verificerede DKK-priser og korrekt tokenregnskab. Doctor viser model- og konfigurationsstatus uden nøgler.
 - API-standardbudgettet er 50 DKK/måned og 5 DKK/job. Manglende paid enablement, API-nøgle eller modelpris blokerer før Anthropic instantieres eller netværk bruges.
-- Det samlede vedvarende forbrug er estimeret til cirka 47 DKK/måned for Contabo + Claude ved 30 videoer, cirka 54 DKK med dobbelt API-forbrugslager. Se OWNER_ACTIONS.md for antagelser og kilder. Estimatet er ikke en leverandørfaktura eller prisgaranti.
+- Contabo Cloud VPS Plus 6 er købt: 6 vCPU, 12 GB RAM, 300 GB NVMe, EU og Ubuntu 24.04. Skærmprisen er €23,75/måned, cirka 177 DKK. Med forventet Claude-forbrug er totalen cirka 183 DKK/måned, cirka 190 DKK med dobbelt API-lager. Det overstiger det gamle 150 DKK-loft; ejeren har bedt om at fortsætte med den købte server, og der er ikke købt yderligere tjenester.
 - Backup og restore validerer arkivstier mod path traversal og links. En ondsindet ZIP testes og blokeres.
 - Metrics-CSV-import er idempotent pr. publikation, metrik, tidspunkt, definition og demo-status. Gentagen import kan ikke skabe dubletter.
 - De to testpost-buildere bruger versionsstyrede `test_post_scripts.json`, nye Kokoro-timingdata og kun gameplay/produktmateriale. Gamle HeyGen-masterfiler genbruges ikke.
@@ -36,7 +36,7 @@ VERIFICERET LOKALT
 MANGLER / BLOKERET EKSTERNT
 - Kokoro-voiceover er godkendt kreativt. Platformsspecifik ejergodkendelse efter fuld visning afventer fortsat; automatiske billedserier og Whisper erstatter ikke ejerens visning og lytning.
 - YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
-- VPS-deploy, offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret. Contabos endelige checkout-pris, binding og Auto Backup-pris er ikke verificeret; faktisk FFmpeg/Kokoro-performance på VPS er ikke testet.
+- VPS er købt, men SSH-adgang, installation, firewall, deploy og faktisk FFmpeg/Kokoro-performance er ikke verificeret. Endelig faktura, moms og binding er ikke verificeret. Offsite krypteret backup, affiliate, skat/moms og kontomonetisering er ikke konfigureret.
 - Der er ingen Claude API-nøgle eller bekræftet leverandørfaktura. Paid API er ikke kaldt. DKK/USD-kurs og alle fire DKK-tokenpriser skal fastsættes på konfigurationsdagen.
 - Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
 - Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
@@ -49,7 +49,7 @@ Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås.
 Demo og produktion holdes adskilt. Forkastede prøveversioner er ikke leveret.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Opret Contabo-konto med 2FA, vælg Cloud VPS 4 med Ubuntu 24.04 og kortest mulig bindingsperiode. Kontrollér checkout mod cirka 41 DKK/måned, og godkend kun hvis pris og binding er acceptable. Claude API-nøgle og separat loft på 50 DKK/måned er næste opgave. Samlet estimat er 47–54 DKK/måned; rendering kræver ikke betalt AI.
+Tilføj den genererede offentlige ED25519-deploymentsnøgle til `/root/.ssh/authorized_keys` via Contabos webkonsol, og angiv serverens offentlige IPv4-adresse. Del ikke root-adgangskode eller privatnøgle. Derefter fortsættes fingerprintkontrol, installation, firewall, deploy og driftstest. Claude API aktiveres først efter grundlæggende serverdrift er verificeret.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.

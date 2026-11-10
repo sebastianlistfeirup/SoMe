@@ -32,7 +32,7 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Standard er `MONTHLY_AI_BUDGET_DKK=50`, `MAX_JOB_AI_COST_DKK=5` og `PAID_JOBS_ENABLED=false`.
 - Doctor rapporterer script-/researchmodel og om nøgle og DKK-priser er konfigureret, men aldrig selve nøglen.
 - Tests bruger udelukkende mocks. Claude API, faktisk leverandørfaktura og produktionskvalitet er ikke eksternt verificeret.
-- Budgetestimatet ved 30 videoer/måned er cirka 41 DKK for Contabo + 6,30 DKK for Claude. Dobbelt API-forbrugslager giver cirka 54 DKK samlet. Det er et estimat med vejledende valutakurser, ikke en prisgaranti; se OWNER_ACTIONS.md for tokenantagelser og kilder.
+- Den købte Contabo Cloud VPS Plus 6 har skærmpris €23,75/måned, cirka 177 DKK. Ved 30 videoer/måned er Claude-estimatet 6,30 DKK og totalen cirka 183 DKK. Dobbelt API-forbrugslager giver cirka 190 DKK samlet. Det er et estimat med vejledende valutakurser, ikke en verificeret faktura; se OWNER_ACTIONS.md for tokenantagelser og kilder.
 
 ## Voiceover og approval
 
@@ -84,7 +84,7 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
 - Claude API og paid jobs er ikke kaldt. Der findes ingen API-nøgle eller bekræftet leverandørfaktura, og produktions-DKK-priser afhænger af valutakursen på konfigurationsdagen.
 - YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
-- VPS-deploy, offsite krypteret backup og produktionsdeploy er ikke verificeret. Contabos checkout, binding, Auto Backup-pris samt faktisk FFmpeg/Kokoro-performance er ikke testet.
+- VPS er købt, men SSH, installation, firewall, produktionsdeploy og faktisk FFmpeg/Kokoro-performance er ikke verificeret. Endelig faktura, moms og binding er ikke verificeret. Offsite krypteret backup er ikke konfigureret.
 - Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.
 - Dansk TTS er ikke kvalitetsgodkendt.
 - FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.

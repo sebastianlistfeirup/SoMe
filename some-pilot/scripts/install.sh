@@ -26,7 +26,8 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 docker run --rm hello-world
 docker compose version
 install -d -m 700 /opt/some/secrets
-install -d -o 10001 -g 10001 /opt/some/data /opt/some/models /opt/some/app
+install -d -o 10001 -g 10001 /opt/some/data /opt/some/models
+install -d -o deploy -g deploy /opt/some/app
 ufw default deny incoming
 ufw default allow outgoing
 if [[ -n "${ADMIN_IP:-}" ]]; then
