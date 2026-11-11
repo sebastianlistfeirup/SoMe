@@ -19,7 +19,8 @@ UDFØRT
 - **Kokoro `af_bella` er ikke kreativt godkendt og må ikke bruges til nye produktionsopslag.** Demo 8 bruger kun espeak som teknisk fallback.
 
 VERIFICERET LOKALT OG PÅ VPS
-- Seneste applikationscommit er `05beeee`; pushet. **95/95 automatiske tests består lokalt.** Web/worker er healthy; migration 0001 og doctor er ok.
+- Seneste applikationscommit er `8800e29`; pushet. **96/96 automatiske tests består lokalt og på serveren.** Web/worker er healthy; migration 0001 og doctor er ok.
+- ElevenLabs Creator-abonnement og API er verificeret. Chris/Nathaniel C er tilføjet fra Voice Library med de valgte ID'er. Begge stemmer er genereret som korte ALLOW-tests med eleven_multilingual_v2; samlet testpris 0,067194 DKK. Lokale previews er `voice-previews/gaming.wav` og `voice-previews/ai.wav`. Adapteren registrerer nu også kald uden request-ID korrekt.
 - Lokal OBS Capture Bridge er implementeret med `scripts/capture_bridge.py`. OBS 33.0.1 og FFmpeg 9.0.2 er installeret. MKV→MP4, kontaktark, rettighedsmanifest, idempotens og SSH-upload er testet. Watcher kører med upload aktiveret; serverens testmappe er slettet, og ingen reel optagelse er publiceret.
 - Tests dækker 80 % grænse, 75 % blokering, forbud mod lavere grænse og AI-som-reelt, HTTPS-bevis, source paths, filtyper, source duration, billedmotion, ren FFmpeg-rendering, pixel range, produktion, manifest, Qwen-kontrakt og approvals.
 - Live demo 8 er downloadet og kontrolleret som MP4, storyboard og thumbnail. Videofilen er 10.375.109 bytes. `media_composition`: 100 %, fem real_video, nul graphic. `visual_media_review=NOT_CONFIGURED` rapporteres ærligt.

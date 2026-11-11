@@ -4,7 +4,7 @@ Contabo-serveren, Claude, YouTube, Instagram, Facebook og TikTok Sandbox er forb
 
 ## 0. Kreativ status — voiceover afvist
 
-**Kokoro `af_bella` er ikke godkendt kreativt og må ikke bruges til nye produktionsopslag.** Ejeren har valgt ElevenLabs `HfRP3cIhYLmeNHeTvkWK` til gaming og `8CjmkufHc22WbMZEBHbm` til AI. ID'erne er gemt lokalt i konfigurationseksemplet og på serveren; gaming er standard. Der må ikke genereres lyd før API-nøgle, abonnement, pris og kommercielle rettigheder er verificeret. Demo 8 bruger kun espeak som teknisk fallback.
+**Kokoro `af_bella` er ikke godkendt kreativt og må ikke bruges til nye produktionsopslag.** Ejeren har valgt ElevenLabs `HfRP3cIhYLmeNHeTvkWK` til gaming og `8CjmkufHc22WbMZEBHbm` til AI. Stemmerne er fundet som Chris – Fast-Paced Informative Narrator og Nathaniel C – Expressive Social Media Creator og tilføjet via den officielle Voice Library. Gaming er standard. Creator-abonnementet er aktivt, API-nøglen virker, og pris/rettigheder er konfigureret: $0,08/1.000 tegn = 0,533288 DKK pr. 1.000 tegn, verificeret 2026-11-11. Begge teststemmer er genereret med eleven_multilingual_v2; lokale previews er `voice-previews/gaming.wav` og `voice-previews/ai.wav`. De er ikke publiceret.
 
 ## 1. Cloudserver — købt, installeret og verificeret
 
