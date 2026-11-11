@@ -4,7 +4,7 @@ Contabo-serveren, Claude, YouTube, Instagram, Facebook og TikTok Sandbox er forb
 
 ## 0. Kreativ status — voiceover afvist
 
-**Kokoro `af_bella` er ikke godkendt kreativt og må ikke bruges til nye produktionsopslag.** Der skal vælges og godkendes separate stemmer til gaming og AI. Demo 8 bruger kun espeak som teknisk fallback og er ikke en stemmegodkendelse.
+**Kokoro `af_bella` er ikke godkendt kreativt og må ikke bruges til nye produktionsopslag.** Ejeren har valgt ElevenLabs `HfRP3cIhYLmeNHeTvkWK` til gaming og `8CjmkufHc22WbMZEBHbm` til AI. ID'erne er gemt lokalt i konfigurationseksemplet og på serveren; gaming er standard. Der må ikke genereres lyd før API-nøgle, abonnement, pris og kommercielle rettigheder er verificeret. Demo 8 bruger kun espeak som teknisk fallback.
 
 ## 1. Cloudserver — købt, installeret og verificeret
 

@@ -64,6 +64,8 @@ class Settings(BaseSettings):
     voice_speed: float = 1.08
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
+    elevenlabs_gaming_voice_id: str = ""
+    elevenlabs_ai_voice_id: str = ""
     elevenlabs_model_id: str = "eleven_multilingual_v2"
     elevenlabs_voice_rights_confirmed: bool = False
     elevenlabs_cost_per_1000_chars_dkk: float = Field(default=0, ge=0)
