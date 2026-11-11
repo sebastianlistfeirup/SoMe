@@ -69,7 +69,8 @@ def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, 
     assert not (tmp_path / "output" / "avatar_request.json").exists()
     manifest = json.loads((tmp_path / "output" / "manifest.json").read_text(encoding="utf-8"))
     assert "voice_assets.json" in manifest["files_sha256"]
-    assert len(manifest["files_sha256"]) == 10
+    assert len(manifest["files_sha256"]) == 11
+    assert manifest["real_media_ratio"] == 1.0
 
     review = approve(db, video, "owner", "youtube", "channel-1", True)
     assert review.digest_json["approval_sha256"]

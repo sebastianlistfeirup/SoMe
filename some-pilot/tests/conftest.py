@@ -36,7 +36,7 @@ def awaiting_video(db):
     root.mkdir()
     (root / "video.mp4").write_bytes(b"video-one")
     (root / "thumbnail.jpg").write_bytes(b"thumbnail-one")
-    checks = {name: {"decision": "ALLOW"} for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice")}
+    checks = {name: {"decision": "ALLOW"} for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition")}
     (root / "checks.json").write_text(json.dumps(checks))
     topic = Topic(niche="test", language="en", title="Safe test topic")
     db.add(topic)

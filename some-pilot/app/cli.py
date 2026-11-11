@@ -99,6 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     produce_parser = sub.add_parser("produce")
     produce_parser.add_argument("--topic-id", type=int, required=True)
     produce_parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=True)
+    produce_parser.add_argument("--media-plan", type=Path, required=True)
     ranking_parser = sub.add_parser("ranking")
     ranking_parser.add_argument("--plan", required=True)
     ranking_parser.add_argument("--output", required=True)
@@ -119,6 +120,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("resume")
     demo = sub.add_parser("demo")
     demo.add_argument("--produce", action="store_true")
+    demo.add_argument("--media-plan", type=Path)
     approve_parser = sub.add_parser("approve")
     approve_parser.add_argument("--video-id", type=int, required=True)
     approve_parser.add_argument("--reviewer", required=True)
@@ -170,7 +172,7 @@ def main() -> int:
                 else:
                     payload = run_adapters(db, adapters, ["handheld gaming PC", "RTX Spark"], ["en"], args.days, Path(args.output))
         elif args.command == "produce":
-            video = produce(db, args.topic_id, args.dry_run)
+            video = produce(db, args.topic_id, args.dry_run, args.media_plan)
             payload = {"video_id": video.id, "status": video.status, "output_dir": video.output_dir, "demo": args.dry_run}
         elif args.command == "ranking":
             from app.pipeline.production_ranking import produce_ranking
@@ -188,13 +190,15 @@ def main() -> int:
             set_pause(db, False, "cli-owner")
             payload = {"paused": False}
         elif args.command == "demo":
+            if args.produce and not args.media_plan:
+                raise ValueError("real_media_plan_required")
             topic = Topic(niche="demo_handhelds", language="en", title="DEMO: A practical checklist for choosing a gaming handheld", score_json={"demo": True})
             db.add(topic)
             db.commit()
             db.refresh(topic)
             payload = {"topic_id": topic.id, "demo": True}
             if args.produce:
-                video = produce(db, topic.id, True)
+                video = produce(db, topic.id, True, args.media_plan)
                 payload.update({"video_id": video.id, "status": video.status, "output_dir": video.output_dir})
         elif args.command == "approve":
             from app.db.models import VideoVersion

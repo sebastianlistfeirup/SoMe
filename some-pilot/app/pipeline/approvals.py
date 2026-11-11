@@ -97,7 +97,7 @@ def approve(
     if not checks_path.exists():
         raise ApprovalError("missing_checks")
     checks = json.loads(checks_path.read_text(encoding="utf-8"))
-    for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice"):
+    for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition"):
         if checks.get(name, {}).get("decision") != "ALLOW":
             raise ApprovalError(f"check_not_allowed:{name}")
     digest = approval_digest(video, platform, account)

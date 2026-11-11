@@ -194,10 +194,12 @@ def queue(request: Request, db: Session = Depends(get_db), auth=Depends(require_
 
 def make_review_card(db: Session, video: VideoVersion) -> dict:
     topic = db.get(Topic, video.topic_id)
+    real_ratio = video.manifest_json.get("real_media_ratio")
     return {
         "video": video,
         "post": post_view(video.post_json, topic.title if topic else f"Version {video.id}"),
         "platform": preferred_platform(video),
+        "real_media_percent": round(real_ratio * 100, 1) if real_ratio is not None else None,
     }
 
 
@@ -256,7 +258,7 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         raise HTTPException(404)
     topic = db.get(Topic, video.topic_id)
     evidence = {}
-    for name in ("claims.json", "rights.json", "checks.json"):
+    for name in ("claims.json", "rights.json", "checks.json", "media_composition.json"):
         path = Path(video.output_dir) / name
         if path.exists():
             try:

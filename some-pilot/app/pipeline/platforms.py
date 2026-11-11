@@ -41,7 +41,7 @@ def new_publication(db: Session, video: VideoVersion, platform: str, account: st
 
 def manual_export(video: VideoVersion, platform: str, output_root: Path) -> Path:
     source = Path(video.output_dir)
-    required = ["video.mp4", "thumbnail.jpg", "captions.srt", "post.json", "manifest.json", "rights.json", "checks.json"]
+    required = ["video.mp4", "thumbnail.jpg", "captions.srt", "post.json", "manifest.json", "rights.json", "checks.json", "media_composition.json"]
     optional = ["clip_plan.json", "storyboard.jpg"]
     missing = [name for name in required if not (source / name).exists()]
     if missing:

@@ -13,6 +13,8 @@
   <div class="post-column">
     <section class="post-preview">
       <p class="eyebrow">Færdigt opslag</p>
+      {% set media = evidence.get('media_composition.json') %}
+      {% if media and media.get('decision') == 'ALLOW' %}<div class="media-proof"><strong>{{ media.get('real_media_percent', 0) }}% rigtige medier</strong><span>{{ media.get('real_video_scenes', 0) }} videoklip · {{ media.get('real_image_scenes', 0) }} billeder · minimum {{ media.get('minimum_required_percent', 80) }}%</span></div>{% else %}<div class="media-proof legacy"><strong>Ældre format</strong><span>Reel mediedækning er ikke dokumenteret for denne version.</span></div>{% endif %}
       <h1>{{ post.title }}</h1>
       <div class="post-section"><h2>Overskrift</h2><p class="title-copy">{{ post.title }}</p></div>
       <div class="post-section"><h2>Opslagstekst</h2><p class="caption-copy">{{ post.caption }}</p></div>

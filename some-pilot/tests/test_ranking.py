@@ -81,13 +81,13 @@ def test_long_transcription_similarity_does_not_use_autojunk():
     assert result["decision"] == "ALLOW"
 
 
-def test_non_demo_requires_licensed_internet_assets(db):
+def test_production_requires_real_media_plan(db):
     from app.db.models import Topic
     from app.pipeline.production import produce
     topic = Topic(niche="handheld_gaming", language="en", title="Production")
     db.add(topic)
     db.commit()
-    with pytest.raises(ValueError, match="licensed_internet_assets_required"):
+    with pytest.raises(ValueError, match="real_media_plan_required"):
         produce(db, topic.id, False)
 
 

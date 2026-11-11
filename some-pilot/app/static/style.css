@@ -254,3 +254,11 @@ code { user-select: all; }
   .filter-tabs a { padding: .7rem .75rem; }
   table { display: block; overflow-x: auto; }
 }
+
+.real-media-badge { display: inline-flex; align-items: center; border-radius: 5px; padding: .24rem .45rem; background: #ecfdf3; color: #067647; font-size: .61rem; font-weight: 700; }
+.media-proof { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 1.2rem; padding: .8rem .9rem; border: 1px solid #abefc6; border-radius: 9px; background: #f0fdf4; }
+.media-proof strong { color: #067647; font-size: .8rem; }
+.media-proof span { color: #475467; font-size: .68rem; text-align: right; }
+.media-proof.legacy { border-color: #fedf89; background: #fffaeb; }
+.media-proof.legacy strong { color: #b54708; }
+@media (max-width: 520px) { .media-proof { align-items: flex-start; flex-direction: column; gap: .35rem; } .media-proof span { text-align: left; } }

@@ -1,0 +1,71 @@
+{
+  "platform": "youtube",
+  "minimum_real_ratio": 1.0,
+  "scenes": [
+    {
+      "kind": "real_video",
+      "source_type": "producer",
+      "source_path": "clips/237930-2032455.mp4",
+      "context": "Official Transistor gameplay representing a varied handheld game library.",
+      "source_url": "https://store.steampowered.com/app/237930/?movie=2032455",
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "attribution": "Transistor official game page",
+      "start_seconds": 59,
+      "effect": "static"
+    },
+    {
+      "kind": "real_video",
+      "source_type": "producer",
+      "source_path": "clips/504230-256706951.mp4",
+      "context": "Official Celeste gameplay representing games the viewer actually plays.",
+      "source_url": "https://store.steampowered.com/app/504230/?movie=256706951",
+      "policy_url": "https://www.celestegame.com/letsplay.html",
+      "rights_holder": "Maddy Makes Games Inc.",
+      "rights_evidence": "Official Celeste page permits monetized Let's Plays, speedruns and reviews; separate soundtrack uploads prohibited.",
+      "attribution": "Celeste official game page",
+      "start_seconds": 32,
+      "effect": "static"
+    },
+    {
+      "kind": "real_video",
+      "source_type": "producer",
+      "source_path": "clips/646570-256740869.mp4",
+      "context": "Official Slay the Spire gameplay illustrating comparisons of budget, operating system and play sessions.",
+      "source_url": "https://store.steampowered.com/app/646570/?movie=256740869",
+      "policy_url": "https://www.megacrit.com/content-policy/",
+      "rights_holder": "Mega Crit Games, LLC",
+      "rights_evidence": "Official content policy permits monetized gameplay videos and music used transformatively; link to respective store page requested.",
+      "attribution": "Slay the Spire official Steam page",
+      "start_seconds": 10,
+      "effect": "static"
+    },
+    {
+      "kind": "real_video",
+      "source_type": "producer",
+      "source_path": "clips/367520-256679401.mp4",
+      "context": "Official Hollow Knight gameplay supporting the reminder to verify compatibility before buying.",
+      "source_url": "https://store.steampowered.com/app/367520/?movie=256679401",
+      "policy_url": "https://www.teamcherry.com.au/faq",
+      "rights_holder": "Team Cherry",
+      "rights_evidence": "Official FAQ grants a free license to game owners and press to create and publish original reviews and gameplay videos and to monetize them.",
+      "attribution": "Hollow Knight official game page",
+      "start_seconds": 72,
+      "effect": "static"
+    },
+    {
+      "kind": "real_video",
+      "source_type": "producer",
+      "source_path": "clips/1145360-256801288.mp4",
+      "context": "Official Hades gameplay closing the handheld checklist with real action footage.",
+      "source_url": "https://store.steampowered.com/app/1145360/?movie=256801288",
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "attribution": "Hades official game page",
+      "start_seconds": 78,
+      "effect": "static"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
     <div class="review-card-meta">
       <span class="status status-{{ card.video.status | lower }}">{{ card.video.status | status_label }}</span>
       {% if card.video.features_json.get('is_demo') %}<span class="tag">DEMO</span>{% endif %}
+      {% if card.real_media_percent is not none %}<span class="real-media-badge">{{ card.real_media_percent }}% rigtige medier</span>{% endif %}
       <span class="version">v{{ card.video.version }}</span>
     </div>
     <h2><a href="/review/{{ card.video.id }}">{{ card.post.title }}</a></h2>

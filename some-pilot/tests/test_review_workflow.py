@@ -43,6 +43,7 @@ def complete_source_files(video):
         "clip_plan.json": "{}",
         "storyboard.jpg": "storyboard",
         "voice_assets.json": '{"decision": "ALLOW"}',
+        "media_composition.json": '{"decision": "ALLOW", "real_media_ratio": 1.0}',
         "post.json": json.dumps(video.post_json),
     }
     for name, content in files.items():

@@ -13,7 +13,7 @@ from app.pipeline.posts import build_post, post_view
 from app.pipeline.production import _write_deliverables
 
 
-REQUIRED_CHECKS = ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice")
+REQUIRED_CHECKS = ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition")
 
 
 def create_post_revision(db: Session, video_id: int, review_id: int, job_id: str) -> VideoVersion:
