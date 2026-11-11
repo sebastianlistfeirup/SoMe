@@ -100,7 +100,8 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - Undermapper understøttes rekursivt, fx `SoMe-captures/Monster Train 2/clip.mp4`. Mappenavnet vælger spilprofil. Alternativt kan filnavne som `hades-*`, `celeste-*` eller `slay-the-spire-*` bruges; andre filnavne bruger standardprofilen Hades.
 - Monster Train 2 bruger [Devolvers tilladelsesgenerator](https://canipostandmonetizevideosofdevolvergames.com/). Indsæt kanalnavn og gem den skriftlige tilladelse som bevis. Klippene markeres som rettighedsreview indtil beviset er tilføjet; upload er ikke publicering.
 - Den permanente watcher kører med upload aktiveret via eksisterende SSH-nøgle til `/opt/some/data/media-library/<spil>/`. Der er ikke behov for GitHub MCP eller råvideoer i Git.
-- Lokal test beviste remux, kontaktark, manifest og upload. Serverens testmappe er slettet. Ingen reel spiloptagelse er publiceret.
+- Alle fire Monster Train 2-filer er verificeret byte-for-byte med lokale MP4 SHA-256-hashes. Alle fire AI-filer er uploadet som `owned_screen_recording`. Fejlregistreringer er flyttet til karantæne, og originalerne er uændrede.
+- Lokal test beviste remux, kontaktark, manifest og upload. Serverens testmappe er slettet. Ingen reel spiloptagelse er publiceret. **Der produceres ingen nye videoer, før ejeren siger “Nu må du begynde”.**
 - Lokale Grok/Gemini/Qwen CLI-processer kræver tændt computer. De er ikke cloud-API'er og kan ikke køre på VPS uden computeren. Grok CLI viser ingen videogenerering. Separate Veo/Imagine API'er kræver egen pris- og rettighedsafklaring.
 
 ## 10. Review-center — klar til ejerens vurdering

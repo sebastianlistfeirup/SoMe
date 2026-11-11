@@ -146,13 +146,13 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Gaming er Chris – Fast-Paced Informative Narrator (`HfRP3cIhYLmeNHeTvkWK`); AI er Nathaniel C – Expressive Social Media Creator (`8CjmkufHc22WbMZEBHbm`). Pris er konfigureret til 0,533288 DKK/1.000 tegn, rettigheder er bekræftet, og begge WAV-tests er ALLOW.
 - Gamingtest: 3,437 sekunder, 48 kHz mono og 0,031464 DKK. AI-test: 3,158 sekunder, 48 kHz mono og 0,03573 DKK. Samlet beregnet testpris er 0,067194 DKK. Lokale previews er `voice-previews/gaming.wav` og `voice-previews/ai.wav`. Intet er publiceret.
 - ElevenLabs svarede uden `x-request-id`, hvilket afslørede at adapteren fejlagtigt rapporterede `paid_call=false` og actual_cost=null. Adapteren registrerer nu succesfulde HTTP-kald med `successful_provider_calls`; regressionstest dækker manglende request-ID og korrekt omkostningsregistrering. Hele pakken er **96 passed**.
-- Capture Bridge er udvidet til rekursive spilmapper. Testen `test_subfolder_selects_game_and_is_scanned_recursively` bekræfter `Monster Train 2/run.mp4` → `monster-train-2`. Hele testpakken er **95 passed**.
-- Fire klip i `SoMe-captures/Monster Train 2/` er registreret og behandles med `rights_review_required=true`. Devolvers officielle tilladelsesgenerator https://canipostandmonetizevideosofdevolvergames.com/ er politik-kilde, men kanalspecifikt skriftligt bevis kræves før produktion. Upload til mediebiblioteket er ikke publicering.
+- Capture Bridge er udvidet til rekursive spilmapper og ukendte mapper stopper i stedet for at blive fejlregistreret som Hades. Hele testpakken er **96 passed**.
+- Alle fire Monster Train 2-klip er uploadet. Lokale MP4-hashes er identiske med serverens hashes: `4e5e8b26`, `2c51c88f`, `5c232681` og `fbd6f930`. Filerne er dermed verificeret byte-for-byte.
+- Alle fire AI-optagelser er uploadet med `source_type=owned_screen_recording`. Ældre Hades-kopier og den uklassificerede rodfil er flyttet til karantæne, og originalerne er uændrede. Watcher er genstartet med den nyeste kode. Der produceres ingen nye videoer før ejerens go.
 
 ## Ikke verificeret / blokeret
 
-- Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt. Kokoro er afvist til fremtidig produktion.
-- ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
+- Kokoro er afvist til fremtidig produktion. ElevenLabs-stemmerne er valgt af ejeren og verificeret med korte live tests; længere produktionskvalitet og faktisk leverandørfaktura er ikke verificeret.
 - Claude er verificeret med syntetisk eval og én live opslagsrevision, men faktisk leverandørfaktura og produktionskvalitet på rigtige researchkilder er ikke verificeret. Bankkurs og eventuel moms kan afvige.
 - TikTok production-demo og app-review mangler. YouTube Testing-token og Meta App Review/Advanced Access kræver senere produktionsforvaltning. Reelle langtidsmetrics og dokumenteret læringsforbedring findes ikke endnu.
 - Fuld automatisk research → licenseret produktion → rendering og multiplatformsplanlægning er ikke implementeret. Revisionsfunktionen retter kun posttekst og genbruger video/lyd/visuals.
