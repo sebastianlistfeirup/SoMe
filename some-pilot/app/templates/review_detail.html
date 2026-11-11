@@ -19,7 +19,7 @@
     <form method="post" action="/review/{{ video.id }}/approve" class="approval">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <h2>Ejergodkendelse</h2>
-      <label>Platform<select name="platform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option></select></label>
+      <label>Platform<select name="platform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option></select></label>
       <label>Målkonto<input name="account" required placeholder="Kanal-/konto-id"></label>
       <label class="check"><input type="checkbox" name="watched" value="true" required> Jeg har set hele videoen og kontrolleret alle beviser.</label>
       <button>Godkend denne version</button>

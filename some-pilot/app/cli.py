@@ -25,7 +25,7 @@ from app.pipeline.jobs import recover_expired_leases
 from app.pipeline.learning import weekly_learning
 from app.pipeline.media import require_tools
 from app.pipeline.metrics import collect_due, import_csv
-from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, YouTubePublisher, manual_export
+from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
 from app.pipeline.production import produce
 from app.pipeline.research import export_observations, import_report, run_adapters
 
@@ -61,7 +61,7 @@ def doctor(db, paid_check: bool = False) -> dict:
         "model_cache": {"path": str(settings.model_cache_dir), "whisper_small_cached": (settings.model_cache_dir / "whisper").exists()},
         "budget": {"monthly_limit_dkk": settings.monthly_ai_budget_dkk, "monthly_reserved_or_actual_dkk": monthly_total(db), "paid_jobs_enabled": settings.paid_jobs_enabled},
         "safety": {"dry_run": settings.dry_run, "publish_enabled": settings.publish_enabled, "paid_jobs_enabled": settings.paid_jobs_enabled},
-        "integrations": {"youtube": YouTubePublisher().capabilities(db), "instagram": InstagramPublisher().capabilities(db), "facebook": FacebookPublisher().capabilities(db), "youtube_research": YouTubeAdapter().capabilities(), "claude": {"script_model": settings.claude_model_text, "research_model": settings.claude_model_research, "api_key_configured": bool(settings.anthropic_api_key), "script_pricing_configured": settings.claude_input_dkk_per_million > 0 and settings.claude_output_dkk_per_million > 0, "research_pricing_configured": settings.claude_research_input_dkk_per_million > 0 and settings.claude_research_output_dkk_per_million > 0}, "voice": {"provider": settings.voice_provider, "local_available": settings.voice_provider == "kokoro", "elevenlabs_configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id and settings.elevenlabs_cost_per_1000_chars_dkk > 0 and settings.elevenlabs_pricing_verified_at and settings.elevenlabs_voice_rights_confirmed), "avatar_required": False}},
+        "integrations": {"youtube": YouTubePublisher().capabilities(db), "instagram": InstagramPublisher().capabilities(db), "facebook": FacebookPublisher().capabilities(db), "tiktok": TikTokPublisher().capabilities(db), "youtube_research": YouTubeAdapter().capabilities(), "claude": {"script_model": settings.claude_model_text, "research_model": settings.claude_model_research, "api_key_configured": bool(settings.anthropic_api_key), "script_pricing_configured": settings.claude_input_dkk_per_million > 0 and settings.claude_output_dkk_per_million > 0, "research_pricing_configured": settings.claude_research_input_dkk_per_million > 0 and settings.claude_research_output_dkk_per_million > 0}, "voice": {"provider": settings.voice_provider, "local_available": settings.voice_provider == "kokoro", "elevenlabs_configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id and settings.elevenlabs_cost_per_1000_chars_dkk > 0 and settings.elevenlabs_pricing_verified_at and settings.elevenlabs_voice_rights_confirmed), "avatar_required": False}},
         "paid_api_test": "not_run",
     }
     checks["overall"] = "render_blocked_disk" if checks["disk"]["stop_render"] else "ok_demo" if all(tools.values()) else "setup_required"
@@ -130,7 +130,7 @@ def build_parser() -> argparse.ArgumentParser:
     export.add_argument("--platform", default="youtube")
     publish = sub.add_parser("publish")
     publish.add_argument("--video-id", type=int, required=True)
-    publish.add_argument("--platform", choices=["youtube", "instagram", "facebook"], required=True)
+    publish.add_argument("--platform", choices=["youtube", "instagram", "facebook", "tiktok"], required=True)
     publish.add_argument("--account", required=True)
     publish.add_argument("--privacy", default="private")
     restore = sub.add_parser("restore")
@@ -218,8 +218,10 @@ def main() -> int:
                 publication = YouTubePublisher().publish(db, video, args.account, args.privacy)
             elif args.platform == "instagram":
                 publication = InstagramPublisher().publish(db, video, args.account)
-            else:
+            elif args.platform == "facebook":
                 publication = FacebookPublisher().publish(db, video, args.account)
+            else:
+                publication = TikTokPublisher().publish(db, video, args.account)
             payload = {"publication_id": publication.id, "status": publication.status, "remote_id": publication.remote_id}
         elif args.command == "restore":
             payload = restore_to_directory(Path(args.input), Path(args.target))

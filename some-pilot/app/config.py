@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     meta_page_id: str = ""
     meta_page_access_token: str = ""
     meta_graph_version: str = ""
+    tiktok_client_key: str = ""
+    tiktok_client_secret: str = ""
+    tiktok_access_token: str = ""
+    tiktok_open_id: str = ""
     public_base_url: str = ""
     signed_media_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     secure_cookies: bool = False

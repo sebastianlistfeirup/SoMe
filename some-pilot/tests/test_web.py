@@ -28,6 +28,7 @@ def test_login_csrf_and_protected_routes(db, awaiting_video):
     response = client.get("/review/1")
     assert response.status_code == 200
     assert b'value="facebook"' in response.content
+    assert b'value="tiktok"' in response.content
     for route in ("/dashboard", "/drafts", "/learnings", "/settings"):
         response = client.get(route)
         assert response.status_code == 200

@@ -265,8 +265,92 @@ class FacebookPublisher:
 
 
 class TikTokPublisher:
-    def capabilities(self) -> dict:
-        return {"publishing_configured": False, "oauth_verified": False, "audit_status": "not_evaluated", "manual_export": True}
+    api_base = "https://open.tiktokapis.com/v2"
 
-    def publish(self, *_args, **_kwargs) -> Publication:
-        raise PublishError("tiktok_requires_current_content_posting_audit; use_manual_export")
+    def capabilities(self, db: Session | None = None) -> dict:
+        settings = get_settings()
+        configured = bool(settings.tiktok_access_token and settings.tiktok_open_id)
+        connection = db.get(Setting, "tiktok_connection") if db is not None else None
+        state = connection.value_json if connection else {}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "draft_upload_verified": bool(state.get("draft_upload_verified")), "open_id_configured": bool(settings.tiktok_open_id), "manual_export": True}
+
+    def publish(self, db: Session, video: VideoVersion, account: str) -> Publication:
+        settings = get_settings()
+        if not all((settings.tiktok_access_token, settings.tiktok_open_id)):
+            raise PublishError("tiktok_not_configured; use_manual_export")
+        if account != settings.tiktok_open_id:
+            raise PublishError("tiktok_open_id_mismatch")
+        verify_approval(db, video, "tiktok", account)
+        publication = new_publication(db, video, "tiktok", account)
+        if publication.status == "PUBLISHED":
+            return publication
+        if publication.status == "RECONCILE_REQUIRED":
+            raise PublishError("reconcile_required_before_retry")
+        publication.status = "PUBLISHING"
+        transition(video, "PUBLISHING")
+        db.commit()
+        video_path = Path(video.video_path)
+        size = video_path.stat().st_size
+        headers = {"Authorization": f"Bearer {settings.tiktok_access_token}", "Content-Type": "application/json; charset=UTF-8"}
+        try:
+            started = httpx.post(
+                f"{self.api_base}/post/publish/inbox/video/init/",
+                headers=headers,
+                json={"source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": size, "total_chunk_count": 1}},
+                timeout=30,
+            )
+            self._raise_for_tiktok_error(started, "init")
+            upload = started.json().get("data", {})
+            publish_id = upload.get("publish_id")
+            upload_url = upload.get("upload_url")
+            if not publish_id or not upload_url:
+                raise PublishError("tiktok_upload_session_missing")
+            with video_path.open("rb") as handle:
+                uploaded = httpx.put(
+                    upload_url,
+                    content=handle,
+                    headers={"Content-Type": "video/mp4", "Content-Range": f"bytes 0-{size - 1}/{size}"},
+                    timeout=120,
+                )
+            if uploaded.status_code >= 400:
+                raise PublishError("tiktok_binary_upload_failed")
+            status = ""
+            for _ in range(6):
+                checked = httpx.post(
+                    f"{self.api_base}/post/publish/status/fetch/",
+                    headers=headers,
+                    json={"publish_id": publish_id},
+                    timeout=20,
+                )
+                self._raise_for_tiktok_error(checked, "status")
+                status = checked.json().get("data", {}).get("status", "")
+                if status in {"PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"}:
+                    break
+                if status in {"FAILED", "CANCELLED"}:
+                    raise PublishError("tiktok_draft_upload_failed")
+                time.sleep(1)
+            if status not in {"PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"}:
+                raise PublishError("tiktok_draft_upload_not_finished_reconcile")
+            publication.remote_id = publish_id
+            publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": "tiktok_draft_inbox"}
+            publication.status = "PUBLISHED"
+            publication.published_at = utcnow()
+            transition(video, "PUBLISHED")
+            db.commit()
+            return publication
+        except httpx.TimeoutException:
+            _mark_timeout(db, publication, video)
+            raise PublishError("tiktok_reconcile_required")
+        except Exception as exc:
+            _mark_failure(db, publication, video, exc)
+            raise
+
+    def _raise_for_tiktok_error(self, response: httpx.Response, step: str) -> None:
+        if response.status_code < 400:
+            return
+        try:
+            error = response.json().get("error", {})
+            detail = f"{error.get('code', '')}:{error.get('message', '')}"
+        except (ValueError, AttributeError):
+            detail = "unreadable_tiktok_error"
+        raise PublishError(f"tiktok_{step}_error:{detail[:300]}")

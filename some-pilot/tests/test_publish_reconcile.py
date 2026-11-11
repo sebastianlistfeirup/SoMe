@@ -135,3 +135,39 @@ def test_failed_publication_can_be_rescheduled_without_duplicate(db, awaiting_vi
     assert result.status == "SCHEDULED"
     assert awaiting_video.status == "SCHEDULED"
     assert db.query(Publication).count() == 1
+
+
+def test_tiktok_draft_upload_uses_file_upload_and_publish_status(db, awaiting_video, monkeypatch):
+    from app.pipeline.platforms import TikTokPublisher
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "dry_run", False)
+    monkeypatch.setattr(settings, "publish_enabled", True)
+    monkeypatch.setattr(settings, "tiktok_access_token", "test-token")
+    monkeypatch.setattr(settings, "tiktok_open_id", "open-1")
+    approve(db, awaiting_video, "owner", "tiktok", "open-1", True)
+    calls = []
+
+    class JsonResponse:
+        status_code = 200
+
+        def __init__(self, body):
+            self.body = body
+
+        def json(self):
+            return self.body
+
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        if url.endswith("/init/"):
+            return JsonResponse({"data": {"publish_id": "publish-1", "upload_url": "https://upload.example/file"}})
+        return JsonResponse({"data": {"status": "SEND_TO_USER_INBOX"}})
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
+    monkeypatch.setattr("app.pipeline.platforms.httpx.put", lambda *_args, **_kwargs: JsonResponse({}))
+    publication = TikTokPublisher().publish(db, awaiting_video, "open-1")
+
+    assert publication.status == "PUBLISHED"
+    assert publication.remote_id == "publish-1"
+    assert publication.response_json["external_visibility"] == "tiktok_draft_inbox"
+    assert calls[0][1]["json"]["source_info"]["source"] == "FILE_UPLOAD"
