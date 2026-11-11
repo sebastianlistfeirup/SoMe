@@ -169,10 +169,14 @@ def save_state(config: dict, state: dict) -> None:
 
 
 def game_for_path(path: Path, config: dict) -> str:
-    for parent in reversed(path.parent.parts):
-        folder_key = re.sub(r"[^a-z0-9]+", "-", parent.lower()).strip("-")
-        if folder_key in config["games"]:
-            return folder_key
+    capture_root = Path(config["capture_dir"]).resolve()
+    parent = path.parent.resolve()
+    if parent != capture_root and capture_root in parent.parents:
+        for candidate in reversed(path.parent.parts):
+            folder_key = re.sub(r"[^a-z0-9]+", "-", candidate.lower()).strip("-")
+            if folder_key in config["games"]:
+                return folder_key
+        return re.sub(r"[^a-z0-9]+", "-", path.parent.name.lower()).strip("-")
     name = path.stem.lower()
     return next((key for key in config["games"] if name.startswith(f"{key}-") or name.startswith(f"{key}_")), config.get("default_game", "hades"))
 

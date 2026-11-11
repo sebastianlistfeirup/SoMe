@@ -101,3 +101,17 @@ def test_subfolder_selects_game_and_is_scanned_recursively(tmp_path, monkeypatch
     results = process_pending(payload)
     assert calls == ["monster-train-2"]
     assert results[0]["status"] == "processed"
+
+
+def test_unknown_subfolder_does_not_fall_back_to_hades(tmp_path, monkeypatch):
+    from scripts.capture_bridge import game_for_path
+    payload = config(tmp_path)
+    nested = tmp_path / "captures" / "AI"
+    nested.mkdir(parents=True)
+    clip = nested / "screen.mp4"
+    clip.write_bytes(b"clip")
+    assert game_for_path(clip, payload) == "ai"
+    monkeypatch.setattr("scripts.capture_bridge.upload_directory", lambda *_args: pytest.fail("unknown profile must not upload"))
+    results = process_pending(payload)
+    assert results[0]["status"] == "error"
+    assert "unknown_game_profile" in results[0]["error"]
