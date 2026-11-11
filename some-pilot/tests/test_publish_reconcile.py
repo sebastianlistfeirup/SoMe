@@ -118,3 +118,19 @@ def test_facebook_graph_error_reports_safe_detail(db, awaiting_video, monkeypatc
     with pytest.raises(PublishError, match="missing_permission"):
         FacebookPublisher().publish(db, awaiting_video, "page-1")
     assert db.query(Publication).one().status == "FAILED"
+
+
+def test_failed_publication_can_be_rescheduled_without_duplicate(db, awaiting_video):
+    from app.pipeline.platforms import new_publication
+
+    approve(db, awaiting_video, "owner", "facebook", "page-1", True)
+    publication = Publication(video_version_id=awaiting_video.id, platform="facebook", account="page-1", idempotency_key=f"video:{awaiting_video.id}:platform:facebook:account:page-1", status="FAILED")
+    db.add(publication)
+    db.commit()
+
+    result = new_publication(db, awaiting_video, "facebook", "page-1")
+
+    assert result.id == publication.id
+    assert result.status == "SCHEDULED"
+    assert awaiting_video.status == "SCHEDULED"
+    assert db.query(Publication).count() == 1
