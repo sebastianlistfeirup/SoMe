@@ -51,7 +51,7 @@ def test_youtube_capabilities_use_verified_connection_state(db):
     assert result["manual_export"] is True
 
 
-def test_facebook_publish_uses_approved_page_and_signed_https_video(db, awaiting_video, monkeypatch):
+def test_facebook_publish_uses_approved_page_and_direct_video_upload(db, awaiting_video, monkeypatch):
     from app.pipeline.platforms import FacebookPublisher
 
     settings = get_settings()
@@ -65,7 +65,6 @@ def test_facebook_publish_uses_approved_page_and_signed_https_video(db, awaiting
     }.items():
         monkeypatch.setattr(settings, name, value)
     approve(db, awaiting_video, "owner", "facebook", "page-1", True)
-    monkeypatch.setattr("app.pipeline.platforms.create_link", lambda *_args: "https://example.com/signed-video")
 
     calls = []
 
@@ -87,7 +86,8 @@ def test_facebook_publish_uses_approved_page_and_signed_https_video(db, awaiting
 
     assert publication.status == "PUBLISHED"
     assert publication.remote_id == "remote-video-1"
-    assert calls[0][1]["data"]["url"] == "https://example.com/signed-video"
+    assert calls[0][1]["files"]["file"][0] == "video.mp4"
+    assert calls[0][1]["data"]["description"]
     assert calls[0][0][0].endswith("/v27.0/page-1/videos")
 
 
