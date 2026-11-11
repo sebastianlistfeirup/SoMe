@@ -37,8 +37,13 @@ class Settings(BaseSettings):
     youtube_client_id: str = ""
     youtube_client_secret: str = ""
     youtube_refresh_token: str = ""
+    meta_app_id: str = ""
+    meta_app_secret: str = ""
+    meta_config_id: str = ""
     meta_access_token: str = ""
     meta_instagram_account_id: str = ""
+    meta_page_id: str = ""
+    meta_page_access_token: str = ""
     meta_graph_version: str = ""
     public_base_url: str = ""
     signed_media_ttl_seconds: int = Field(default=900, ge=60, le=3600)

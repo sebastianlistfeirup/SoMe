@@ -49,3 +49,43 @@ def test_youtube_capabilities_use_verified_connection_state(db):
     assert result["private_upload_verified"] is True
     assert result["channel_id"] == "channel-1"
     assert result["manual_export"] is True
+
+
+def test_facebook_publish_uses_approved_page_and_signed_https_video(db, awaiting_video, monkeypatch):
+    from app.pipeline.platforms import FacebookPublisher
+
+    settings = get_settings()
+    for name, value in {
+        "dry_run": False,
+        "publish_enabled": True,
+        "meta_page_access_token": "test-page-token",
+        "meta_page_id": "page-1",
+        "meta_graph_version": "v27.0",
+        "public_base_url": "https://example.com",
+    }.items():
+        monkeypatch.setattr(settings, name, value)
+    approve(db, awaiting_video, "owner", "facebook", "page-1", True)
+    monkeypatch.setattr("app.pipeline.platforms.create_link", lambda *_args: "https://example.com/signed-video")
+
+    calls = []
+
+    class Response:
+        status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"id": "remote-video-1"}
+
+    def post(*args, **kwargs):
+        calls.append((args, kwargs))
+        return Response()
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
+    publication = FacebookPublisher().publish(db, awaiting_video, "page-1")
+
+    assert publication.status == "PUBLISHED"
+    assert publication.remote_id == "remote-video-1"
+    assert calls[0][1]["data"]["url"] == "https://example.com/signed-video"
+    assert calls[0][0][0].endswith("/v27.0/page-1/videos")

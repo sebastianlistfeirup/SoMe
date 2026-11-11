@@ -126,10 +126,12 @@ class YouTubePublisher:
 
 
 class InstagramPublisher:
-    def capabilities(self) -> dict:
+    def capabilities(self, db: Session | None = None) -> dict:
         settings = get_settings()
         configured = bool(settings.meta_access_token and settings.meta_instagram_account_id and settings.meta_graph_version and settings.public_base_url)
-        return {"publishing_configured": configured, "oauth_verified": False, "private_upload_verified": False, "manual_export": True, "public_media_url_required": True}
+        connection = db.get(Setting, "meta_connection") if db is not None else None
+        state = connection.value_json if connection else {}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "profile_verified": bool(state.get("instagram_profile_verified")), "test_publication_verified": bool(state.get("instagram_test_publication_verified")), "private_upload_verified": False, "private_upload_supported": False, "manual_export": True, "public_media_url_required": True}
 
     def publish(self, db: Session, video: VideoVersion, account: str, media_url: str = "") -> Publication:
         settings = get_settings()
@@ -189,6 +191,62 @@ class InstagramPublisher:
                 raise PublishError("instagram_reconcile_required") from exc
             _mark_failure(db, publication, video, exc)
             raise
+        except Exception as exc:
+            _mark_failure(db, publication, video, exc)
+            raise
+
+
+class FacebookPublisher:
+    def capabilities(self, db: Session | None = None) -> dict:
+        settings = get_settings()
+        configured = bool(settings.meta_page_access_token and settings.meta_page_id and settings.meta_graph_version and settings.public_base_url)
+        connection = db.get(Setting, "meta_connection") if db is not None else None
+        state = connection.value_json if connection else {}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "page_verified": bool(state.get("facebook_page_verified")), "test_publication_verified": bool(state.get("facebook_test_publication_verified")), "page_id": state.get("facebook_page_id"), "manual_export": True, "public_media_url_required": True}
+
+    def publish(self, db: Session, video: VideoVersion, account: str) -> Publication:
+        settings = get_settings()
+        if not all((settings.meta_page_access_token, settings.meta_page_id, settings.meta_graph_version, settings.public_base_url)):
+            raise PublishError("facebook_not_configured; use_manual_export")
+        if not re.fullmatch(r"v\d+\.\d+", settings.meta_graph_version):
+            raise PublishError("explicit_valid_meta_graph_version_required")
+        if account != settings.meta_page_id:
+            raise PublishError("facebook_page_mismatch")
+        verify_approval(db, video, "facebook", account)
+        media_url = create_link(db, video, "facebook", account)
+        if not media_url.startswith("https://"):
+            raise PublishError("signed_https_media_url_required")
+        publication = new_publication(db, video, "facebook", account)
+        if publication.status == "PUBLISHED":
+            return publication
+        if publication.status == "RECONCILE_REQUIRED":
+            raise PublishError("reconcile_required_before_retry")
+        publication.status = "PUBLISHING"
+        transition(video, "PUBLISHING")
+        db.commit()
+        try:
+            response = httpx.post(
+                f"https://graph.facebook.com/{settings.meta_graph_version}/{account}/videos",
+                headers={"Authorization": f"Bearer {settings.meta_page_access_token}"},
+                data={"url": media_url, "description": video.post_json.get("text", "")},
+                timeout=120,
+            )
+            if response.status_code in {401, 403}:
+                raise PublishError("facebook_authorization_required")
+            response.raise_for_status()
+            remote_id = response.json().get("id")
+            if not remote_id:
+                raise PublishError("facebook_remote_video_id_missing")
+            publication.remote_id = remote_id
+            publication.response_json = {"id": remote_id}
+            publication.status = "PUBLISHED"
+            publication.published_at = utcnow()
+            transition(video, "PUBLISHED")
+            db.commit()
+            return publication
+        except httpx.TimeoutException:
+            _mark_timeout(db, publication, video)
+            raise PublishError("facebook_reconcile_required")
         except Exception as exc:
             _mark_failure(db, publication, video, exc)
             raise

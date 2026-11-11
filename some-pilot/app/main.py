@@ -18,7 +18,7 @@ from app.config import get_settings
 from app.db.models import AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
 from app.pipeline.approvals import ApprovalError, approve, paused, set_pause, transition
-from app.pipeline.platforms import InstagramPublisher, YouTubePublisher, manual_export
+from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, YouTubePublisher, manual_export
 from app.pipeline.signed_media import SignedMediaError, create_link, resolve_link
 
 from contextlib import asynccontextmanager
@@ -292,7 +292,7 @@ def economy(request: Request, db: Session = Depends(get_db), auth=Depends(requir
 @app.get("/settings", response_class=HTMLResponse)
 def settings_page(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
     safe = {"DRY_RUN": settings.dry_run, "PUBLISH_ENABLED": settings.publish_enabled, "PAID_JOBS_ENABLED": settings.paid_jobs_enabled, "APP_TIMEZONE": settings.app_timezone, "MONTHLY_AI_BUDGET_DKK": settings.monthly_ai_budget_dkk, "MAX_JOB_AI_COST_DKK": settings.max_job_ai_cost_dkk}
-    capabilities = {"youtube_publish": YouTubePublisher().capabilities(db), "instagram_publish": InstagramPublisher().capabilities(), "youtube_research": YouTubeAdapter().capabilities()}
+    capabilities = {"youtube_publish": YouTubePublisher().capabilities(db), "instagram_publish": InstagramPublisher().capabilities(db), "facebook_publish": FacebookPublisher().capabilities(db), "youtube_research": YouTubeAdapter().capabilities()}
     voice_profiles = {
         "active": {"provider": settings.voice_provider, "preset": settings.voice_preset, "speed": settings.voice_speed, "avatar_required": False},
         "elevenlabs": {"configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id), "voice_id_configured": bool(settings.elevenlabs_voice_id), "verified_price_configured": settings.elevenlabs_cost_per_1000_chars_dkk > 0 and bool(settings.elevenlabs_pricing_verified_at), "voice_rights_confirmed": settings.elevenlabs_voice_rights_confirmed, "paid_jobs_enabled": settings.paid_jobs_enabled},
