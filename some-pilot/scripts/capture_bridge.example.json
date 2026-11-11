@@ -31,6 +31,14 @@
       "rights_evidence": "Official content policy permits monetized gameplay videos and music used transformatively; link to respective store page requested.",
       "attribution": "Slay the Spire official Steam page",
       "context": "Own Slay the Spire gameplay recorded locally with OBS for editorial commentary."
+    },
+    "monster-train-2": {
+      "source_url": "https://store.steampowered.com/app/2742830/",
+      "policy_url": "https://canipostandmonetizevideosofdevolvergames.com/",
+      "rights_holder": "Shiny Shoe / Big Fan (Devolver Digital)",
+      "rights_evidence": "Devolver's official permission generator permits streaming and monetization. Owner-specific written permission must be generated and attached before production; capture metadata still requires rights review.",
+      "attribution": "Monster Train 2 official game page and Devolver permission proof",
+      "context": "Own Monster Train 2 gameplay recorded locally with OBS for editorial commentary."
     }
   }
 }

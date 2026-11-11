@@ -169,6 +169,10 @@ def save_state(config: dict, state: dict) -> None:
 
 
 def game_for_path(path: Path, config: dict) -> str:
+    for parent in reversed(path.parent.parts):
+        folder_key = re.sub(r"[^a-z0-9]+", "-", parent.lower()).strip("-")
+        if folder_key in config["games"]:
+            return folder_key
     name = path.stem.lower()
     return next((key for key in config["games"] if name.startswith(f"{key}-") or name.startswith(f"{key}_")), config.get("default_game", "hades"))
 
@@ -178,7 +182,7 @@ def process_pending(config: dict, upload: bool = False) -> list[dict]:
     capture_dir.mkdir(parents=True, exist_ok=True)
     state = load_state(config)
     results = []
-    for path in sorted(capture_dir.iterdir()):
+    for path in sorted(capture_dir.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in VIDEO_EXTENSIONS:
             continue
         game = game_for_path(path, config)

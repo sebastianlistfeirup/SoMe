@@ -85,3 +85,19 @@ def test_filename_selects_game_profile(tmp_path):
     assert game_for_path(Path("celeste-run-01.mkv"), payload) == "celeste"
     assert game_for_path(Path("hades-boss.mkv"), payload) == "hades"
     assert game_for_path(Path("unlabelled.mkv"), payload) == "hades"
+
+
+def test_subfolder_selects_game_and_is_scanned_recursively(tmp_path, monkeypatch):
+    from scripts.capture_bridge import game_for_path
+    payload = config(tmp_path)
+    payload["games"]["monster-train-2"] = dict(payload["games"]["hades"])
+    nested = tmp_path / "captures" / "Monster Train 2"
+    nested.mkdir(parents=True)
+    clip = nested / "run.mp4"
+    clip.write_bytes(b"clip")
+    assert game_for_path(clip, payload) == "monster-train-2"
+    calls = []
+    monkeypatch.setattr("scripts.capture_bridge.process_capture", lambda path, config, game, upload: calls.append(game) or {"status": "processed", "directory": str(tmp_path / "result")})
+    results = process_pending(payload)
+    assert calls == ["monster-train-2"]
+    assert results[0]["status"] == "processed"
