@@ -19,7 +19,8 @@ UDFØRT
 - **Kokoro `af_bella` er ikke kreativt godkendt og må ikke bruges til nye produktionsopslag.** Demo 8 bruger kun espeak som teknisk fallback.
 
 VERIFICERET LOKALT OG PÅ VPS
-- Seneste applikationscommit er `24a4820`; pushet og deployet. **89/89 automatiske tests består lokalt og på serveren.** Web/worker er healthy; migration 0001 og doctor er ok.
+- Seneste applikationscommit er `3fb9d06`; pushet. **94/94 automatiske tests består lokalt.** Web/worker er healthy; migration 0001 og doctor er ok.
+- Lokal OBS Capture Bridge er implementeret med `scripts/capture_bridge.py`. OBS 33.0.1 og FFmpeg 9.0.2 er installeret. MKV→MP4, kontaktark, rettighedsmanifest, idempotens og SSH-upload er testet. Watcher kører med upload aktiveret; serverens testmappe er slettet, og ingen reel optagelse er publiceret.
 - Tests dækker 80 % grænse, 75 % blokering, forbud mod lavere grænse og AI-som-reelt, HTTPS-bevis, source paths, filtyper, source duration, billedmotion, ren FFmpeg-rendering, pixel range, produktion, manifest, Qwen-kontrakt og approvals.
 - Live demo 8 er downloadet og kontrolleret som MP4, storyboard og thumbnail. Videofilen er 10.375.109 bytes. `media_composition`: 100 %, fem real_video, nul graphic. `visual_media_review=NOT_CONFIGURED` rapporteres ærligt.
 - `doctor` viser YouTube/Instagram/Facebook/TikTok verificeret og Qwen `api_key_configured=false`, `workspace_configured=false`, `pricing_configured=false`.

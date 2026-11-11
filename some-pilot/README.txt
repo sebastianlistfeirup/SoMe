@@ -98,3 +98,15 @@ GeForce Now, Qwen og Wan
 GeForce Now er ikke konfigureret. NVIDIAs vilkår beskriver personlig, ikke-kommerciel brug, én session ad gangen og forbud mod botting. Der laves ingen skjult auto-gameplay. En senere optagelse skal være ejerstyret med OBS og kontrol af spillets politik. Se https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 
 Qwen-storyboardreview er implementeret, men ikke konfigureret eller eksternt verificeret. Qwen Vision: https://www.alibabacloud.com/help/en/model-studio/vision. Wan text-to-video er asynkron API: https://www.alibabacloud.com/help/en/model-studio/text-to-video-api-reference. Wan2.7 koster ifølge den officielle prisside $0,10/sekund ved 720P og $0,15/sekund ved 1080P: https://www.alibabacloud.com/help/en/model-studio/model-pricing. Betalte kald kræver separat pris- og budgetaccept, og AI-output tæller ikke som reel medieprocent.
+
+
+Lokal OBS Capture Bridge
+------------------------
+OBS og FFmpeg behandler nye optagelser på Windows via `scripts/capture_bridge.py`. Konfigurationen ligger som `capture_bridge.example.json`; den faktiske lokale konfiguration og SSH-nøglen ligger uden for Git.
+
+  python scripts/capture_bridge.py --config /path/capture_bridge.json --input /path/hades-run.mkv --game hades
+  python scripts/capture_bridge.py --config /path/capture_bridge.json --watch --upload
+
+Nye filer i `C:/Users/compu/Videos/SoMe-captures` overvåges, ventes skriveferdige og konverteres til MP4 med kontaktark og `some-capture-v1` manifest. Output ligger i `SoMe-processed/<spil>/` og kan uploades via eksisterende SSH-forbindelse til `/opt/some/data/media-library/<spil>/`. Brug filnavne som `hades-*`, `celeste-*` eller `slay-the-spire-*`; andre filnavne bruger standardprofilen. Upload kan udelades ved at undlade `--upload`. Ingen optagelse publiceres automatisk, og rettigheds-/ejergodkendelse er stadig obligatorisk.
+
+Grok, Gemini og Qwen CLI er lokale processer og kan ikke køre med computeren slukket. Et CLI-abonnement er ikke en cloud-API eller en videogenereringskontrakt. Separate Veo/Imagine API'er kræver egen nøgle, pris og rettighedsafklaring. ElevenLabs bruger den eksisterende paid-/pris-/rettighedsblokerede adapter og aktiveres først efter hemmelig nøgleopsætning og kontrol af abonnementet.

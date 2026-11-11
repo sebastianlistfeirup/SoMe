@@ -93,20 +93,29 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - Officiel Wan2.7-pris for International er $0,10/sekund ved 720P og $0,15/sekund ved 1080P. Ti sekunder 1080P koster $1,50, cirka 10 DKK og overstiger 5 DKK-jobloftet. Pris: https://www.alibabacloud.com/help/en/model-studio/model-pricing
 - Ingen betalt Qwen/Wan-aktivering uden ejerens API-nøgle, workspace, pris- og budgetaccept. Der er ikke påløbet Qwen-/Wan-omkostning.
 
-## 9. Review-center — klar til ejerens vurdering
+## 9. Lokal OBS Capture Bridge — aktiv
+
+- OBS Studio 33.0.1 og FFmpeg 9.0.2 er installeret lokalt. `scripts/capture_bridge.py` overvåger `C:/Users/compu/Videos/SoMe-captures` og behandler nye MKV/MP4/MOV-filer.
+- Resultatet ligger under `C:/Users/compu/Videos/SoMe-processed/<spil>/` med `gameplay.mp4`, `contact-sheet.jpg`, `capture-manifest.json` og procesresultat.
+- Filnavn vælger spilprofil: `hades-*`, `celeste-*` eller `slay-the-spire-*`. Andre filnavne bruger standardprofilen Hades.
+- Den permanente watcher kører med upload aktiveret via eksisterende SSH-nøgle til `/opt/some/data/media-library/<spil>/`. Der er ikke behov for GitHub MCP eller råvideoer i Git.
+- Lokal test beviste remux, kontaktark, manifest og upload. Serverens testmappe er slettet. Ingen reel spiloptagelse er publiceret.
+- Lokale Grok/Gemini/Qwen CLI-processer kræver tændt computer. De er ikke cloud-API'er og kan ikke køre på VPS uden computeren. Grok CLI viser ingen videogenerering. Separate Veo/Imagine API'er kræver egen pris- og rettighedsafklaring.
+
+## 10. Review-center — klar til ejerens vurdering
 
 - Åbn `https://62.171.167.243.sslip.io/review`. Se video, thumbnail, titel, tekst, hashtags, kilder, platform, konto og medieprocent.
 - Platform forhånds vælges, og konto-ID udfyldes. **Godkend opslag** registrerer kun godkendelse; der sker ingen automatisk publicering.
 - **Afvis med kommentar** gemmer feedback. **Ret opslag med AI** ændrer kun titel, caption og hashtags; video, lyd og visuals genbruges. Ny version kræver ny godkendelse.
 - Demo 8 ligger under `/review/8` som den eneste nye mediedemo. Den er ikke godkendt eller publiceret.
 
-## 10. Backup og offsite lager
+## 11. Backup og offsite lager
 
 - Seneste verificerede krypterede backup er `/data/backups/some-backup-20261111T155413Z.zip.enc`.
 - Vælg separat lager med dokumenteret pris og sikker adgang. Behold 7 daglige + 4 ugentlige kopier og udfør restoretest i separat mappe.
 - Offsite-overførsel er ikke konfigureret. Backupnøglen skal opbevares separat fra serveren.
 
-## 11. Kvalitet, rettigheder og kommerciel lancering
+## 12. Kvalitet, rettigheder og kommerciel lancering
 
 - Godkend hver færdig version efter at have set hele videoen. Ingen automatisk publicering af DEMO eller AWAITING_OWNER-versioner.
 - Kontrollér konkrete stock-, gameplay-, musik- og personrettigheder pr. asset. Der findes ingen 10-sekundersregel.
@@ -115,6 +124,13 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - ElevenLabs kræver særskilt ejeraccept af voice, kommercielle vilkår og pris. HeyGen og synlige avatarer er udfaset.
 - Reelle læringsforbedringer er ikke dokumenteret endnu. Fuld automatisk research → medieplan → rendering → multiplatformsplanlægning er ikke færdig.
 
-## Præcis næste handling
+## Præcis næste handling — ElevenLabs-nøgle
 
-Åbn `https://62.171.167.243.sslip.io/review/8`, log ind som ejer og se demo 8 med 100 % rigtige udgiverklip. Herefter fortsættes med TikTok-app-demo og valg af nye stemmer som aftalt.
+Læg nøglen direkte på serveren uden at sende den i chat:
+
+1. Kør `ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy` fra `C:\Users\compu\Documents\SoMe`.
+2. Kør `sudo nano /opt/some/secrets/app.env`.
+3. Tilføj `ELEVENLABS_API_KEY=din-nøgle` som ny linje. Gem med Ctrl+O, Enter og Ctrl+X.
+4. Skriv `exit` og derefter “nøglen er lagt på serveren” i chatten.
+
+Derefter hentes stemmeliste og abonnementsinformation uden at vise nøglen. Officiel API-pris for multilingual TTS er $0,08/1.000 tegn; abonnementets faktiske kvote og kommercielle licens kontrolleres før generering.

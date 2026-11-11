@@ -133,6 +133,17 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Ny krypteret backup `/data/backups/some-backup-20261111T155413Z.zip.enc` er verified=true og external_offsite=false.
 - Officielle kilder for senere arbejde: NVIDIA GeForce NOW-vilkår https://www.nvidia.com/en-us/geforce-now/terms-of-use/ (personlig, ikke-kommerciel, én session, ingen botting); Qwen Vision https://www.alibabacloud.com/help/en/model-studio/vision; Wan async API https://www.alibabacloud.com/help/en/model-studio/text-to-video-api-reference; priser https://www.alibabacloud.com/help/en/model-studio/model-pricing. Wan2.7 1080P er $0,15/sekund, så 10 sekunder koster $1,50, cirka 10 DKK og overstiger 5 DKK-jobloftet.
 
+## Lokal OBS Capture Bridge — 2026-11-11
+
+- OBS Studio 33.0.1 er fundet på `C:/Program Files/obs-studio/bin/64bit/obs64.exe`. FFmpeg 9.0.2 er installeret via winget med verificeret pakkehash.
+- `scripts/capture_bridge.py` er commitet med hemmelighedsfri eksempelkonfiguration. Tests dækker HTTPS-konfiguration, MKV→MP4, kontaktark, manifest, idempotens og spilvalg via filnavn. Hele pakken er **94 passed** på det nybyggede image.
+- Lokal Windows-test med en kort syntetisk MKV gav MP4 på 1.557.388 bytes, kontaktark og `some-capture-v1` manifest med `source_type=owned_gameplay`, `ai_generated=false` og `publication_allowed=false`.
+- Første upload stoppede på remote ejerskab. Upload er rettet til midlertidig deploy-ejer før SCP og containerbruger 10001 bagefter; genforsøg kan genbruge den lokale outputmappe. Andet forsøg lykkedes, og filerne blev verificeret på VPS.
+- Serverens midlertidige testmappe `/opt/some/data/media-library/hades/20261111-193934-bridge-selftest` er slettet. De lokale testinput/output er også fjernet. Ingen reel spiloptagelse eller publicering er foretaget.
+- Watcher er startet med upload aktiveret. Den overvåger `C:/Users/compu/Videos/SoMe-captures`, gemmer under `SoMe-processed` og uploader via eksisterende SSH-nøgle uden at læse eller vise den. Nye filer navngives `hades-*`, `celeste-*` eller `slay-the-spire-*`.
+- Grok CLI blev kontrolleret med `grok --help`: headless prompt findes, men det er en lokal proces og viser ingen videogenerering. Lokale CLI'er kan ikke køre med computeren slukket. Veo/Imagine skal vurderes separat som cloud-API med egen nøgle og pris.
+- ElevenLabs er ikke aktiveret endnu. Officiel API-pris for multilingual TTS er $0,08/1.000 tegn ifølge https://elevenlabs.io/pricing/api. Nøgle, abonnement og kommerciel licens skal verificeres før kald.
+
 ## Ikke verificeret / blokeret
 
 - Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt. Kokoro er afvist til fremtidig produktion.
