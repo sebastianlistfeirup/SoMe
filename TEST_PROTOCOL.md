@@ -118,6 +118,21 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Live revision kostede **0,0131722136 DKK**. Samlet kendt Claude-testforbrug er cirka **0,155439 DKK**. Testen godkendte eller publicerede ikke demo 6. Den midlertidige testkonto og dens sessions er slettet.
 - Beskyttede HTTPS-kald bekræftede `/review`, `/review/6`, `/static/style.css`, `/static/app.js`, `/media/6/thumbnail.jpg` og `/media/6/video.mp4`. Video er 2.065.008 bytes, thumbnail er 62.345 bytes og MIME-typerne er korrekte. Thumbnail er visuelt læst. Kimi Desktop-browserens visuelle panel viste et tomt dokument og kunne ikke bruges som screenshotbevis; dette er ikke markeret som visuel browserverificering.
 
+## Reel mediepipeline og 100 % demo — 2026-11-11
+
+- Commits `95ff191`, `4de19fe` og `24a4820` er pushet og deployet. Standardbuild og hele testpakken gav **89 passed** lokalt og på VPS. Web/worker er healthy.
+- Ny produktion kræver `--media-plan`; `demo --produce` kræver samme plan. Pillow-slide-fallback er ikke længere standardproduktion. Ranking skriver 100 % reel dækning for sine ti rigtige klip.
+- Tests bekræfter exact 80 % ALLOW, 75 % BLOCK, forbud mod lavere grænse, `ai_generated_cannot_count_as_real`, HTTPS source/policy, path containment, filsignatur, source duration og caption/scene-match.
+- FFmpeg-test producerer faktisk 1080×1920 H.264/AAC med real_video + real_image/zoom_in. JPEG full-range konverteres eksplicit til begrænset `yuv420p`; den oprindelige pixel-formatfejl er rettet uden at svække testen.
+- `media_composition.json` er den 11. manifestfil. Approval kræver ALLOW for media_composition, og ZIP-eksport kræver filen. Review viser procent på kort og detaljeside; ældre formater markeres som ældre.
+- Qwen-storyboardreview har mocktest for API/workspace/prisblokering, billedpayload, endpoint, JSON og DKK-settlement. `doctor` viser alle tre Qwen-konfigurationer som false. Der er ikke foretaget et eksternt Qwen-/Wan-kald eller påløbet omkostning.
+- Den konkrete plan `research/top10-legion-go2/real-media-demo.json` kræver 100 % og bruger fem officielle udgiverklip. Demo 8 er produceret på VPS med Transistor, Celeste, Slay the Spire, Hollow Knight og Hades.
+- Demo 8: video_id=8, topic_id=8, 17,5 sekunders reel tidslinje, 17,6 sekunders output, fem real_video, nul real_image, nul graphic, **100 % reel mediedækning**, 11 manifestfiler og teknisk ALLOW. MP4 er 10.375.109 bytes.
+- MP4, storyboard og thumbnail er downloadet og visuelt kontrolleret. Titel/caption-kontrast er forbedret. Thumbnail er et rent frame fra Hollow Knight-originalklippet ved 74,639 sekunder uden captions eller titeloverlay; manifesthash er opdateret.
+- Demo 6 (syntetisk) og demo 7 (første reel rendering) er markeret REJECTED som erstattede af demo 8 med audit events. Demo 8 er AWAITING_OWNER, ikke godkendt og ikke publiceret.
+- Ny krypteret backup `/data/backups/some-backup-20261111T155413Z.zip.enc` er verified=true og external_offsite=false.
+- Officielle kilder for senere arbejde: NVIDIA GeForce NOW-vilkår https://www.nvidia.com/en-us/geforce-now/terms-of-use/ (personlig, ikke-kommerciel, én session, ingen botting); Qwen Vision https://www.alibabacloud.com/help/en/model-studio/vision; Wan async API https://www.alibabacloud.com/help/en/model-studio/text-to-video-api-reference; priser https://www.alibabacloud.com/help/en/model-studio/model-pricing. Wan2.7 1080P er $0,15/sekund, så 10 sekunder koster $1,50, cirka 10 DKK og overstiger 5 DKK-jobloftet.
+
 ## Ikke verificeret / blokeret
 
 - Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt. Kokoro er afvist til fremtidig produktion.
