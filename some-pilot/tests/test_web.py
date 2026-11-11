@@ -14,7 +14,7 @@ def test_login_csrf_and_protected_routes(db, awaiting_video):
         yield db
 
     app.dependency_overrides[get_db] = override_db
-    client = TestClient(app)
+    client = TestClient(app, base_url="https://testserver")
     response = client.get("/opportunities", follow_redirects=False)
     assert response.status_code == 303
     response = client.post("/login", data={"username": "owner", "password": "wrong"}, follow_redirects=False)
