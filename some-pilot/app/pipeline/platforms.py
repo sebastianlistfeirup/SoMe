@@ -21,10 +21,14 @@ def new_publication(db: Session, video: VideoVersion, platform: str, account: st
     key = f"video:{video.id}:platform:{platform}:account:{account}"
     existing = db.query(Publication).filter(Publication.idempotency_key == key).first()
     if existing:
-        if existing.status == "FAILED" and video.status == "APPROVED":
-            existing.status = "SCHEDULED"
-            transition(video, "SCHEDULED")
-            db.commit()
+        if existing.status == "FAILED":
+            if video.status == "FAILED":
+                transition(video, "AWAITING_OWNER", "retry")
+                transition(video, "APPROVED", "retry")
+            if video.status == "APPROVED":
+                existing.status = "SCHEDULED"
+                transition(video, "SCHEDULED")
+                db.commit()
         return existing
     verify_approval(db, video, platform, account)
     publication = Publication(video_version_id=video.id, platform=platform, account=account, idempotency_key=key)

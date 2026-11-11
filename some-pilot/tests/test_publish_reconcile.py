@@ -125,6 +125,7 @@ def test_failed_publication_can_be_rescheduled_without_duplicate(db, awaiting_vi
 
     approve(db, awaiting_video, "owner", "facebook", "page-1", True)
     publication = Publication(video_version_id=awaiting_video.id, platform="facebook", account="page-1", idempotency_key=f"video:{awaiting_video.id}:platform:facebook:account:page-1", status="FAILED")
+    awaiting_video.status = "FAILED"
     db.add(publication)
     db.commit()
 
