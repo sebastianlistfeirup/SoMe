@@ -231,8 +231,13 @@ class FacebookPublisher:
                 data={"url": media_url, "description": video.post_json.get("text", "")},
                 timeout=120,
             )
-            if response.status_code in {401, 403}:
-                raise PublishError("facebook_authorization_required")
+            if response.status_code >= 400:
+                try:
+                    error = response.json().get("error", {})
+                    detail = f"{error.get('type', '')}:{error.get('code', '')}:{error.get('message', '')}"
+                except (ValueError, AttributeError):
+                    detail = "unreadable_graph_error"
+                raise PublishError(f"facebook_graph_error:{detail[:300]}")
             response.raise_for_status()
             remote_id = response.json().get("id")
             if not remote_id:

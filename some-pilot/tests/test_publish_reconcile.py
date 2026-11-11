@@ -89,3 +89,32 @@ def test_facebook_publish_uses_approved_page_and_signed_https_video(db, awaiting
     assert publication.remote_id == "remote-video-1"
     assert calls[0][1]["data"]["url"] == "https://example.com/signed-video"
     assert calls[0][0][0].endswith("/v27.0/page-1/videos")
+
+
+def test_facebook_graph_error_reports_safe_detail(db, awaiting_video, monkeypatch):
+    from app.pipeline.platforms import FacebookPublisher
+
+    settings = get_settings()
+    for name, value in {
+        "dry_run": False,
+        "publish_enabled": True,
+        "meta_page_access_token": "test-page-token",
+        "meta_page_id": "page-1",
+        "meta_graph_version": "v27.0",
+        "public_base_url": "https://example.com",
+    }.items():
+        monkeypatch.setattr(settings, name, value)
+    approve(db, awaiting_video, "owner", "facebook", "page-1", True)
+    monkeypatch.setattr("app.pipeline.platforms.create_link", lambda *_args: "https://example.com/signed-video")
+
+    class Response:
+        status_code = 400
+
+        def json(self):
+            return {"error": {"type": "OAuthException", "code": 200, "message": "missing_permission"}}
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", lambda *_args, **_kwargs: Response())
+
+    with pytest.raises(PublishError, match="missing_permission"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert db.query(Publication).one().status == "FAILED"
