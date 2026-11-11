@@ -1,56 +1,39 @@
 SoMe-maskinen — STATUS
-Opdateret: 2026-11-10
+Opdateret: 2026-11-11
 Repository: https://github.com/sebastianlistfeirup/SoMe
 Baseline før arbejdet: 2b601349cfffdc332ef9b348bdf0498331b45c5b. Arbejdstræet indeholdt værdifuldt WIP fra andre spor og er bevaret.
 
 UDFØRT
-- Backend er migreret til voiceover uden avatar. Ingen HeyGen-konto, avatar-MP4, PIP eller avatar-request er nødvendig for ranking eller almindelig produktion.
-- `app/pipeline/voice.py` indeholder providerkontrakt med Kokoro og valgfri ElevenLabs. Alle segmenter får WAV-/lydstreamkontrol, teksthash, varighed, sample rate og SHA-256.
-- Eksisterende Kokoro-assets genbruges kun når metadata og manuskripttekst matcher. Ændret manuskript kræver nye lydassets.
-- Ranking bruger `editorial-ranking-v4-voiceover` med claim control og voice control. Almindelig produktion har samme voice-provenance. Approval kræver begge kontroller og gyldig approvalhash.
-- `voice_assets.json` er et obligatorisk artefakt i manifestet. Nye versioner har ti hash-verificerede manifestfiler.
-- ElevenLabs bruger det dokumenterede `/v1/text-to-speech/{voice_id}` med PCM 24 kHz og lokal WAV-konvertering. Paid jobs, API-nøgle, voice-ID, stemmerettigheder og dateret pris kræves før netværk. Ingen paid call er foretaget.
-- CLI har `--voice-provider kokoro|elevenlabs`. De gamle `--avatar-dir` og `avatar-request` kommandoer er fjernet fra aktiv brug.
-- Doctor og settings viser voice-provider, pris-/rettighedsstatus og avatar_required=false uden secrets.
-- Claude-routering er implementeret: `claude-sonnet-5-5` til manuskripter og `claude-haiku-5-5` til research/claimkontrol. Hver rute har separate verificerede DKK-priser og korrekt tokenregnskab. Doctor viser model- og konfigurationsstatus uden nøgler.
-- API-standardbudgettet er 50 DKK/måned og 5 DKK/job. Manglende paid enablement, API-nøgle eller modelpris blokerer før Anthropic instantieres eller netværk bruges.
-- Contabo Cloud VPS Plus 6 er købt: 6 vCPU, 12 GB RAM, 300 GB NVMe, EU og Ubuntu 24.04. Skærmprisen er €23,75/måned, cirka 177 DKK. Med forventet Claude-forbrug er totalen cirka 183 DKK/måned, cirka 190 DKK med dobbelt API-lager. Det overstiger det gamle 150 DKK-loft; ejeren har bedt om at fortsætte med den købte server, og der er ikke købt yderligere tjenester.
-- Backup og restore validerer arkivstier mod path traversal og links. En ondsindet ZIP testes og blokeres.
-- Metrics-CSV-import er idempotent pr. publikation, metrik, tidspunkt, definition og demo-status. Gentagen import kan ikke skabe dubletter.
-- De to testpost-buildere bruger versionsstyrede `test_post_scripts.json`, nye Kokoro-timingdata og kun gameplay/produktmateriale. Gamle HeyGen-masterfiler genbruges ikke.
-- Backend-sider for kontrolpanel, kladder og læringer fra det eksisterende WIP er bevaret.
+- Contabo Cloud VPS Plus 6 er installeret og hærdet: 6 vCPU, 12 GB RAM, 300 GB NVMe, Ubuntu 24.04, Docker, UFW og Fail2ban. Dashboard bruger gyldig HTTPS via Caddy på `https://62.171.167.243.sslip.io`.
+- Claude API er aktiv med Sonnet til manuskripter og Haiku til claimkontrol. Live manuskript → claimkontrol er bestået. API-loft 50 DKK/måned og 5 DKK/job.
+- YouTube OAuth, kanaladgang, privat upload, Analytics og begrænset researchnøgle er verificeret. Privat testvideo: `9EEY0uC9Xnc`. Research gav 40 reelle observationer uden fejl.
+- Instagram og Facebook er forbundet via Facebook Login for Business efter at Unified Login returnerede nul konti. Instagram-konto `17841457024132563` / `@pixelandparameters`; Facebook-side `1467423036459990`.
+- Instagram-testreel er verificeret: https://www.instagram.com/reel/DfmPOXZhJ3e/ — remote ID `18110461838195602`.
+- Facebook-testreel er verificeret: `/reel/1691097949310064/` — remote ID `1691097949310064`. Direkte multipart-upload fra serveren bruges efter at URL-upload gav Graph-fejl 390.
+- Facebook-adapteren har approval-, idempotency-, retry- og timeout-kontrol. Fejl fra Graph rapporteres med sikker fejldetalje.
+- Krypteret backup `/data/backups/some-backup-20261111T112644Z.zip.enc` er verificeret. Offsite backup er ikke konfigureret.
+- **Kokoro `af_bella` er ikke længere kreativt godkendt. Stemmen er afvist af ejeren og må ikke bruges til nye produktionsopslag.** Der skal vælges separate, godkendte stemmer til gaming og AI før backendens store videreudvikling.
 
-VERIFICERET LOKALT
-- Endelig Docker-build og **73 automatiske tests** bestod, også med PAID_JOBS_ENABLED=true. Kun en ekstern Starlette TestClient-deprecationwarning.
-- Tests dækker Sonnet/Haiku-routing, separate priser, thinking-blokke, præcise claim-/review-skemaer, 2.000-token reviewgrænse og blokering før netværk uden paid enablement, nøgle eller DKK-pris.
-- Backup-tests er miljøuafhængige og dækker både ukrypteret og Fernet-krypteret backup med verify og restore. ElevenLabs-blokeringstesten styrer selv paid-tilstanden.
-- Lokale voiceover-, ranking-, testpost-, approval-, backup- og healthresultater er bevaret. Ingen social publicering, privat upload eller OAuth er foretaget.
-
-VERIFICERET PÅ CONTABO VPS
-- Commit `9e194f3` er deployet via standardscriptet. Docker-build og **73/73 tests** bestod på selve VPS’en. Web og worker er healthy; migration 0001 og doctor er ok.
-- SSH er nøglebaseret med effektiv `PermitRootLogin no`, `PasswordAuthentication no` og UFW default deny. SSH tillades kun fra ejerens aktuelle admin-IP. Web lytter kun på 127.0.0.1:8000.
-- Serverdemo `topic-2-v1`, video_id=1: 17,533 sekunder, 1080×1920, H.264 + AAC, AWAITING_OWNER, syv kontroller ALLOW og 10/10 manifesthashes korrekte.
-- Kokoro `af_bella`: 3,679 sekunder, 24 kHz mono, voice control ALLOW, paid_call=false og cost_dkk=0.
-- Krypteret backup `/data/backups/some-backup-20261110T211132Z.zip.enc` er verificeret. Restore gav integrity=ok, og midlertidige restoredata er fjernet. Offsite er ikke konfigureret.
-- Dashboard-ejer `owner` er oprettet. Initialadgangskoden ligger kun i root-beskyttet `/opt/some/secrets/initial-admin-password`.
-- Claude API-nøgle er konfigureret uden at være vist. Sonnet-healthcheck svarede OK med 16 input + 4 outputtokens. Haiku returnerede valid JSON efter håndtering af thinking-blokke.
-- Komplet syntetisk evaluering bestod: Sonnet-manuskript med 354 input + 402 outputtokens, derefter Haiku-claimkontrol med 707 input + 387 outputtokens og `ALLOW`, issues=[].
-- De sidste eval-kald kostede 0,031517 DKK for manuskript og 0,001761 DKK for review. Samlet forbrug inklusive alle fejlrettende probes er **0,142267 DKK** af 50 DKK. Paid jobs er aktiveret; publishing er stadig fra.
-- De fire DKK-priser bruger 2026-11-10-kurs 6,6661 DKK/USD: Sonnet 13,3322/66,661 og Haiku 0,66661/3,33305 pr. million input/output. Faktisk bankkurs og moms kan afvige.
+VERIFICERET LOKALT OG PÅ VPS
+- Den endelige integrationspakke har **77/77 automatiske tests bestået**, også med PAID_JOBS_ENABLED=true og SECURE_COOKIES=true.
+- Commit `3bd9146` er pushet og deployet. Web/worker er healthy; migration 0001 og doctor er ok.
+- `doctor` viser YouTube oauth_verified/private_upload_verified=true, Instagram test_publication_verified=true og Facebook test_publication_verified=true.
+- Tidligere voice-, video-, manifest-, backup- og restorekontroller er bevaret, men de er ikke kreativ godkendelse af Kokoro-stemmen.
 
 MANGLER / BLOKERET EKSTERNT
-- Platformsspecifik ejergodkendelse efter fuld visning afventer. YouTube/Meta OAuth, kanal/konto, privat upload, publicering og virkelige metrics er ikke verificeret. TikTok bruger manuel eksport.
-- Contabos cloudfirewall er ikke konfigureret; UFW er aktiv. Endelig Contabo- og Claude-faktura/moms er ikke verificeret. Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret.
-- Den lærende hjerne har endnu ingen reelle publicerede datapunkter. Dæmpet læring er implementeret, men ikke bevist forbedret af egne opslag.
-- Kokoro er verificeret for engelsk. Dansk TTS er ikke kvalitetsgodkendt. Espeak-ng er kun teknisk fallback.
-- Rangeringen er redaktionel, ikke en FPS- eller batteritest. Views/likes/abonnementer og 100 % fejlfrihed kan ikke garanteres.
+- TikTok bruger fortsat manuel eksport. Ingen TikTok Content Posting-integration er verificeret.
+- YouTube-appen står i Testing; varig produktionsdrift kræver senere passende app-verificering/vedvarende tokenforvaltning.
+- Meta App Review/Advanced Access er ikke gennemført; de verificerede tests bruger ejerens egen konto og Standard Access.
+- Der er endnu ingen tilstrækkelige reelle publicerede datapunkter til at bevise læringsforbedring. Testopslagene er integrationstests, ikke kreative produktionskandidater.
+- Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret. Contabos cloudfirewall er ikke konfigureret; UFW og Fail2ban er aktive på serveren.
+- Ingen 100 % fejlfriheds-, performance- eller resultatgaranti gives.
 
 SIKKERHEDSTILSTAND
 DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=true; WORKER_CONCURRENCY=1; MONTHLY_AI_BUDGET_DKK=50; MAX_JOB_AI_COST_DKK=5.
-Nødstop, diskstop og rettigheds-/alder-/sikkerhedsblokeringer må ikke omgås. Demo og produktion holdes adskilt.
+Nødstop, diskstop, approvalhash og rettigheds-/sikkerhedsblokeringer må ikke omgås. Nye opslag kræver konkret ejergodkendelse. Kokoro-stemmen er afvist til fremtidig produktion.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Claude er verificeret. Næste integration er YouTube/Google: opret/vælg kanal og Google Cloud-projekt, aktivér YouTube Data API v3 og YouTube Analytics API og konfigurér ejerstyret OAuth. Første upload skal være PRIVATE med separat godkendelse. Indtil da bruges manuel eksport.
+Vælg og kreativt godkend nye stemmer til gaming og AI. Integrationsarbejdet på YouTube, Instagram og Facebook er verificeret; herefter følger den store backend-bearbejdning.
 
 TESTBEVIS
-Se TEST_PROTOCOL.md for kommandoer, resultater og ikke-verificerede punkter. Ingen garanti gives for fejlfri drift eller performance.
+Se TEST_PROTOCOL.md for kommandoer, live resultater og ikke-verificerede punkter.

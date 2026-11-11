@@ -96,16 +96,25 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Komplet syntetisk eval: Sonnet skrev validt manuskript og claim; Haiku svarede ALLOW, issues=[]. Manuskript: 354 input + 402 outputtokens, 0,031517 DKK. Review: 707 input + 387 outputtokens, 0,001761 DKK.
 - Samlet månedligt API-forbrug inklusive alle sundheds-, fejl- og evalkald: **0,142267 DKK** af 50 DKK. Alle costs er SETTLED; paid jobs er aktiveret. Ingen eval er publiceret eller gemt som socialt opslag.
 
+## Live SoMe-integrationer — 2026-11-11
+
+- **YouTube:** OAuth og kanaladgang verificeret. Privat upload `9EEY0uC9Xnc` er PRIVATE og processed. Ni Analytics-metrikker kunne læses. Begrænset researchnøgle gav 40 reelle observationer uden fejl.
+- **Instagram:** Facebook Login for Business med systembrugertoken; konto `17841457024132563` / `@pixelandparameters` verificeret via Graph. Testreel `18110461838195602` er publiceret og verificeret på https://www.instagram.com/reel/DfmPOXZhJ3e/.
+- **Facebook:** Side `1467423036459990` og koblingen til Instagram verificeret. Første URL-upload gav Graph-fejl 390; direkte multipart-upload er implementeret. Testreel `1691097949310064` er publiceret og verificeret som `/reel/1691097949310064/`.
+- **Retry-sikkerhed:** Graph-fejldetaljer rapporteres uden tokens; FAILED video + publication kan genoptages uden dublet. Regressionstests dækker direct upload, Graph-fejl og retry.
+- **Meta Unified Login:** Tokenudveksling virkede, men `assigned_instagram_accounts` gav nul konti. Derfor blev den understøttede Facebook Login-route med Page og linked Instagram brugt til den faktiske verificerede løsning.
+- **Netværk/sikkerhed:** Caddy HTTPS er verificeret. Efter skiftende admin-IP'er er SSH nøglebaseret med root/password fra, UFW og Fail2ban aktive. `doctor` viser alle tre SoMe-integrationer som verificerede. Publishing er slået fra igen efter testene.
+- **Backup:** `/data/backups/some-backup-20261111T112644Z.zip.enc` er encrypted=true og verified=true; offsite=false.
+- **Vigtigt:** Testopslagene var offentlige integrationstests med særskilt ejergodkendelse. De er ikke kreative produktionsgodkendelser. **Kokoro-stemmen er efterfølgende afvist af ejeren og må ikke bruges til nye produktionsopslag.**
+
 ## Ikke verificeret / blokeret
 
-- Kokoro-stemmen er kreativt godkendt; platformsspecifik approval efter ejerens fulde visning afventer fortsat.
+- Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt. Kokoro er afvist til fremtidig produktion.
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
 - Claude er verificeret med syntetisk eval, men faktisk leverandørfaktura og produktionskvalitet på rigtige researchkilder er ikke verificeret. Bankkurs og eventuel moms kan afvige.
-- YouTube/Meta OAuth, privat upload, publicering og virkelige metrics er ikke testet. TikTok bruger manuel eksport.
-- Contabos cloudfirewall og offsite backup er ikke konfigureret. Endelig faktura og moms er ikke verificeret; kontrolpanelet viser én måneds kontrakt.
-- Ingen reelle publicerede datapunkter eller dokumenteret læringsforbedring findes endnu.
-- Dansk TTS er ikke kvalitetsgodkendt.
-- FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.
+- TikTok bruger manuel eksport. YouTube Testing-token og Meta App Review/Advanced Access kræver senere produktionsforvaltning. Reelle langtidsmetrics og dokumenteret læringsforbedring findes ikke endnu.
+- Contabos cloudfirewall og offsite backup er ikke konfigureret. Endelig faktura og moms er ikke verificeret.
+- Dansk TTS er ikke kvalitetsgodkendt. FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.
 
 ## Regel
 

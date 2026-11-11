@@ -2,22 +2,22 @@
 
 Contabo-serveren og Claude API er installeret og verificeret. Der er ikke foretaget OAuth eller social publicering. Del aldrig passwords, API-nøgler, client secrets eller refresh tokens i chat eller Git.
 
-## 0. Kreativ status — voiceover godkendt
+## 0. Kreativ status — voiceover afvist
 
-Kokoro-voiceover uden avatar er godkendt kreativt. Den aktuelle kandidat er `some-pilot/data/versions/handheld-voiceover-v1/video.mp4` på 102,1 sekunder med komplet claim- og voice-kontrol samt ti hash-verificerede manifestfiler. `handheld-zoom-v11` og `handheld-safe-v10` er kreative referencer. Ingen version er publiceret.
+**Kokoro `af_bella` er ikke godkendt kreativt. Ejeren afviser stemmen, og den må ikke bruges til nye produktionsopslag.** Der skal vælges og godkendes separate stemmer til gaming og AI. Eksisterende testopslag var kun integrations-/tekniske tests og er ikke kreative produktionsgodkendelser.
 
 ## 1. Cloudserver — købt, installeret og verificeret
 
-**Driftsserver 2026-11-10:** Contabo Cloud VPS Plus 6 med EU-lokation og Ubuntu 24.04 LTS.
+**Driftsserver:** Contabo Cloud VPS Plus 6 med EU-lokation og Ubuntu 24.04 LTS.
 
 - 6 vCPU, 12 GB RAM, 300 GB NVMe, fem snapshots, 500 Mbit/s-port og ubegrænset trafik. Kontrolpanelet viser én måneds kontrakt og €23,75/måned, cirka 177 DKK. Endelig faktura og moms er ikke verificeret.
-- Serveren overstiger det tidligere 150 DKK-loft. Efter ejerens besked om at fortsætte bruges den købte server; der skal ikke købes flere servere eller større API-pakker.
-- Commit `9e194f3` er deployet, 73/73 tests bestod på serveren, web/worker er healthy, og en reel demovideo samt Kokoro-lyd er produceret og kontrolleret.
-- SSH bruger separat ED25519-nøgle med fingeraftryk `SHA256:JlwDFKo3YXhjG1DAkgEgbY8B8otWKuiJEgT12w1kF4A`. Root- og passwordlogin over SSH er slået fra. UFW tillader kun SSH fra ejerens aktuelle admin-IP.
-- Dashboardet er kun tilgængeligt via SSH-tunnel på `http://127.0.0.1:8000`. Bruger er `owner`; den tilfældige initialadgangskode ligger i root-beskyttet `/opt/some/secrets/initial-admin-password` på serveren.
+- Serveren overstiger det tidligere 150 DKK-loft. Der skal ikke købes flere servere eller større API-pakker uden ny beslutning.
+- Commit `3bd9146` er deployet, 77/77 tests bestod på serveren, web/worker er healthy.
+- SSH bruger separat ED25519-nøgle med fingeraftryk `SHA256:JlwDFKo3YXhjG1DAkgEgbY8B8otWKuiJEgT12w1kF4A`. Root- og passwordlogin over SSH er slået fra. UFW og Fail2ban er aktive; dynamiske admin-IP'er kræver ikke længere VNC-ændringer.
+- Caddy giver gyldig HTTPS på `https://62.171.167.243.sslip.io`. Dashboardbruger er `owner`; initialadgangskoden ligger i root-beskyttet `/opt/some/secrets/initial-admin-password`.
 - Krypteret backup og restore er verificeret. Contabos cloudfirewall og offsite backup mangler; der skal ikke købes Auto Backup uden ny prisafklaring.
 
-Kokoro, Whisper og rendering kører lokalt på serveren. Claude API er verificeret til manuskripter og claimkontrol med Sonnet/Haiku og 50 DKK-loft. `PAID_JOBS_ENABLED=true`; `DRY_RUN=true` og `PUBLISH_ENABLED=false` ændres ikke uden separat privat uploadtest og ejergodkendelse.
+Kokoro, Whisper og rendering kører lokalt på serveren. Claude API er verificeret til manuskripter og claimkontrol med Sonnet/Haiku og 50 DKK-loft. `PAID_JOBS_ENABLED=true`; `DRY_RUN=true` og `PUBLISH_ENABLED=false` er genoprettet efter de godkendte testuploads.
 
 ## 2. Claude Console — samlet server- og API-budget
 
