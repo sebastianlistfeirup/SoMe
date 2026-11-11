@@ -97,7 +97,8 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 
 - OBS Studio 33.0.1 og FFmpeg 9.0.2 er installeret lokalt. `scripts/capture_bridge.py` overvåger `C:/Users/compu/Videos/SoMe-captures` og behandler nye MKV/MP4/MOV-filer.
 - Resultatet ligger under `C:/Users/compu/Videos/SoMe-processed/<spil>/` med `gameplay.mp4`, `contact-sheet.jpg`, `capture-manifest.json` og procesresultat.
-- Filnavn vælger spilprofil: `hades-*`, `celeste-*` eller `slay-the-spire-*`. Andre filnavne bruger standardprofilen Hades.
+- Undermapper understøttes rekursivt, fx `SoMe-captures/Monster Train 2/clip.mp4`. Mappenavnet vælger spilprofil. Alternativt kan filnavne som `hades-*`, `celeste-*` eller `slay-the-spire-*` bruges; andre filnavne bruger standardprofilen Hades.
+- Monster Train 2 bruger [Devolvers tilladelsesgenerator](https://canipostandmonetizevideosofdevolvergames.com/). Indsæt kanalnavn og gem den skriftlige tilladelse som bevis. Klippene markeres som rettighedsreview indtil beviset er tilføjet; upload er ikke publicering.
 - Den permanente watcher kører med upload aktiveret via eksisterende SSH-nøgle til `/opt/some/data/media-library/<spil>/`. Der er ikke behov for GitHub MCP eller råvideoer i Git.
 - Lokal test beviste remux, kontaktark, manifest og upload. Serverens testmappe er slettet. Ingen reel spiloptagelse er publiceret.
 - Lokale Grok/Gemini/Qwen CLI-processer kræver tændt computer. De er ikke cloud-API'er og kan ikke køre på VPS uden computeren. Grok CLI viser ingen videogenerering. Separate Veo/Imagine API'er kræver egen pris- og rettighedsafklaring.

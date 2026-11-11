@@ -143,6 +143,8 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Watcher er startet med upload aktiveret. Den overvåger `C:/Users/compu/Videos/SoMe-captures`, gemmer under `SoMe-processed` og uploader via eksisterende SSH-nøgle uden at læse eller vise den. Nye filer navngives `hades-*`, `celeste-*` eller `slay-the-spire-*`.
 - Grok CLI blev kontrolleret med `grok --help`: headless prompt findes, men det er en lokal proces og viser ingen videogenerering. Lokale CLI'er kan ikke køre med computeren slukket. Veo/Imagine skal vurderes separat som cloud-API med egen nøgle og pris.
 - ElevenLabs er ikke aktiveret endnu. Officiel API-pris for multilingual TTS er $0,08/1.000 tegn ifølge https://elevenlabs.io/pricing/api. Nøgle, abonnement og kommerciel licens skal verificeres før kald.
+- Capture Bridge er udvidet til rekursive spilmapper. Testen `test_subfolder_selects_game_and_is_scanned_recursively` bekræfter `Monster Train 2/run.mp4` → `monster-train-2`. Hele testpakken er **95 passed**.
+- Fire klip i `SoMe-captures/Monster Train 2/` er registreret og behandles med `rights_review_required=true`. Devolvers officielle tilladelsesgenerator https://canipostandmonetizevideosofdevolvergames.com/ er politik-kilde, men kanalspecifikt skriftligt bevis kræves før produktion. Upload til mediebiblioteket er ikke publicering.
 
 ## Ikke verificeret / blokeret
 
