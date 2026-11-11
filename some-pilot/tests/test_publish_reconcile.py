@@ -169,5 +169,6 @@ def test_tiktok_draft_upload_uses_file_upload_and_publish_status(db, awaiting_vi
 
     assert publication.status == "PUBLISHED"
     assert publication.remote_id == "publish-1"
+    assert publication.upload_session == "publish-1"
     assert publication.response_json["external_visibility"] == "tiktok_draft_inbox"
     assert calls[0][1]["json"]["source_info"]["source"] == "FILE_UPLOAD"

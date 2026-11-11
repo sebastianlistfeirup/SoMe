@@ -305,6 +305,8 @@ class TikTokPublisher:
             upload_url = upload.get("upload_url")
             if not publish_id or not upload_url:
                 raise PublishError("tiktok_upload_session_missing")
+            publication.upload_session = publish_id
+            db.commit()
             with video_path.open("rb") as handle:
                 uploaded = httpx.put(
                     upload_url,
@@ -315,7 +317,7 @@ class TikTokPublisher:
             if uploaded.status_code >= 400:
                 raise PublishError("tiktok_binary_upload_failed")
             status = ""
-            for _ in range(6):
+            for _ in range(30):
                 checked = httpx.post(
                     f"{self.api_base}/post/publish/status/fetch/",
                     headers=headers,
@@ -328,9 +330,9 @@ class TikTokPublisher:
                     break
                 if status in {"FAILED", "CANCELLED"}:
                     raise PublishError("tiktok_draft_upload_failed")
-                time.sleep(1)
+                time.sleep(2)
             if status not in {"PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"}:
-                raise PublishError("tiktok_draft_upload_not_finished_reconcile")
+                raise PublishError(f"tiktok_draft_upload_not_finished_reconcile:{status or 'unknown'}")
             publication.remote_id = publish_id
             publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": "tiktok_draft_inbox"}
             publication.status = "PUBLISHED"
