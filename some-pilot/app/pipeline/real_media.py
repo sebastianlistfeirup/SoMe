@@ -231,6 +231,29 @@ def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: 
     }
 
 
+def thumbnail_from_source(prepared: list[PreparedMedia], durations: list[float], output: Path) -> dict:
+    if len(prepared) != len(durations):
+        raise ValueError("thumbnail_scene_duration_mismatch")
+    target = sum(durations) * 0.65
+    elapsed = 0.0
+    selected_index = next((index for index, item in enumerate(prepared) if item.scene.kind == "real_video"), None)
+    for index, (item, duration) in enumerate(zip(prepared, durations)):
+        if item.scene.kind == "real_video" and elapsed + duration >= target:
+            selected_index = index
+            break
+        elapsed += duration
+    if selected_index is None:
+        selected_index = next((index for index, item in enumerate(prepared) if item.scene.kind == "real_image"), None)
+    if selected_index is None:
+        raise MediaError("real_thumbnail_source_missing")
+    item = prepared[selected_index]
+    source_seconds = item.scene.start_seconds + durations[selected_index] * 0.65
+    inputs = ["-ss", f"{source_seconds:.3f}"] if item.scene.kind == "real_video" else []
+    crop = f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:x='(in_w-1080)*{item.scene.focus_x:.3f}':y='(in_h-1920)*{item.scene.focus_y:.3f}',scale=out_range=tv,format=yuv420p"
+    run(["ffmpeg", "-y", *inputs, "-i", str(item.path), "-vf", crop, "-frames:v", "1", "-q:v", "2", str(output)])
+    return {"scene_index": selected_index + 1, "source_seconds": round(source_seconds, 3), "source_type": item.scene.source_type, "clean_frame_without_captions": True}
+
+
 def write_media_composition(output: Path, plan: RealMediaPlan, coverage: dict) -> None:
     payload = {"platform": plan.platform, **coverage}
     (output / "media_composition.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")

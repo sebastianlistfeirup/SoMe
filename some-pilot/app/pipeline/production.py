@@ -10,10 +10,10 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
 from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
-from app.pipeline.media import probe, require_tools, storyboard, synthesize, technical_checks, thumbnail, transcribe
+from app.pipeline.media import probe, require_tools, storyboard, synthesize, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
-from app.pipeline.real_media import load_media_plan, media_coverage, prepare_media, render_real_media, write_media_composition
+from app.pipeline.real_media import load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
 from app.pipeline.voice import VoiceSegment, voice_asset_report
 
 
@@ -133,9 +133,8 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
         rendered = output / "video.mp4"
         layout = render_real_media(prepared, narration, captions, draft.title, rendered, coverage)
-        render_duration = float(probe(rendered)["format"]["duration"])
         thumb = output / "thumbnail.jpg"
-        thumbnail(rendered, thumb, at_seconds=render_duration * 0.65)
+        layout["thumbnail"] = thumbnail_from_source(prepared, durations, thumb)
         board = output / "storyboard.jpg"
         storyboard(rendered, board)
         video.video_path = str(rendered)
