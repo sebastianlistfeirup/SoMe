@@ -90,6 +90,16 @@ def health(db: Session = Depends(get_db)) -> dict:
     return {"status": "ok", "publish_enabled": settings.publish_enabled, "paid_jobs_enabled": settings.paid_jobs_enabled}
 
 
+@app.get("/terms", response_class=HTMLResponse)
+def terms(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "terms.html", {"request": request})
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "privacy.html", {"request": request})
+
+
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": None})
