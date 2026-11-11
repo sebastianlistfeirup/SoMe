@@ -1,6 +1,6 @@
 # Testprotokol — SoMe-maskinen
 
-Dato: 2026-11-10
+Dato: 2026-11-10 til 2026-11-11
 Miljø: Windows-vært, Git Bash, Docker Desktop Linux containers, Python 3.11, SQLite/WAL, FFmpeg, faster-whisper small/int8, Kokoro-82M ONNX
 Formål: Skelne mellem faktisk udførte lokale kontroller og integrationer, der stadig kræver ejerens konti og godkendelser.
 
@@ -101,18 +101,30 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - **YouTube:** OAuth og kanaladgang verificeret. Privat upload `9EEY0uC9Xnc` er PRIVATE og processed. Ni Analytics-metrikker kunne læses. Begrænset researchnøgle gav 40 reelle observationer uden fejl.
 - **Instagram:** Facebook Login for Business med systembrugertoken; konto `17841457024132563` / `@pixelandparameters` verificeret via Graph. Testreel `18110461838195602` er publiceret og verificeret på https://www.instagram.com/reel/DfmPOXZhJ3e/.
 - **Facebook:** Side `1467423036459990` og koblingen til Instagram verificeret. Første URL-upload gav Graph-fejl 390; direkte multipart-upload er implementeret. Testreel `1691097949310064` er publiceret og verificeret som `/reel/1691097949310064/`.
+- **TikTok:** Sandbox OAuth og målkonto `@pixelandparameters` er verificeret. Ejeren har vist TikTok-appens systemnotifikation “Din indhold fra SoMe-maskinen er klar”, som beviser kladde-levering til inboxen. Første upload havde intet gemt publish_id; publication 4 og video 4 er reconcileret med ejerbevis og audit event, uden en ny upload. `external_visibility=tiktok_draft_inbox`; det er ikke et offentligt opslag. Direct Post er slået fra.
 - **Retry-sikkerhed:** Graph-fejldetaljer rapporteres uden tokens; FAILED video + publication kan genoptages uden dublet. Regressionstests dækker direct upload, Graph-fejl og retry.
 - **Meta Unified Login:** Tokenudveksling virkede, men `assigned_instagram_accounts` gav nul konti. Derfor blev den understøttede Facebook Login-route med Page og linked Instagram brugt til den faktiske verificerede løsning.
-- **Netværk/sikkerhed:** Caddy HTTPS er verificeret. Efter skiftende admin-IP'er er SSH nøglebaseret med root/password fra, UFW og Fail2ban aktive. `doctor` viser alle tre SoMe-integrationer som verificerede. Publishing er slået fra igen efter testene.
-- **Backup:** `/data/backups/some-backup-20261111T112644Z.zip.enc` er encrypted=true og verified=true; offsite=false.
-- **Vigtigt:** Testopslagene var offentlige integrationstests med særskilt ejergodkendelse. De er ikke kreative produktionsgodkendelser. **Kokoro-stemmen er efterfølgende afvist af ejeren og må ikke bruges til nye produktionsopslag.**
+- **Netværk/sikkerhed:** Caddy HTTPS er verificeret. Efter skiftende admin-IP'er er SSH nøglebaseret med root/password fra, UFW og Fail2ban aktive. `doctor` viser YouTube, Instagram, Facebook og TikTok som verificerede. Publishing er slået fra igen efter testene.
+- **Backup:** `/data/backups/some-backup-20261111T140525Z.zip.enc` er encrypted=true og verified=true; offsite=false.
+- **Vigtigt:** Testopslagene var integrationstests med særskilt ejergodkendelse. De er ikke kreative produktionsgodkendelser. **Kokoro-stemmen er efterfølgende afvist af ejeren og må ikke bruges til nye produktionsopslag.**
+
+## Review-center og reel opslagsrevision — 2026-11-11
+
+- Commit `ab01f5f` er deployet. Standardbuild og `docker compose run --rm --no-deps worker pytest -q` gav **81 passed** lokalt; deploymentens standardtest gav **81 passed** på VPS. Web/worker er healthy.
+- Automatiske HTTP-tests dækker login/CSRF, komplet opslagsvisning, forbundet konto, tom afvisningskommentar, afvisning, revisionskø, worker, nyt manifest, idempotens, ny godkendelse og approvalhash. Video/thumbnail og alle ti manifestfiler hashes.
+- En rigtig HTTPS-test oprettede demo 5 via normal CLI. Med midlertidig ejerkonto blev demo 5 afvist med kommentaren “Make the title shorter and the caption more direct. Keep it practical and use relevant gaming hashtags.”
+- `/review/5/revise` sendte jobbet til den rigtige worker. Claude svarede med en ny titel/caption/hashtags. `revise_post` lykkedes på første forsøg og oprettede demo 6 med status AWAITING_OWNER og `revision_scope=title_caption_hashtags`.
+- Demo 6 har titlen “Gaming Handheld Buying Checklist”, caption “Choosing a gaming handheld? Check your games, budget, operating system and play sessions first. Verify current details before you buy.” og hashtags `gaming`, `handheldgaming`, `gamingtips`, `buyingguide`, `checklist`, `tech`.
+- Live revision kostede **0,0131722136 DKK**. Samlet kendt Claude-testforbrug er cirka **0,155439 DKK**. Testen godkendte eller publicerede ikke demo 6. Den midlertidige testkonto og dens sessions er slettet.
+- Beskyttede HTTPS-kald bekræftede `/review`, `/review/6`, `/static/style.css`, `/static/app.js`, `/media/6/thumbnail.jpg` og `/media/6/video.mp4`. Video er 2.065.008 bytes, thumbnail er 62.345 bytes og MIME-typerne er korrekte. Thumbnail er visuelt læst. Kimi Desktop-browserens visuelle panel viste et tomt dokument og kunne ikke bruges som screenshotbevis; dette er ikke markeret som visuel browserverificering.
 
 ## Ikke verificeret / blokeret
 
 - Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt. Kokoro er afvist til fremtidig produktion.
 - ElevenLabs eksternt API, faktisk leverandørfaktura og stemmekvalitet er ikke testet.
-- Claude er verificeret med syntetisk eval, men faktisk leverandørfaktura og produktionskvalitet på rigtige researchkilder er ikke verificeret. Bankkurs og eventuel moms kan afvige.
-- TikTok bruger manuel eksport. YouTube Testing-token og Meta App Review/Advanced Access kræver senere produktionsforvaltning. Reelle langtidsmetrics og dokumenteret læringsforbedring findes ikke endnu.
+- Claude er verificeret med syntetisk eval og én live opslagsrevision, men faktisk leverandørfaktura og produktionskvalitet på rigtige researchkilder er ikke verificeret. Bankkurs og eventuel moms kan afvige.
+- TikTok production-demo og app-review mangler. YouTube Testing-token og Meta App Review/Advanced Access kræver senere produktionsforvaltning. Reelle langtidsmetrics og dokumenteret læringsforbedring findes ikke endnu.
+- Fuld automatisk research → licenseret produktion → rendering og multiplatformsplanlægning er ikke implementeret. Revisionsfunktionen retter kun posttekst og genbruger video/lyd/visuals.
 - Contabos cloudfirewall og offsite backup er ikke konfigureret. Endelig faktura og moms er ikke verificeret.
 - Dansk TTS er ikke kvalitetsgodkendt. FPS/batteritid på Legion Go 2 er ikke målt; rangeringen er redaktionel.
 

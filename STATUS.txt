@@ -5,27 +5,31 @@ Baseline før arbejdet: 2b601349cfffdc332ef9b348bdf0498331b45c5b. Arbejdstræet 
 
 UDFØRT
 - Contabo Cloud VPS Plus 6 er installeret og hærdet: 6 vCPU, 12 GB RAM, 300 GB NVMe, Ubuntu 24.04, Docker, UFW og Fail2ban. Dashboard bruger gyldig HTTPS via Caddy på `https://62.171.167.243.sslip.io`.
-- Claude API er aktiv med Sonnet til manuskripter og Haiku til claimkontrol. Live manuskript → claimkontrol er bestået. API-loft 50 DKK/måned og 5 DKK/job.
+- Claude API er aktiv med Sonnet til manuskripter/opslagsrevisioner og Haiku til claimkontrol. Live manuskript → claimkontrol og live opslagsrevision er bestået. API-loft 50 DKK/måned og 5 DKK/job.
 - YouTube OAuth, kanaladgang, privat upload, Analytics og begrænset researchnøgle er verificeret. Privat testvideo: `9EEY0uC9Xnc`. Research gav 40 reelle observationer uden fejl.
-- Instagram og Facebook er forbundet via Facebook Login for Business efter at Unified Login returnerede nul konti. Instagram-konto `17841457024132563` / `@pixelandparameters`; Facebook-side `1467423036459990`.
-- Instagram-testreel er verificeret: https://www.instagram.com/reel/DfmPOXZhJ3e/ — remote ID `18110461838195602`.
-- Facebook-testreel er verificeret: `/reel/1691097949310064/` — remote ID `1691097949310064`. Direkte multipart-upload fra serveren bruges efter at URL-upload gav Graph-fejl 390.
-- Facebook-adapteren har approval-, idempotency-, retry- og timeout-kontrol. Fejl fra Graph rapporteres med sikker fejldetalje.
-- Krypteret backup `/data/backups/some-backup-20261111T112644Z.zip.enc` er verificeret. Offsite backup er ikke konfigureret.
-- **Kokoro `af_bella` er ikke længere kreativt godkendt. Stemmen er afvist af ejeren og må ikke bruges til nye produktionsopslag.** Der skal vælges separate, godkendte stemmer til gaming og AI før backendens store videreudvikling.
+- Instagram og Facebook er forbundet via Facebook Login for Business. Instagram-konto `17841457024132563` / `@pixelandparameters`; Facebook-side `1467423036459990`.
+- Instagram-testreel: https://www.instagram.com/reel/DfmPOXZhJ3e/ — remote ID `18110461838195602`.
+- Facebook-testreel: `/reel/1691097949310064/` — remote ID `1691097949310064`. Direkte multipart-upload bruges efter at URL-upload gav Graph-fejl 390.
+- TikTok Sandbox OAuth og `video.upload` er verificeret med målkonto `@pixelandparameters`. Ejeren har bekræftet systemnotifikationen “Din indhold fra SoMe-maskinen er klar” i TikTok-appen. Det er en kladde i TikTok-inboxen, ikke et offentligt opslag. Første upload manglede gemt publish_id; status er reconcileret med ejerbevis uden ny upload. Direct Post er ikke aktiveret eller verificeret.
+- Backendens nye review-center er implementeret og deployet. `/review` viser video, thumbnail, titel, opslagstekst, hashtags, kilder, forhåndsvalgt platform og forbundet konto. Ejeren kan godkende eller afvise med kommentar.
+- Afvisning → AI-rettelse er et reelt worker-flow. `revise_post` omskriver kun titel, caption og hashtags, kopierer video/lyd/visuals til en ny version med nyt manifest og kræver ny godkendelse. Jobs er idempotente pr. afvisning.
+- **Kokoro `af_bella` er ikke længere kreativt godkendt og må ikke bruges til nye produktionsopslag.** Der skal vælges separate, godkendte stemmer til gaming og AI.
 
 VERIFICERET LOKALT OG PÅ VPS
-- Den endelige integrationspakke har **77/77 automatiske tests bestået**, også med PAID_JOBS_ENABLED=true og SECURE_COOKIES=true.
-- Commit `3bd9146` er pushet og deployet. Web/worker er healthy; migration 0001 og doctor er ok.
-- `doctor` viser YouTube oauth_verified/private_upload_verified=true, Instagram test_publication_verified=true og Facebook test_publication_verified=true.
-- Tidligere voice-, video-, manifest-, backup- og restorekontroller er bevaret, men de er ikke kreativ godkendelse af Kokoro-stemmen.
+- Applikationscommit `ab01f5f` er pushet og deployet. Den komplette pakke har **81/81 automatiske tests bestået** både lokalt og på serveren. Web/worker er healthy; migration 0001 og doctor er ok.
+- `doctor` viser YouTube oauth_verified/private_upload_verified=true, Instagram/Facebook test_publication_verified=true og TikTok oauth_verified/draft_upload_verified=true.
+- Rigtig HTTPS-test med midlertidig konto: demo 5 blev afvist med redaktionel kommentar; det rigtige `revise_post`-job og Claude oprettede demo 6. Jobbet lykkedes på første forsøg. Demo 6 er AWAITING_OWNER med titlen “Gaming Handheld Buying Checklist”, skarpere caption og seks hashtags. Ingen publicering eller godkendelse blev udført af testen.
+- Video, thumbnail, CSS og JavaScript er hentet gennem de beskyttede HTTPS-ruter med korrekte MIME-typer. Demo 6 og dens filer er kontrolleret. Den midlertidige testkonto og sessions er slettet.
+- Live opslagsrevision kostede 0,013172 DKK. Samlet kendt Claude-testforbrug er cirka 0,155439 DKK.
+- Krypteret backup `/data/backups/some-backup-20261111T140525Z.zip.enc` er verificeret. Offsite backup er ikke konfigureret.
 
 MANGLER / BLOKERET EKSTERNT
-- TikTok bruger fortsat manuel eksport. Ingen TikTok Content Posting-integration er verificeret.
-- YouTube-appen står i Testing; varig produktionsdrift kræver senere passende app-verificering/vedvarende tokenforvaltning.
-- Meta App Review/Advanced Access er ikke gennemført; de verificerede tests bruger ejerens egen konto og Standard Access.
+- TikTok production-appens obligatoriske demo-video og review mangler. Sandbox og Direct Post må ikke forveksles med godkendt offentlig direct-post-produktion.
+- Nye kreative stemmer til gaming og AI er ikke valgt eller godkendt.
+- Den fulde produktionskø for research → manuskript → licenserede internetassets → rendering og automatisk multiplatformsplanlægning er ikke færdig. Tekstrevision genbruger bevidst video og stemme; den påstår ikke at rette visuelle fejl eller voiceover.
+- YouTube-appen står i Testing; varig produktionsdrift kræver senere passende app-verificering/vedvarende tokenforvaltning. Meta App Review/Advanced Access er ikke gennemført.
 - Der er endnu ingen tilstrækkelige reelle publicerede datapunkter til at bevise læringsforbedring. Testopslagene er integrationstests, ikke kreative produktionskandidater.
-- Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret. Contabos cloudfirewall er ikke konfigureret; UFW og Fail2ban er aktive på serveren.
+- Offsite backup, affiliate, skat/moms og monetisering er ikke konfigureret. Contabos cloudfirewall er ikke konfigureret; UFW og Fail2ban er aktive. Dynamisk ejer-IP kræver opdatering af Caddy-whitelisten ved skift.
 - Ingen 100 % fejlfriheds-, performance- eller resultatgaranti gives.
 
 SIKKERHEDSTILSTAND
@@ -33,7 +37,7 @@ DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=true; WORKER_CONCURRENCY=
 Nødstop, diskstop, approvalhash og rettigheds-/sikkerhedsblokeringer må ikke omgås. Nye opslag kræver konkret ejergodkendelse. Kokoro-stemmen er afvist til fremtidig produktion.
 
 PRÆCIS NÆSTE HANDLING — KUN ÉN OPGAVE
-Vælg og kreativt godkend nye stemmer til gaming og AI. Integrationsarbejdet på YouTube, Instagram og Facebook er verificeret; herefter følger den store backend-bearbejdning.
+Åbn `https://62.171.167.243.sslip.io/review/6`, log ind som ejer og gennemgå demo 6 i det nye review-center. Der sker ingen publicering fra siden. Herefter fortsættes med TikTok-app-demo og valg af nye stemmer som aftalt med ejeren.
 
 TESTBEVIS
 Se TEST_PROTOCOL.md for kommandoer, live resultater og ikke-verificerede punkter.

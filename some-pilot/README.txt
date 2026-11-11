@@ -70,9 +70,9 @@ Tests
 
 Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
-Gameplay-ranking (internetklip og lokal voiceover som standard)
---------------------------------------------------------------
-Top-10-videoer bruger voiceover uden avatar. Kokoro er den lokale standardprovider. En eksisterende stemmemappe genbruges kun når alle 11 segmenter har matchende manuskriptmetadata, gyldig WAV, lydstream, varighed, sample rate, teksthash og SHA-256:
+Gameplay-ranking (internetklip og lokal voiceover)
+-------------------------------------------------
+Top-10-videoer bruger voiceover uden avatar. **Kokoro `af_bella` er afvist kreativt af ejeren og må ikke bruges til nye produktionsopslag.** Den tekniske provider findes stadig til tidligere tests, men der skal vælges en ny godkendt stemme før ny produktion. En eksisterende stemmemappe genbruges kun når alle 11 segmenter har matchende manuskriptmetadata, gyldig WAV, lydstream, varighed, sample rate, teksthash og SHA-256. Den eksisterende tekniske CLI-kontrakt er:
 
   python -m app.cli ranking --plan /research/plan.json --platform reels --mobile-style zoom --voice-provider kokoro --output /data/versions/NY-VERSION
 
