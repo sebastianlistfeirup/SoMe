@@ -29,9 +29,12 @@ class RealMediaScene(BaseModel):
     focus_y: float = Field(default=0.5, ge=0, le=1)
     contains_people: bool = False
     ages_verified: bool = False
+    ai_generated: bool = False
 
     @model_validator(mode="after")
     def valid_source(self):
+        if self.ai_generated and self.kind != "graphic":
+            raise ValueError("ai_generated_cannot_count_as_real")
         if self.kind == "graphic":
             if self.source_type != "synthetic":
                 raise ValueError("graphic_must_be_synthetic")
@@ -193,13 +196,13 @@ def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: 
             caption_filters.append(
                 f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:textfile={caption_file}:"
                 f"fontcolor=white:fontsize={size}:line_spacing=10:x=(w-text_w)/2:y=h-390:borderw=2:bordercolor=black:"
-                f"box=1:boxcolor=black@0.35:boxborderw=14:enable='between(t,{chunk_start:.3f},{chunk_end:.3f})'"
+                f"box=1:boxcolor=black@0.58:boxborderw=14:enable='between(t,{chunk_start:.3f},{chunk_end:.3f})'"
             )
     title_size = _font_size(title_lines, 48, 920)
     caption_filters.append(
         f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile={title_file}:"
-        f"fontcolor=white:fontsize={title_size}:line_spacing=8:x=(w-text_w)/2:y=120:borderw=2:bordercolor=black:"
-        f"box=1:boxcolor=black@0.30:boxborderw=14:enable='lt(t,2.5)'"
+        f"fontcolor=white:fontsize={title_size}:line_spacing=8:x=(w-text_w)/2:y=100:borderw=2:bordercolor=black:"
+        f"box=1:boxcolor=black@0.65:boxborderw=16:enable='lt(t,2.5)'"
     )
     filters.append(f"[scenes]{','.join(caption_filters)},scale=out_range=tv,format=yuv420p[final]")
     inputs.extend(["-i", str(narration)])

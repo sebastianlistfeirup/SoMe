@@ -139,8 +139,10 @@ def _srt_seconds(value: str) -> float:
     return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
 
 
-def thumbnail(video: Path, output: Path) -> None:
-    run(["ffmpeg", "-y", "-ss", "1", "-i", str(video), "-frames:v", "1", str(output)])
+def thumbnail(video: Path, output: Path, at_seconds: float = 1) -> None:
+    if at_seconds < 0:
+        raise ValueError("thumbnail_time_must_be_positive")
+    run(["ffmpeg", "-y", "-ss", f"{at_seconds:.3f}", "-i", str(video), "-frames:v", "1", str(output)])
 
 
 def storyboard(video: Path, output: Path) -> None:

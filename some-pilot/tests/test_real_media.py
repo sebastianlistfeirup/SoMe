@@ -55,6 +55,8 @@ def test_real_media_requires_https_evidence_and_rejects_effects_on_video():
         RealMediaScene.model_validate({**scene_payload(), "policy_url": "http://insecure.example"})
     with pytest.raises(ValidationError, match="video_effects"):
         RealMediaScene.model_validate(scene_payload(effect="zoom_in"))
+    with pytest.raises(ValidationError, match="ai_generated_cannot_count_as_real"):
+        RealMediaScene.model_validate({**scene_payload(), "ai_generated": True})
 
 
 def make_media(root: Path):

@@ -70,7 +70,7 @@ T = TypeVar("T", bound=BaseModel)
 
 def demo_draft(topic: Topic) -> ScriptDraft:
     return ScriptDraft(
-        title=topic.title,
+        title=topic.title.removeprefix("DEMO: "),
         narration="Choosing your next gaming device is easier with a simple checklist. Start with the games you actually play. Then compare your budget, your preferred operating system, and how long you usually play. Verify current specifications and compatibility before you buy. Save this checklist for your next upgrade.",
         claims=[],
         hook_type="practical_checklist",

@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     claude_output_dkk_per_million: float = Field(default=0, ge=0)
     claude_research_input_dkk_per_million: float = Field(default=0, ge=0)
     claude_research_output_dkk_per_million: float = Field(default=0, ge=0)
+    dashscope_api_key: str = ""
+    qwen_workspace_id: str = ""
+    qwen_model_vision: str = "qwen3.8-max"
+    qwen_input_dkk_per_million: float = Field(default=0, ge=0)
+    qwen_output_dkk_per_million: float = Field(default=0, ge=0)
     youtube_api_key: str = ""
     youtube_client_id: str = ""
     youtube_client_secret: str = ""

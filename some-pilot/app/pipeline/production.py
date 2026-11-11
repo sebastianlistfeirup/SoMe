@@ -133,8 +133,9 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
         rendered = output / "video.mp4"
         layout = render_real_media(prepared, narration, captions, draft.title, rendered, coverage)
+        render_duration = float(probe(rendered)["format"]["duration"])
         thumb = output / "thumbnail.jpg"
-        thumbnail(rendered, thumb)
+        thumbnail(rendered, thumb, at_seconds=render_duration * 0.65)
         board = output / "storyboard.jpg"
         storyboard(rendered, board)
         video.video_path = str(rendered)
@@ -150,8 +151,17 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         ages_verified = all(item.scene.ages_verified for item in prepared if item.scene.contains_people)
         safety = content_policy(draft.narration + "\n" + draft.post_text, contains_people=contains_people, ages_verified=ages_verified)
         quality = transcription_quality(draft.narration, transcription)
-        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "voice": voice, "media_composition": coverage, "transcription": transcription, "owner_review_required": True}
+        visual_review = {"decision": "NOT_CONFIGURED", "issues": [], "rights_not_evaluated": True}
+        db.commit()
+        if settings.dashscope_api_key:
+            from app.pipeline.visual_review import review_storyboard
+            visual_review = review_storyboard(db, board, coverage, f"visual-{video.id}-v{version_number}").model_dump()
+        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "voice": voice, "media_composition": coverage, "visual_media_review": visual_review, "transcription": transcription, "owner_review_required": True}
         (output / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
+        if visual_review["decision"] not in {"ALLOW", "NOT_CONFIGURED"}:
+            transition(video, "BLOCKED")
+            db.commit()
+            raise ValueError("visual_media_review_not_allowed:" + ",".join(visual_review["issues"]))
         if safety.decision != "ALLOW" or quality["decision"] != "ALLOW":
             transition(video, "BLOCKED")
             raise ValueError("safety_or_quality_blocked")
