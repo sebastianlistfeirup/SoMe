@@ -18,7 +18,9 @@ from app.config import get_settings
 from app.db.models import AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
 from app.pipeline.approvals import ApprovalError, approve, paused, set_pause, transition
+from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
+from app.pipeline.posts import format_duration, platform_label, post_view, preferred_platform, status_label
 from app.pipeline.signed_media import SignedMediaError, create_link, resolve_link
 
 from contextlib import asynccontextmanager
@@ -36,6 +38,9 @@ app = FastAPI(title=settings.app_name, docs_url=None, redoc_url=None, lifespan=l
 root = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=root / "static"), name="static")
 templates = Jinja2Templates(directory=root / "templates")
+templates.env.filters["status_label"] = status_label
+templates.env.filters["platform_label"] = platform_label
+templates.env.filters["duration"] = format_duration
 login_attempts: dict[str, list[float]] = {}
 hasher = PasswordHasher()
 
@@ -74,7 +79,8 @@ def csrf_check(request: Request, csrf_token: str = Form(...), db: Session = Depe
 
 def render(request: Request, template: str, db: Session, auth: tuple[AuthUser, AuthSession], **context) -> HTMLResponse:
     user, session = auth
-    return templates.TemplateResponse(request, template, {"request": request, "user": user, "csrf_token": session.csrf_token, "paused": paused(db), "app_name": settings.app_name, **context})
+    awaiting_count = db.query(VideoVersion).filter(VideoVersion.status == "AWAITING_OWNER").count()
+    return templates.TemplateResponse(request, template, {"request": request, "user": user, "csrf_token": session.csrf_token, "paused": paused(db), "app_name": settings.app_name, "awaiting_count": awaiting_count, **context})
 
 
 @app.exception_handler(401)
@@ -133,7 +139,7 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
     session = AuthSession(id=secrets.token_urlsafe(32), user_id=user.id, csrf_token=secrets.token_urlsafe(32), expires_at=datetime.now(timezone.utc) + timedelta(minutes=settings.session_ttl_minutes))
     db.add(session)
     db.commit()
-    response = RedirectResponse("/opportunities", status_code=303)
+    response = RedirectResponse("/review", status_code=303)
     response.set_cookie("some_session", session.id, httponly=True, secure=settings.secure_cookies, samesite="strict", max_age=settings.session_ttl_minutes * 60, path="/")
     return response
 
@@ -158,7 +164,9 @@ def dashboard(request: Request, db: Session = Depends(get_db), auth=Depends(requ
     metric_totals = {name: value for name, value in db.query(MetricSnapshot.metric_name, func.sum(MetricSnapshot.metric_value)).filter(MetricSnapshot.is_demo.is_(False), MetricSnapshot.metric_name.in_(["views", "likes", "comments", "shares"])).group_by(MetricSnapshot.metric_name).all()}
     latest_jobs = db.query(Job).order_by(Job.updated_at.desc()).limit(8).all()
     latest_learning = db.get(Setting, "learning_model")
-    return render(request, "dashboard.html", db, auth, status_counts=status_counts, metric_totals=metric_totals, latest_jobs=latest_jobs, latest_learning=latest_learning)
+    awaiting = db.query(VideoVersion).filter(VideoVersion.status == "AWAITING_OWNER").order_by(VideoVersion.updated_at.desc()).limit(3).all()
+    review_cards = [make_review_card(db, video) for video in awaiting]
+    return render(request, "dashboard.html", db, auth, status_counts=status_counts, metric_totals=metric_totals, latest_jobs=latest_jobs, latest_learning=latest_learning, review_cards=review_cards)
 
 
 @app.get("/opportunities", response_class=HTMLResponse)
@@ -184,10 +192,61 @@ def queue(request: Request, db: Session = Depends(get_db), auth=Depends(require_
     return render(request, "queue.html", db, auth, videos=videos)
 
 
+def make_review_card(db: Session, video: VideoVersion) -> dict:
+    topic = db.get(Topic, video.topic_id)
+    return {
+        "video": video,
+        "post": post_view(video.post_json, topic.title if topic else f"Version {video.id}"),
+        "platform": preferred_platform(video),
+    }
+
+
+def destination_options(db: Session) -> list[dict]:
+    youtube = db.get(Setting, "youtube_connection")
+    meta = db.get(Setting, "meta_connection")
+    tiktok = db.get(Setting, "tiktok_connection")
+    youtube_state = youtube.value_json if youtube else {}
+    meta_state = meta.value_json if meta else {}
+    tiktok_state = tiktok.value_json if tiktok else {}
+    definitions = [
+        ("youtube", youtube_state.get("channel_id", ""), youtube_state.get("channel_title") or "YouTube-konto ikke forbundet"),
+        ("instagram", meta_state.get("instagram_account_id") or settings.meta_instagram_account_id, f"@{meta_state['instagram_username']}" if meta_state.get("instagram_username") else "Instagram-konto ikke forbundet"),
+        ("tiktok", tiktok_state.get("open_id") or settings.tiktok_open_id, tiktok_state.get("display_name") or "TikTok-konto ikke forbundet"),
+        ("facebook", meta_state.get("facebook_page_id") or settings.meta_page_id, meta_state.get("facebook_page_name") or "Facebook-side ikke forbundet"),
+    ]
+    return [
+        {
+            "value": platform,
+            "label": platform_label(platform),
+            "account": account or "",
+            "account_label": account_label,
+        }
+        for platform, account, account_label in definitions
+    ]
+
+
+def selected_destination(db: Session, platform: str) -> dict:
+    option = next((item for item in destination_options(db) if item["value"] == platform), None)
+    if not option:
+        raise ApprovalError("unsupported_platform")
+    return option
+
+
 @app.get("/review", response_class=HTMLResponse)
 def review_list(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
-    videos = db.query(VideoVersion).filter(VideoVersion.status.in_(["AWAITING_OWNER", "APPROVED", "REJECTED"])).order_by(VideoVersion.updated_at.desc()).all()
-    return render(request, "review.html", db, auth, videos=videos)
+    filter_name = request.query_params.get("status", "awaiting")
+    status_filters = {
+        "awaiting": ["AWAITING_OWNER"],
+        "rejected": ["REJECTED"],
+        "approved": ["APPROVED", "SCHEDULED", "PUBLISHING", "PUBLISHED"],
+        "all": ["AWAITING_OWNER", "APPROVED", "REJECTED", "SCHEDULED", "PUBLISHING", "PUBLISHED"],
+    }
+    if filter_name not in status_filters:
+        filter_name = "awaiting"
+    videos = db.query(VideoVersion).filter(VideoVersion.status.in_(status_filters[filter_name])).order_by(VideoVersion.updated_at.desc()).limit(100).all()
+    counts = {status: count for status, count in db.query(VideoVersion.status, func.count(VideoVersion.id)).group_by(VideoVersion.status).all()}
+    cards = [make_review_card(db, video) for video in videos]
+    return render(request, "review.html", db, auth, cards=cards, filter=filter_name, counts=counts)
 
 
 @app.get("/review/{video_id}", response_class=HTMLResponse)
@@ -204,30 +263,79 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
                 evidence[name] = json.loads(path.read_text(encoding="utf-8"))
             except (json.JSONDecodeError, OSError):
                 evidence[name] = {"error": "unreadable_or_invalid_evidence"}
-    return render(request, "review_detail.html", db, auth, video=video, topic=topic, evidence=evidence)
+    selected_platform = preferred_platform(video)
+    platforms = destination_options(db)
+    selected = selected_destination(db, selected_platform)
+    latest_rejection = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "REJECTED").order_by(Review.created_at.desc(), Review.id.desc()).first()
+    latest_approval = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "APPROVED").order_by(Review.created_at.desc(), Review.id.desc()).first()
+    revision_job = next((job for job in db.query(Job).filter(Job.kind == "revise_post").order_by(Job.created_at.desc()).limit(100).all() if job.payload.get("video_id") == video.id), None)
+    revisions = [item for item in db.query(VideoVersion).filter(VideoVersion.topic_id == video.topic_id).order_by(VideoVersion.created_at.desc()).all() if item.features_json.get("revision_of") == video.id]
+    return render(
+        request,
+        "review_detail.html",
+        db,
+        auth,
+        video=video,
+        topic=topic,
+        post=post_view(video.post_json, topic.title if topic else ""),
+        evidence=evidence,
+        platforms=platforms,
+        selected_platform=selected_platform,
+        selected_account=selected["account"],
+        selected_account_label=selected["account_label"],
+        latest_rejection=latest_rejection,
+        latest_approval=latest_approval,
+        revision_job=revision_job,
+        revisions=revisions,
+    )
 
 
 @app.post("/review/{video_id}/approve")
-def approve_video(video_id: int, request: Request, platform: str = Form(...), account: str = Form(...), watched: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+def approve_video(video_id: int, request: Request, platform: str = Form(...), account: str = Form(""), watched: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
     if not video:
         raise HTTPException(404)
     try:
+        destination = selected_destination(db, platform)
+        account = account.strip() or destination["account"]
+        if not account:
+            raise ApprovalError("connected_account_required")
         approve(db, video, auth[0].username, platform, account, watched)
     except ApprovalError as exc:
         raise HTTPException(409, str(exc)) from exc
-    return RedirectResponse(f"/review/{video_id}", status_code=303)
+    return RedirectResponse(f"/review/{video_id}?approved=1", status_code=303)
 
 
 @app.post("/review/{video_id}/reject")
 def reject_video(video_id: int, note: str = Form(""), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
+    note = note.strip()
     if not video or video.status != "AWAITING_OWNER":
         raise HTTPException(409)
+    if len(note) < 3:
+        raise HTTPException(422, "Skriv kort hvad der skal rettes")
     transition(video, "REJECTED", auth[0].username)
     db.add(Review(video_version_id=video.id, decision="REJECTED", reviewer=auth[0].username, note=note[:2000]))
     db.commit()
-    return RedirectResponse("/review", status_code=303)
+    return RedirectResponse(f"/review/{video_id}?rejected=1", status_code=303)
+
+
+@app.post("/review/{video_id}/revise")
+def revise_video(video_id: int, db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    video = db.get(VideoVersion, video_id)
+    if not video or video.status != "REJECTED":
+        raise HTTPException(409, "Kun afviste opslag kan rettes")
+    rejection = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "REJECTED").order_by(Review.created_at.desc(), Review.id.desc()).first()
+    if not rejection:
+        raise HTTPException(409, "Afvisning med kommentar mangler")
+    job, _created = enqueue(db, "revise_post", {"video_id": video.id, "review_id": rejection.id}, f"post-revision:{video.id}:{rejection.id}", max_attempts=2)
+    if job.status == "FAILED":
+        job.status = "QUEUED"
+        job.attempts = 0
+        job.error_code = None
+        job.due_at = datetime.now(timezone.utc)
+        db.commit()
+    return RedirectResponse(f"/review/{video_id}?revision=queued", status_code=303)
 
 
 @app.get("/media/{video_id}/{name}")

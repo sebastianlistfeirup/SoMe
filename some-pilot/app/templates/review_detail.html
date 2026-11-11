@@ -1,33 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ topic.title }}</h1>
-<p><span class="status">{{ video.status }}</span> <span class="tag">{{ 'DEMO' if video.features_json.get('is_demo') else 'PRODUKTION' }}</span></p>
-<div class="review">
-  <div>
-    <video controls preload="metadata" src="/media/{{ video.id }}/video.mp4"></video>
-    <p><a href="/media/{{ video.id }}/captions.srt">Undertekster</a> · <a href="/media/{{ video.id }}/storyboard.jpg">Storyboard</a></p>
+<div class="detail-topline"><a class="back-link" href="/review">← Tilbage til opslag</a><div><span class="status status-{{ video.status | lower }}">{{ video.status | status_label }}</span>{% if video.features_json.get('is_demo') %}<span class="tag">DEMO</span>{% endif %}<span class="version">Version {{ video.version }}</span></div></div>
+<div class="review-layout">
+  <div class="preview-column">
+    <section class="preview-card">
+      <div class="video-frame"><video controls preload="metadata" poster="/media/{{ video.id }}/thumbnail.jpg" src="/media/{{ video.id }}/video.mp4">Din browser kan ikke afspille videoen.</video></div>
+      <div class="preview-info"><div><strong>Forhåndsvisning</strong><span>{{ video.duration_seconds | duration }} · {{ video.language | upper }} · {{ video.features_json.get('aspect_ratio', '9:16') }}</span></div><span class="platform-chip" data-platform-name>{{ selected_platform | platform_label }}</span></div>
+      <details class="thumbnail-toggle"><summary>Se thumbnail i fuld størrelse</summary><img src="/media/{{ video.id }}/thumbnail.jpg" alt="Thumbnail til {{ post.title }}"></details>
+      <div class="asset-links"><a href="/media/{{ video.id }}/captions.srt">Undertekster</a><a href="/media/{{ video.id }}/storyboard.jpg">Storyboard</a><a href="/export/{{ video.id }}/{{ selected_platform }}">Download ZIP</a></div>
+    </section>
   </div>
-  <section>
-    <h2>Opslag</h2><p>{{ video.post_json.get('text','') }}</p>
-    <h2>Links</h2><ul>{% for link in video.post_json.get('links',[]) %}<li>{{ link }}</li>{% endfor %}</ul>
-    <h2>Påstande og kilder</h2><pre>{{ evidence.get('claims.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
-    <h2>Rettighedsbevis</h2><pre>{{ evidence.get('rights.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
-    <h2>Teknisk og redaktionel kontrol</h2><pre>{{ evidence.get('checks.json', {'error': 'missing'}) | tojson(indent=2) }}</pre>
-    <h2>Versionsmanifest</h2><pre>{{ video.manifest_json | tojson(indent=2) }}</pre>
-    <p><a class="button secondary" href="/export/{{ video.id }}/youtube">YouTube ZIP</a> <a class="button secondary" href="/export/{{ video.id }}/instagram">Instagram ZIP</a> <a class="button secondary" href="/export/{{ video.id }}/facebook">Facebook ZIP</a></p>
+  <div class="post-column">
+    <section class="post-preview">
+      <p class="eyebrow">Færdigt opslag</p>
+      <h1>{{ post.title }}</h1>
+      <div class="post-section"><h2>Overskrift</h2><p class="title-copy">{{ post.title }}</p></div>
+      <div class="post-section"><h2>Opslagstekst</h2><p class="caption-copy">{{ post.caption }}</p></div>
+      <div class="post-section"><h2>Hashtags</h2>{% if post.hashtags %}<div class="hashtag-list">{% for tag in post.hashtags %}<span>#{{ tag }}</span>{% endfor %}</div>{% else %}<p class="muted">Ingen hashtags på denne version.</p>{% endif %}</div>
+      {% if post.links %}<div class="post-section"><h2>Kildelinks</h2><ul class="source-links">{% for link in post.links %}<li><a href="{{ link }}" rel="noopener noreferrer" target="_blank">{{ link }}</a></li>{% endfor %}</ul></div>{% endif %}
+    </section>
+
     {% if video.status == 'AWAITING_OWNER' %}
-    <form method="post" action="/review/{{ video.id }}/approve" class="approval">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <h2>Ejergodkendelse</h2>
-      <label>Platform<select name="platform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option></select></label>
-      <label>Målkonto<input name="account" required placeholder="Kanal-/konto-id"></label>
-      <label class="check"><input type="checkbox" name="watched" value="true" required> Jeg har set hele videoen og kontrolleret alle beviser.</label>
-      <button>Godkend denne version</button>
-    </form>
-    <form method="post" action="/review/{{ video.id }}/reject">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Note<input name="note"></label><button class="danger">Afvis</button>
-    </form>
+    <section class="decision-card" id="decision">
+      <div class="decision-heading"><div><p class="eyebrow">Din beslutning</p><h2>Er opslaget klar?</h2></div><span class="secure-note">Ingen automatisk publicering</span></div>
+      <form method="post" action="/review/{{ video.id }}/approve" class="approval-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="account" value="{{ selected_account }}" data-account-input>
+        <label for="platform">Platform</label>
+        <div class="select-wrap"><select id="platform" name="platform" data-platform-select>{% for option in platforms %}<option value="{{ option.value }}" data-account="{{ option.account }}" data-account-label="{{ option.account_label }}" {% if option.value == selected_platform %}selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div>
+        <div class="account-preview"><span class="account-avatar">@</span><div><small>Publiceres på</small><strong data-account-name>{{ selected_account_label }}</strong></div><span class="connected-dot">{{ 'Forbundet' if selected_account else 'Ikke forbundet' }}</span></div>
+        <label class="watch-check"><input type="checkbox" name="watched" value="true" required><span><strong>Jeg har set hele videoen</strong><small>Jeg har kontrolleret thumbnail, tekst, hashtags og kilder.</small></span></label>
+        <button class="button approve-button" type="submit">Godkend opslag</button>
+      </form>
+      <details class="reject-details" {% if request.query_params.get('reject') %}open{% endif %}><summary>Ikke klar? Afvis og fortæl hvad der skal ændres</summary><form method="post" action="/review/{{ video.id }}/reject" class="reject-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="note">Hvad skal vi rette?</label><textarea id="note" name="note" rows="4" minlength="3" maxlength="2000" required placeholder="Fx: Gør overskriften kortere, og gør teksten mere direkte." data-character-count="note-count"></textarea><div class="field-help"><span>Din kommentar bruges til næste version.</span><span id="note-count"></span></div><button class="button reject-button" type="submit">Afvis med kommentar</button></form></details>
+    </section>
+    {% elif video.status == 'REJECTED' %}
+    <section class="decision-card rejected-panel" {% if revision_job and revision_job.status in ['QUEUED','RUNNING'] and not revisions %}data-revision-pending{% endif %}>
+      <p class="eyebrow">Din feedback</p><h2>Opslaget er afvist</h2>
+      {% if latest_rejection %}<blockquote>{{ latest_rejection.note }}</blockquote>{% endif %}
+      {% if revisions %}<div class="revision-success"><strong>En rettet version er klar</strong><p>Video og stemme er genbrugt. Titel, opslagstekst og hashtags er rettet, og den nye version kræver din godkendelse.</p><a class="button" href="/review/{{ revisions[0].id }}">Se rettet version {{ revisions[0].version }}</a></div>{% elif revision_job and revision_job.status in ['QUEUED','RUNNING'] %}<div class="revision-progress"><span class="spinner"></span><div><strong>AI arbejder på en ny version</strong><p>Siden opdateres automatisk, når rettelsen er klar.</p></div></div><a class="button secondary" href="/review/{{ video.id }}">Opdatér status</a>{% elif revision_job and revision_job.status == 'FAILED' %}<div class="error-box"><strong>Rettelsen kunne ikke gennemføres</strong><p>{{ revision_job.error_code }}. Ingen ny version blev godkendt eller publiceret.</p></div>{% endif %}
+      {% if not revisions and (not revision_job or revision_job.status == 'FAILED') %}<form method="post" action="/review/{{ video.id }}/revise"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><p class="muted">AI retter overskrift, opslagstekst og hashtags ud fra din kommentar. Selve videoen og stemmen genbruges.</p><button class="button" type="submit">Ret opslag med AI</button></form>{% endif %}
+    </section>
+    {% elif latest_approval %}
+    <section class="decision-card approved-panel"><div class="approved-mark">✓</div><div><p class="eyebrow">Beslutning registreret</p><h2>Opslaget er godkendt</h2><p>Godkendt til <strong>{{ latest_approval.digest_json.get('platform') | platform_label }}</strong> på den valgte konto. Der sker ingen ny publicering fra denne side.</p></div></section>
     {% endif %}
-  </section>
+
+    <details class="evidence-panel"><summary><span>Kontrol og dokumentation</span><span class="evidence-summary">Se checks og filer</span></summary><div class="evidence-content"><p>Godkendelsen er knyttet til præcis denne videofil, tekst, platform og konto. Enhver ændring kræver ny godkendelse.</p><details><summary>Påstande og kilder</summary><pre>{{ evidence.get('claims.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Rettighedsbevis</summary><pre>{{ evidence.get('rights.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Teknisk og redaktionel kontrol</summary><pre>{{ evidence.get('checks.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Versionsmanifest</summary><pre>{{ video.manifest_json | tojson(indent=2) }}</pre></details></div></details>
+  </div>
 </div>
 {% endblock %}

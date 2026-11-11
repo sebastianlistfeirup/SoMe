@@ -13,6 +13,7 @@ from app.pipeline.approvals import paused, sha256_file, transition
 from app.pipeline.media import probe, render, require_tools, storyboard, synthesize, technical_checks, thumbnail, transcribe
 from app.pipeline.scenes import make_scene_assets
 from app.pipeline.policy import content_policy, rights_policy
+from app.pipeline.posts import build_post
 from app.pipeline.voice import VoiceSegment, voice_asset_report
 
 
@@ -65,7 +66,9 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, allow_synthetic_fa
     version_number = db.query(VideoVersion).filter(VideoVersion.topic_id == topic.id).count() + 1
     output = settings.data_dir / "versions" / f"topic-{topic.id}-v{version_number}"
     output.mkdir(parents=True, exist_ok=False)
-    video = VideoVersion(script_id=script.id, topic_id=topic.id, version=version_number, output_dir=str(output), post_json={"text": draft.post_text, "links": [claim.source_url for claim in draft.claims], "ai_disclosure": True}, hook_type=draft.hook_type, language=topic.language, features_json={"niche": topic.niche, "pacing": "measured", "voice": "espeak-ng", "CTA": "save", "production_cost": production_cost, "is_demo": dry_run})
+    default_hashtags = ["ai", "artificialintelligence", "tech"] if "ai" in topic.niche.lower() else ["gaming", "handheldgaming", "tech"]
+    post = build_post(draft.title, draft.post_text, default_hashtags, [claim.source_url for claim in draft.claims], ai_disclosure=True)
+    video = VideoVersion(script_id=script.id, topic_id=topic.id, version=version_number, output_dir=str(output), post_json=post, hook_type=draft.hook_type, language=topic.language, features_json={"niche": topic.niche, "pacing": "measured", "voice": "espeak-ng", "CTA": "save", "production_cost": production_cost, "is_demo": dry_run})
     db.add(video)
     db.flush()
     try:

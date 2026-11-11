@@ -46,9 +46,11 @@ CLI-kontrakt
 
 Yderligere sikre kommandoer: migrate, demo, approve, export, publish, restore, recover-jobs, init-user. Mutationskommandoer skriver maskinlæsbare resultatfiler under data/results. Publicering kræver aktivt enablement, en gyldig ejergodkendelse og en understøttet adapter; ellers bruges ZIP-eksport.
 
-Godkendelse og publicering
---------------------------
-Kun en autentificeret ejer kan godkende. Hele videoen skal bekræftes set. Godkendelsen binder SHA-256 for video/thumbnail samt tekst, links, platform og konto. Enhver ændring kræver ny godkendelse. PUBLISH_ENABLED=false, DRY_RUN=true og nødstop kontrolleres centralt igen umiddelbart før upload. Upload-timeout giver RECONCILE_REQUIRED, ikke blind retry.
+Review-center, godkendelse og publicering
+-----------------------------------------
+`/review` samler færdige opslag med video, thumbnail, overskrift, opslagstekst, hashtags, kildelinks, platform og forbundet målkonto. Platform forhånds vælges fra produktionens metadata, og konto-ID udfyldes fra den verificerede integration. Ejeren kan godkende eller afvise med en konkret kommentar. Afviste opslag kan sendes til `revise_post`-jobbet; Claude omskriver kun titel, opslagstekst og hashtags. Video, lyd og billedmateriale genbruges og fremgår eksplicit af revisionsscope. Den rettede kopi får nyt versionsmanifest og stopper i AWAITING_OWNER. Selve afvisningen eller rettelsen publicerer aldrig noget.
+
+Kun en autentificeret ejer kan godkende. Hele videoen skal bekræftes set. Godkendelsen binder SHA-256 for video/thumbnail samt tekst, links, platform og konto. Enhver ændring kræver ny godkendelse. PUBLISH_ENABLED=false, DRY_RUN=true og nødstop kontrolleres centralt igen umiddelbart før upload. Upload-timeout giver RECONCILE_REQUIRED, ikke blind retry. Revisionsjobs er idempotente pr. afvisning og kan ikke genbruge en tidligere godkendelse.
 
 Lærende hjerne
 --------------

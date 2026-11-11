@@ -1,1 +1,29 @@
-{% extends "base.html" %}{% block content %}<h1>Gennemgang</h1><p>Se hele videoen og kontrollér tekst, links, kilder, rettigheder og kontrolresultater før godkendelse.</p><div class="grid">{% for video in videos %}<article><h2>Version {{ video.id }} · {{ video.status }}</h2><p>{{ video.hook_type }} · {{ video.language }}</p><a class="button" href="/review/{{ video.id }}">Gennemgå</a></article>{% else %}<p>Ingen versioner afventer gennemgang.</p>{% endfor %}</div>{% endblock %}
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <p class="eyebrow">Dit review-center</p>
+    <h1>Godkend opslag</h1>
+    <p>Alt er samlet. Se videoen, kontrollér opslaget og vælg derefter om det er klar.</p>
+  </div>
+  {% if awaiting_count %}<span class="count-badge">{{ awaiting_count }} klar til dig</span>{% endif %}
+</div>
+<nav class="filter-tabs" aria-label="Filtrér opslag">
+  <a class="{{ 'active' if filter == 'awaiting' else '' }}" href="/review">Afventer dig <span>{{ counts.get('AWAITING_OWNER', 0) }}</span></a>
+  <a class="{{ 'active' if filter == 'rejected' else '' }}" href="/review?status=rejected">Afvisninger <span>{{ counts.get('REJECTED', 0) }}</span></a>
+  <a class="{{ 'active' if filter == 'approved' else '' }}" href="/review?status=approved">Godkendte <span>{{ counts.get('APPROVED', 0) + counts.get('SCHEDULED', 0) + counts.get('PUBLISHING', 0) + counts.get('PUBLISHED', 0) }}</span></a>
+  <a class="{{ 'active' if filter == 'all' else '' }}" href="/review?status=all">Alle</a>
+</nav>
+{% if cards %}
+<div class="review-grid">
+  {% for card in cards %}{% include "_review_card.html" %}{% endfor %}
+</div>
+{% else %}
+<section class="empty-state">
+  <div class="empty-icon">✓</div>
+  <h2>{% if filter == 'awaiting' %}Du er helt opdateret{% else %}Ingen opslag her endnu{% endif %}</h2>
+  <p>{% if filter == 'awaiting' %}Når et nyt opslag er færdigt, ligger det her med video, thumbnail og tekst klar til dig.{% else %}Prøv en af de andre visninger.{% endif %}</p>
+  {% if filter != 'awaiting' %}<a class="button" href="/review">Se opslag der afventer dig</a>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

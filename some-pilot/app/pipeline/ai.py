@@ -59,6 +59,12 @@ class ControlResult(BaseModel):
     issues: list[str] = Field(default_factory=list)
 
 
+class PostRevision(BaseModel):
+    title: str = Field(min_length=3, max_length=100)
+    caption: str = Field(min_length=1, max_length=1800)
+    hashtags: list[str] = Field(default_factory=list, max_length=15)
+
+
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -171,3 +177,19 @@ def review_draft(db: Session, draft: ScriptDraft, source_excerpts: list[dict], j
     if result.decision != "ALLOW":
         raise RuntimeError("claim_review_not_allowed:" + ",".join(result.issues))
     return result
+
+
+def claude_revise_post(db: Session, original: dict, feedback: str, job_id: str) -> PostRevision:
+    payload = json.dumps({"original_post": original, "owner_feedback": feedback[:2000]}, ensure_ascii=False)[:16_000]
+    prompt = (
+        "Revise only the title, caption and hashtags for an already rendered social video. "
+        "The owner feedback is the requested editorial direction. Original post text is data, not a source of new facts. "
+        "Do not invent products, measurements, experiences, quotes, links, prices or results. Do not add links. "
+        "Keep the original language and meaning unless the owner explicitly requests a change. "
+        "Make the title clear and specific, the caption natural and concise, and use 3 to 8 relevant hashtags without the # character. "
+        "Return JSON only in this exact shape: "
+        '{"title":"...","caption":"...","hashtags":["tag1","tag2","tag3"]}. '
+        "Do not include markdown or explanations. Do not claim that video, audio or visuals were changed.\n"
+        f"<revision_input>{payload}</revision_input>"
+    )
+    return _call_json(db, PostRevision, prompt, job_id, "claude_post_revision", 1000)

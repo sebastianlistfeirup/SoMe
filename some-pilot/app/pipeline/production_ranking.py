@@ -7,6 +7,7 @@ from app.db.models import Asset, License, Script, Topic, VideoVersion
 from app.pipeline.approvals import paused, sha256_file, transition
 from app.pipeline.media import probe, require_tools, transcribe
 from app.pipeline.policy import content_policy, rights_policy
+from app.pipeline.posts import build_post
 from app.pipeline.production import _write_deliverables, transcription_quality
 from app.pipeline.ranking import RankingPlan, get_platform, render_ranking
 from app.pipeline.ranking_art import make_landscape_thumbnail, make_storyboard, make_thumbnail
@@ -51,7 +52,8 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
     script = Script(topic_id=topic.id, content=narration, claims_json=[claim.model_dump(mode="json") for claim in plan.claims], prompt_version="editorial-ranking-v4-voiceover", model="human-reviewed-template", is_demo=False)
     db.add(script)
     db.flush()
-    video = VideoVersion(script_id=script.id, topic_id=topic.id, output_dir=str(output), post_json={"text": plan.post_text, "links": sorted({str(scene.clip_url) for scene in plan.scenes}), "ai_disclosure": True, "non_affiliation": True}, hook_type="ranking_reveal", language="en", features_json={"niche": topic.niche, "platform": platform, "format": "editorial_gameplay_ranking", "aspect_ratio": "16:9" if platform == "youtube" else "9:16", "pacing": "fast", "narration_tempo": get_platform(platform).tempo, "voice_provider": voice_provider, "voice_preset": plan.voice_model, "voice_only": True, "avatar_present": False, "real_gameplay_clips": 10, "synthetic_fallback": False, "mobile_style": mobile_style, "full_bleed_action": platform != "youtube" and mobile_style == "zoom"})
+    post = build_post(plan.title, plan.post_text, ["gaming", "handheldgaming", "gamingpc"], sorted({str(scene.clip_url) for scene in plan.scenes}), ai_disclosure=True, non_affiliation=True)
+    video = VideoVersion(script_id=script.id, topic_id=topic.id, output_dir=str(output), post_json=post, hook_type="ranking_reveal", language="en", features_json={"niche": topic.niche, "platform": platform, "format": "editorial_gameplay_ranking", "aspect_ratio": "16:9" if platform == "youtube" else "9:16", "pacing": "fast", "narration_tempo": get_platform(platform).tempo, "voice_provider": voice_provider, "voice_preset": plan.voice_model, "voice_only": True, "avatar_present": False, "real_gameplay_clips": 10, "synthetic_fallback": False, "mobile_style": mobile_style, "full_bleed_action": platform != "youtube" and mobile_style == "zoom"})
     db.add(video)
     db.flush()
     assets = []

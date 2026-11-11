@@ -103,7 +103,7 @@ class YouTubePublisher:
         db.commit()
         try:
             token = self._access_token()
-            metadata = {"snippet": {"title": video.post_json.get("text", "")[:95], "description": video.post_json.get("text", "")}, "status": {"privacyStatus": privacy}}
+            metadata = {"snippet": {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "description": video.post_json.get("text", "")}, "status": {"privacyStatus": privacy}}
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=UTF-8", "X-Upload-Content-Type": "video/mp4"}
             start = httpx.post("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", headers=headers, json=metadata, timeout=30)
             if start.status_code in {401, 403}:

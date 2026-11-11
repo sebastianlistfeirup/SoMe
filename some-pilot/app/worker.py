@@ -16,6 +16,7 @@ from app.pipeline.learning import weekly_learning
 from app.pipeline.maintenance import cleanup_temporary_files, prune_backups
 from app.pipeline.metrics import collect_due
 from app.pipeline.research import run_adapters
+from app.pipeline.revisions import create_post_revision
 
 
 def next_local(hour: int, weekday: int | None = None) -> datetime:
@@ -59,6 +60,9 @@ def execute(db, job) -> Path:
         result["offsite_upload"] = "not_configured"
     elif job.kind == "maintenance":
         result = {"deleted_temporary_files": cleanup_temporary_files()}
+    elif job.kind == "revise_post":
+        video = create_post_revision(db, job.payload["video_id"], job.payload["review_id"], job.id)
+        result = {"status": "AWAITING_OWNER", "video_id": video.id, "source_video_id": job.payload["video_id"], "scope": "title_caption_hashtags"}
     else:
         raise ValueError("unsupported_job_kind")
     path = output / "result.json"

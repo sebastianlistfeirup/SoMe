@@ -1,0 +1,20 @@
+<article class="review-card">
+  <a class="review-card-media" href="/review/{{ card.video.id }}" aria-label="Åbn {{ card.post.title }}">
+    <img src="/media/{{ card.video.id }}/thumbnail.jpg" alt="Thumbnail til {{ card.post.title }}" loading="lazy">
+    <span class="video-duration">{{ card.video.duration_seconds | duration }}</span>
+  </a>
+  <div class="review-card-body">
+    <div class="review-card-meta">
+      <span class="status status-{{ card.video.status | lower }}">{{ card.video.status | status_label }}</span>
+      {% if card.video.features_json.get('is_demo') %}<span class="tag">DEMO</span>{% endif %}
+      <span class="version">v{{ card.video.version }}</span>
+    </div>
+    <h2><a href="/review/{{ card.video.id }}">{{ card.post.title }}</a></h2>
+    <p class="caption-excerpt">{{ card.post.caption }}</p>
+    {% if card.post.hashtags %}<p class="hashtags">{% for tag in card.post.hashtags[:4] %}<span>#{{ tag }}</span>{% endfor %}</p>{% endif %}
+    <div class="review-card-footer">
+      <span>{{ card.platform | platform_label }}</span>
+      <a class="text-link" href="/review/{{ card.video.id }}">{% if card.video.status == 'AWAITING_OWNER' %}Gennemgå opslag{% else %}Åbn opslag{% endif %} <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</article>
