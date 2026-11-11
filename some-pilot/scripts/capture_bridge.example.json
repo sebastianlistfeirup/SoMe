@@ -1,0 +1,36 @@
+{
+  "capture_dir": "C:/Users/compu/Videos/SoMe-captures",
+  "processed_dir": "C:/Users/compu/Videos/SoMe-processed",
+  "default_game": "hades",
+  "poll_seconds": 5,
+  "stable_pause_seconds": 1,
+  "ssh_config": "C:/Users/compu/Documents/SoMe/.codex_tmp/deploy/ssh_config",
+  "ssh_alias": "some-contabo-deploy",
+  "remote_root": "/opt/some/data/media-library",
+  "games": {
+    "hades": {
+      "source_url": "https://store.steampowered.com/app/1145360/",
+      "policy_url": "https://www.supergiantgames.com/blog/policy-on-lets-play-videos/",
+      "rights_holder": "Supergiant Games, LLC",
+      "rights_evidence": "Official publisher policy permits monetized reviews and commentary using captured gameplay and music as part of game videos; functional official game link required.",
+      "attribution": "Hades official game page",
+      "context": "Own Hades gameplay recorded locally with OBS for editorial commentary."
+    },
+    "celeste": {
+      "source_url": "https://store.steampowered.com/app/504230/",
+      "policy_url": "https://www.celestegame.com/letsplay.html",
+      "rights_holder": "Maddy Makes Games Inc.",
+      "rights_evidence": "Official Celeste page permits monetized Let's Plays, speedruns and reviews; separate soundtrack uploads prohibited.",
+      "attribution": "Celeste official game page",
+      "context": "Own Celeste gameplay recorded locally with OBS for editorial commentary."
+    },
+    "slay-the-spire": {
+      "source_url": "https://store.steampowered.com/app/646570/",
+      "policy_url": "https://www.megacrit.com/content-policy/",
+      "rights_holder": "Mega Crit Games, LLC",
+      "rights_evidence": "Official content policy permits monetized gameplay videos and music used transformatively; link to respective store page requested.",
+      "attribution": "Slay the Spire official Steam page",
+      "context": "Own Slay the Spire gameplay recorded locally with OBS for editorial commentary."
+    }
+  }
+}
