@@ -93,7 +93,7 @@ def test_elevenlabs_adapter_converts_pcm_and_records_cost(tmp_path, monkeypatch)
 
     class Response:
         content = b"pcm"
-        headers = {"x-request-id": "request-1"}
+        headers = {}
 
         def raise_for_status(self):
             return None
@@ -108,7 +108,8 @@ def test_elevenlabs_adapter_converts_pcm_and_records_cost(tmp_path, monkeypatch)
     assert result["decision"] == "ALLOW"
     assert result["paid_call"] is True
     assert result["actual_cost_dkk"] == 0.0014
-    assert result["files"][0]["request_id"] == "request-1"
+    assert result["successful_provider_calls"] == 1
+    assert result["files"][0]["request_id"] is None
     assert calls[0][1]["params"] == {"output_format": "pcm_24000"}
 
 

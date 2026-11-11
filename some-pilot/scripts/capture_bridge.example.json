@@ -39,6 +39,15 @@
       "rights_evidence": "Devolver's official permission generator permits streaming and monetization. Owner-specific written permission must be generated and attached before production; capture metadata still requires rights review.",
       "attribution": "Monster Train 2 official game page and Devolver permission proof",
       "context": "Own Monster Train 2 gameplay recorded locally with OBS for editorial commentary."
+    },
+    "ai": {
+      "source_type": "owned_screen_recording",
+      "source_url": "https://openai.com/",
+      "policy_url": "https://openai.com/policies/terms-of-use/",
+      "rights_holder": "Owner-recorded screen material; third-party tool rights require clip review",
+      "rights_evidence": "Owner-recorded AI tool demonstrations. UI brands, generated output, third-party content, account details and secrets must be reviewed per clip before production.",
+      "attribution": "Owner-recorded AI tool demonstrations with tool-specific review",
+      "context": "Owner-recorded Claude, Qwen, Codex, Kimi and local AI demonstrations for editorial commentary."
     }
   }
 }

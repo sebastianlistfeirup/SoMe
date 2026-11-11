@@ -87,7 +87,7 @@ def upload_directory(directory: Path, config: dict, game: str) -> str:
     scp = [tool_path("scp", config), "-F", str(ssh_config)]
     run([*ssh, f"sudo install -d -o \"$(id -un)\" -g \"$(id -gn)\" {remote}"])
     files = [path for path in directory.iterdir() if path.is_file()]
-    run([*scp, *map(str, files), f"{config['ssh_alias']}:{remote}/"])
+    run([*scp, *map(str, files), f"{config['ssh_alias']}:{remote}/"], timeout=7200)
     run([*ssh, f"sudo chown -R 10001:10001 {remote}"])
     return remote
 
@@ -116,7 +116,7 @@ def process_capture(input_path: Path, config: dict, game_key: str, upload: bool 
         "schema": "some-capture-v1",
         "game": game_key,
         "kind": "real_video",
-        "source_type": "owned_gameplay",
+        "source_type": game.get("source_type", "owned_gameplay"),
         "context": game.get("context", f"Own gameplay from {game_key}"),
         "source_path": output.name,
         "source_url": game["source_url"],

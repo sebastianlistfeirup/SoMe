@@ -15,7 +15,7 @@ MIN_REAL_MEDIA_RATIO = 0.80
 
 class RealMediaScene(BaseModel):
     kind: Literal["real_video", "real_image", "graphic"]
-    source_type: Literal["producer", "generic", "owned_gameplay", "synthetic"]
+    source_type: Literal["producer", "generic", "owned_gameplay", "owned_screen_recording", "synthetic"]
     source_path: str = ""
     context: str = Field(min_length=3, max_length=300)
     source_url: str = ""

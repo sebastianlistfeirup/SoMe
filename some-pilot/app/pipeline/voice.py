@@ -166,6 +166,7 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path) -> dict:
     if reasons:
         return _base_report("elevenlabs", reasons, files, paid_call=False, estimated_cost_dkk=estimated_cost, actual_cost_dkk=None)
     output_dir.mkdir(parents=True, exist_ok=False)
+    successful_calls = 0
     for segment in segments:
         raw_path = output_dir / f"{segment.segment_id}.pcm"
         path = output_dir / f"{segment.segment_id}.wav"
@@ -178,13 +179,14 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path) -> dict:
                 timeout=45,
             )
             response.raise_for_status()
+            successful_calls += 1
             raw_path.write_bytes(response.content)
             run(["ffmpeg", "-y", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", str(raw_path), "-ar", "48000", str(path)])
             files.append(_audio_file(segment, path, reasons, voice=settings.elevenlabs_voice_id, model=settings.elevenlabs_model_id, request_id=response.headers.get("x-request-id"), reused=False))
         except Exception as exc:
             reasons.append(f"voice_provider_request_failed:{segment.segment_id}:{type(exc).__name__}")
-    paid_call = any(row.get("request_id") for row in files)
-    return _base_report("elevenlabs", reasons, files, paid_call=paid_call, estimated_cost_dkk=estimated_cost, actual_cost_dkk=estimated_cost if paid_call else None, cost_basis="configured_verified_character_unit_price")
+    paid_call = successful_calls > 0
+    return _base_report("elevenlabs", reasons, files, paid_call=paid_call, estimated_cost_dkk=estimated_cost, actual_cost_dkk=estimated_cost if paid_call else None, successful_provider_calls=successful_calls, cost_basis="configured_verified_character_unit_price")
 
 
 def prepare_voice(segments: list[VoiceSegment], provider: str, output_dir: Path, existing_dir: Path | None = None) -> dict:
