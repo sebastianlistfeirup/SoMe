@@ -7,7 +7,7 @@ from pathlib import Path
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, text
@@ -98,6 +98,14 @@ def terms(request: Request) -> HTMLResponse:
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "privacy.html", {"request": request})
+
+
+@app.get("/tiktokDNEepLrDLh4SgEN8VZPDcTcL09iuTuaj.txt", response_class=PlainTextResponse)
+def tiktok_domain_verification():
+    path = root / "static" / "tiktokDNEepLrDLh4SgEN8VZPDcTcL09iuTuaj.txt"
+    if not path.is_file():
+        raise HTTPException(404)
+    return PlainTextResponse(path.read_text(encoding="utf-8"), media_type="text/plain", headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/login", response_class=HTMLResponse)
