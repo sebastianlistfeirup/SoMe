@@ -51,6 +51,8 @@ class RealMediaScene(BaseModel):
 class RealMediaPlan(BaseModel):
     platform: Literal["youtube", "instagram", "tiktok", "facebook"] = "youtube"
     minimum_real_ratio: float = Field(default=MIN_REAL_MEDIA_RATIO, ge=MIN_REAL_MEDIA_RATIO, le=1)
+    editorial_packet: str = "editorial-packet.json"
+    quality_dimensions: dict[str, float] | None = None
     scenes: list[RealMediaScene] = Field(min_length=1, max_length=30)
 
 

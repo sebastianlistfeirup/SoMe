@@ -44,6 +44,8 @@ Al ny produktion kræver `--media-plan`. Den gamle Pillow-slide-produktion er ik
 
 Mindst 80 % af varigheden skal være real_video/real_image. Planens `minimum_real_ratio` kan være højere, men aldrig lavere. Andelen måles pr. varighed, ikke pr. antal scener. `ai_generated=true` kan ikke bruges til at tælle AI-video som reel. Filsignatur, kildepath, videostream og source duration valideres. Hvert asset har kontekst, HTTPS source/policy URL, rettighedshaver, bevis, kreditering og aldersmetadata. Rettigheder og medieprocent skal være ALLOW før rendering og ved godkendelse.
 
+Ikke-demo-produktion kræver også `editorial-packet.json` og alle syv `quality_dimensions`. Pakken valideres mod Content Bible 1.1-skemaet, skal være produktionsklar og matche lane. Mindst 85 point, friske inspected sources og hørbar reception for hvert featured game er obligatorisk. Ranking har samme 85-points-, freshness- og receptionsgate pr. scene. Evidensudløb kontrolleres igen ved dispatch. Research-eksemplet i `content/examples` er ikke et gyldigt produktionsinput.
+
 `media_composition.json` dokumenterer procent, varighed, scenetyper og kontekst. Manifestet hasher dynamisk alle faktiske leveranceartifacts, herunder script, subtitles, voice report og eventuelle ElevenLabs narration/alignment/transcription-filer. Thumbnail vælges som et rent frame fra originalkilden uden undertekster/titeloverlay. Review-kort og detailvisning viser reel medieprocent; ældre formater markeres som ældre.
 
 CLI-kontrakt
@@ -81,7 +83,7 @@ Tests
   docker compose build
   docker compose run --rm --no-deps worker pytest -q
 
-Den aktuelle pakke har 173 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+Den aktuelle pakke har 178 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
 Gameplay-ranking (internetklip og ElevenLabs-voiceover)
 ------------------------------------------------------

@@ -160,6 +160,8 @@ def test_live_production_uses_ai_elevenlabs_voice_and_records_cost(db, tmp_path,
     monkeypatch.setattr("app.pipeline.production.claude_draft", lambda *_args: demo_draft(topic))
     monkeypatch.setattr("app.pipeline.production.review_draft", lambda *_args: ControlResult(decision="ALLOW"))
     monkeypatch.setattr("app.pipeline.production.current_prompt_version", lambda _db: "test-prompt")
+    (tmp_path / "editorial-packet.json").write_text('{"lane":"ai"}')
+    monkeypatch.setattr("app.pipeline.production.evaluate_editorial_packet", lambda *_args: {"decision": "ALLOW", "blockers": [], "score": 100, "source_valid_until": None})
     selected = {}
 
     def fake_voice(_segments, provider, output_dir, **kwargs):

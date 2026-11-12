@@ -1,10 +1,12 @@
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from sqlalchemy.orm import Session
 
 from app.db.models import Asset, License, Script, Topic, VideoVersion
 from app.pipeline.approvals import paused, sha256_file, transition
+from app.pipeline.editorial import GameReception, editorial_score, freshness_blockers, reception_blockers, EvidenceClaim
 from app.pipeline.media import probe, require_tools, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
@@ -27,13 +29,47 @@ def _existing_voice_dir(plan_path: Path, voice_dir: str | None) -> Path | None:
     return directory
 
 
-def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = "reels", mobile_style: str = "zoom", voice_provider: str = "kokoro") -> dict:
+def evaluate_ranking_editorial(plan: RankingPlan, narration: str, now: datetime | None = None) -> dict:
+    now = now or datetime.now(timezone.utc)
+    blockers = []
+    try:
+        score = editorial_score(plan.quality_dimensions or {})
+    except ValueError as exc:
+        score = 0
+        blockers.append(str(exc))
+    if score < 85:
+        blockers.append("editorial_quality_below_85")
+    claims = []
+    valid_until = []
+    for claim in plan.claims:
+        observed = datetime.fromisoformat(claim.verified_at).replace(tzinfo=timezone.utc)
+        expiry = observed + timedelta(hours=168)
+        valid_until.append(expiry)
+        claims.append(EvidenceClaim(id=claim.id, text=claim.text, source_url=str(claim.source_url), evidence_type="documented", scope=claim.evidence_note, observed_at=observed, expires_at=expiry, status="verified" if claim.verified else "not_checked"))
+    blockers.extend(freshness_blockers(claims, now))
+    games = []
+    for scene in plan.scenes:
+        reception = scene.reception or GameReception(game=scene.game, platform="unknown", observed_at=now)
+        if reception.game != scene.game:
+            blockers.append(f"{scene.game}:reception_game_mismatch")
+        games.append(reception)
+        valid_until.append(reception.observed_at + timedelta(hours=24))
+    blockers.extend(reception_blockers(games, narration))
+    expiry = min(valid_until) if valid_until else None
+    return {"decision": "ALLOW" if not blockers else "BLOCK", "score": score, "threshold": 85, "blockers": blockers, "source_refresh_checked_at": now.isoformat(), "source_valid_until": expiry.isoformat() if expiry else None, "claims_checked": len(claims), "games_checked": len(games)}
+
+
+def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = "reels", mobile_style: str = "zoom", voice_provider: str = "elevenlabs") -> dict:
     if paused(db):
         raise RuntimeError("emergency_stop_active")
     plan = RankingPlan.model_validate_json(plan_path.read_text(encoding="utf-8"))
     claim_control = ranking_claim_control(plan)
     if claim_control["decision"] != "ALLOW":
         raise ValueError("ranking_claim_control_blocked:" + ",".join(claim_control["issues"]))
+    narration = " ".join([plan.hook, *[scene.narration for scene in sorted(plan.scenes, key=lambda item: item.rank, reverse=True)]])
+    editorial = evaluate_ranking_editorial(plan, narration)
+    if editorial["decision"] != "ALLOW":
+        raise ValueError("editorial_blocked:" + ",".join(editorial["blockers"]))
     require_tools()
     existing_voice = _existing_voice_dir(plan_path, plan.voice_dir) if voice_provider == "kokoro" else None
     voice = prepare_voice(ranking_voice_segments(plan), voice_provider, output / "voice-assets", existing_voice)
@@ -96,7 +132,7 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
     quality = transcription_quality(narration, transcription)
     media_composition = {"decision": "ALLOW", "reasons": [], "real_media_seconds": round(duration, 3), "timeline_seconds": round(duration, 3), "real_media_ratio": 1.0, "real_media_percent": 100.0, "minimum_required_ratio": 0.8, "minimum_required_percent": 80.0, "real_scene_count": len(plan.scenes), "graphic_scene_count": 0, "measurement": "duration_weighted_not_scene_count", "ai_generated_counts_as_real": False, "contexts": [{"kind": "real_video", "source_type": "producer", "context": scene.game, "effect": "editorial_zoom"} for scene in plan.scenes]}
     (output / "media_composition.json").write_text(json.dumps({"platform": target_platform, **media_composition}, indent=2, ensure_ascii=False), encoding="utf-8")
-    checks = {"rights": rights.model_dump(), "layout": layout, "technical": technical, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "voice": voice, "media_composition": media_composition, "transcription": transcription, "visual_review": "required_before_publication", "editorial_limits": "Subjective handheld ranking, not FPS testing on Legion Go 2. Publisher policies are not legal guarantees.", "owner_review_required": True}
+    checks = {"rights": rights.model_dump(), "layout": layout, "technical": technical, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "editorial": editorial, "voice": voice, "media_composition": media_composition, "transcription": transcription, "visual_review": "required_before_publication", "editorial_limits": "Subjective handheld ranking, not FPS testing on Legion Go 2. Publisher policies are not legal guarantees.", "owner_review_required": True}
     (output / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
     if safety.decision != "ALLOW" or quality["decision"] != "ALLOW":
         transition(video, "BLOCKED")

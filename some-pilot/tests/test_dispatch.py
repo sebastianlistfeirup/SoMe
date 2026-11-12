@@ -176,3 +176,25 @@ def test_stale_approval_cannot_enqueue_more_jobs(db, awaiting_video, monkeypatch
 def test_invalid_schedule_is_a_controlled_approval_error():
     with pytest.raises(Exception, match="invalid_publication_time"):
         normalize_publish_at("not-a-date")
+
+
+def test_expired_editorial_evidence_blocks_dispatch_after_approval(db, awaiting_video, monkeypatch):
+    enable_publishing(monkeypatch)
+    review = approve_destinations(db, awaiting_video, "owner", DESTINATIONS, True)
+    review.checks_json = {**review.checks_json, "editorial": {"decision": "ALLOW", "source_valid_until": "2020-01-01T00:00:00+00:00"}}
+    db.commit()
+    with pytest.raises(Exception, match="editorial_source_refresh_required"):
+        verify_approval(db, awaiting_video, "youtube", "channel-1")
+
+
+def test_changed_narration_artifact_invalidates_approval(db, awaiting_video, monkeypatch):
+    enable_publishing(monkeypatch)
+    from pathlib import Path
+
+    path = Path(awaiting_video.output_dir) / "narration.wav"
+    path.write_bytes(b"original narration")
+    db.commit()
+    approve_destinations(db, awaiting_video, "owner", DESTINATIONS, True)
+    path.write_bytes(b"changed narration")
+    with pytest.raises(Exception, match="approval_invalidated_by_change"):
+        verify_approval(db, awaiting_video, "youtube", "channel-1")

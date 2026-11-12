@@ -12,7 +12,7 @@ Contabo-serveren, Claude, YouTube, Instagram, Facebook og TikTok Sandbox er forb
 
 - 6 vCPU, 12 GB RAM, 300 GB NVMe, fem snapshots, 500 Mbit/s-port og ubegrænset trafik. Kontrolpanelet viser én måneds kontrakt og €23,75/måned, cirka 177 DKK. Endelig faktura og moms er ikke verificeret.
 - Serveren overstiger det tidligere 150 DKK-loft. Der skal ikke købes flere servere eller større API-pakker uden ny beslutning.
-- Applikationscommit `a0b77ba` er deployet, **173/173 tests** bestod lokalt og på serveren, web/worker er healthy.
+- Applikationscommit `a0b77ba` er deployet, **178/178 tests** bestod lokalt og på serveren, web/worker er healthy.
 - SSH bruger separat ED25519-nøgle. Root- og passwordlogin over SSH er slået fra. UFW og Fail2ban er aktive.
 - Caddy giver gyldig HTTPS på `https://62.171.167.243.sslip.io`. Dashboardbruger er `owner`; initialadgangskoden ligger i root-beskyttet `/opt/some/secrets/initial-admin-password`.
 - Caddy’s admin-whitelist skal opdateres, når ejerens IP skifter. Offentlige health-/juridiske ruter og callbacks er adskilt fra ejer-ruterne.
@@ -82,7 +82,8 @@ Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af
 - **Mindst 80 % af hver ny videos varighed skal være rigtige videoklip eller rigtige billeder.** Målingen er duration-weighted. En medieplan kan kræve 90–100 %, men aldrig sænke grænsen.
 - Producentklip, generiske kontekstklip, egne gameplayoptagelser og rigtige fotos med zoom/pan understøttes. Grafik/title cards må højst fylde 20 %.
 - Hver scene skal have kontekst, lokal fil, HTTPS source/policy URL, rettighedshaver, bevis, kreditering og person-/aldersmetadata. `ai_generated=true` kan ikke tælle som reelt.
-- `media_composition.json` er obligatorisk i checks, 11-fils manifestet og ZIP-eksport. Approval kræver ALLOW. Review viser reel procent på kort og detaljeside.
+- `media_composition.json` er obligatorisk i checks, det dynamiske artifact-manifest og ZIP-eksport. Approval kræver ALLOW. Review viser reel procent på kort og detaljeside.
+- Ikke-demo-produktion kræver desuden `editorial-packet.json` i samme mappe samt alle syv `quality_dimensions` i medieplanen. Pakken skal være `needs_owner_review` eller `approved_draft`, matche Gaming/AI-lane og opnå mindst 85 point. Hvert featured game skal have hørbar reception eller en sand dokumenteret undtagelse. Udløbet evidens giver `editorial_source_refresh_required` ved dispatch.
 - Medieplaner og klip køres foreløbig via CLI med filer i samme mappe. En visuel upload-/biblioteksoplevelse og fuld automatisk medieplanlægning er ikke færdig.
 - Eksempel: `research/top10-legion-go2/real-media-demo.json`. På serveren ligger plan og klip under `/data/media-plans/real-demo`.
 - **Demo 8** er produceret med 100 % officiel video fra Transistor, Celeste, Slay the Spire, Hollow Knight og Hades. Den har 11 manifestfiler, teknisk ALLOW og rent source-frame som thumbnail. Demo 6 og 7 er erstattede. Demo 8 er ikke publiceret.

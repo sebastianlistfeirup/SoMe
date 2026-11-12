@@ -3,10 +3,10 @@ Opdateret: 2026-11-12
 Repository: https://github.com/sebastianlistfeirup/SoMe
 
 AKTIV ARKITEKTUR
-- Pixel and Parameters Content Bible v1.1 er integreret med 20 recipes, 120 idéer, 57 evidenskilder, redaktionelle scoringer, friskhedsregler og reception/freshness-validering. Steam- og Metacritic-opslag accepterer ikke manglende data som succes.
+- Pixel and Parameters Content Bible v1.1 er integreret med 20 recipes, 120 idéer, 57 evidenskilder og redaktionelle scoringer. Ikke-demo-produktion kræver en schema-valideret `editorial-packet.json`, lane-match og mindst 85 point. Research-eksempler, uaktuelle kilder og manglende hørbar reception blokerer før stemme/rendering; kildernes udløb kontrolleres igen ved dispatch. Steam- og Metacritic-opslag accepterer ikke manglende data som succes.
 - Backendens review-center viser den færdige video, thumbnail, titel, opslagstekst, hashtags, kilder og medieprocent. ElevenLabs-narration kan afspilles separat, når den findes i manifestet.
 - Facebook, Instagram, YouTube og TikTok er valgt som standard. Ejeren kan fjerne destinationer, vælge YouTube-synlighed og angive et fremtidigt tidspunkt. Kun forbundne, konkrete konto-ID'er kan godkendes.
-- Godkendelsen er immutable: Den binder video, thumbnail, tekst, links, destinationer, konto-ID'er, synlighed og tidspunkt med SHA-256. Ændringer kræver en ny revision og ny godkendelse.
+- Godkendelsen er immutable: Den binder video, thumbnail, narration, subtitles, alignment, script, editorial-pakke, tekst, links, destinationer, konto-ID'er, synlighed og tidspunkt med SHA-256, når artifacts findes. Ændringer kræver en ny revision og ny godkendelse.
 - Godkendelse opretter automatisk ét idempotent publiceringsjob pr. destination. Worker understøtter separat kø, status, tre forsøg, delvis completion og RECONCILE_REQUIRED ved usikkert resultat. Afvisning opretter ingen publiceringsjobs.
 - En pakke markeres først PUBLISHED, når samtlige valgte destination/konto-par er bekræftet. En fejl på én destination gentager ikke allerede publicerede destinationer.
 
@@ -23,12 +23,12 @@ TIKTOK
 - Den gatede adapter bruger creator_info og `/post/publish/video/init/`, aldrig inbox-endpointet. Kun `PUBLISH_COMPLETE` accepteres som publiceret. Production-review og reelt Direct Post-kald er ikke verificeret.
 
 VERIFICERET LOKALT
-- Standardbuild og hele testpakken: 173/173 tests består i frisk Docker-container.
+- Standardbuild og hele testpakken: 178/178 tests består i frisk Docker-container.
 - Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost og AI-lane-valg.
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
 VERIFICERET PÅ VPS
-- Commit `a0b77ba` er deployet med standardscriptet. Hele pakken består også på VPS: 173/173 tests.
+- Commit `a0b77ba` er deployet med standardscriptet. Hele pakken består også på VPS: 178/178 tests.
 - Migration 0001 og doctor er OK. Web og worker er healthy, og både loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
 - Doctor viser `direct_post_eligible=false` og `direct_post_blocker=tiktok_direct_post_not_eligible`. ElevenLabs er konfigureret; der er ikke foretaget nye betalte produktionskald.
 

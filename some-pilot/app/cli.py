@@ -105,7 +105,7 @@ def build_parser() -> argparse.ArgumentParser:
     ranking_parser.add_argument("--output", required=True)
     ranking_parser.add_argument("--platform", choices=["tiktok", "reels", "youtube"], default="reels")
     ranking_parser.add_argument("--mobile-style", choices=["zoom", "safe"], default="zoom")
-    ranking_parser.add_argument("--voice-provider", choices=["kokoro", "elevenlabs"], default="kokoro")
+    ranking_parser.add_argument("--voice-provider", choices=["kokoro", "elevenlabs"], default="elevenlabs")
     metrics = sub.add_parser("metrics")
     metrics.add_argument("--due", action="store_true")
     metrics.add_argument("--import-csv")

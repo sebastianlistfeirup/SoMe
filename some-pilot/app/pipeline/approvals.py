@@ -1,5 +1,6 @@
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy.orm import Session
@@ -25,12 +26,19 @@ def canonical_hash(value: dict) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def artifact_hashes(video: VideoVersion) -> dict:
+    root = Path(video.output_dir)
+    names = ("narration.wav", "captions.srt", "script.json", "alignment.json", "alignment.normalized.json", "editorial.json")
+    return {name: sha256_file(str(root / name)) for name in names if (root / name).is_file()}
+
+
 def approval_digest(video: VideoVersion, platform: str, account: str) -> dict:
     if not video.video_path or not video.thumbnail_path:
         raise ApprovalError("missing_rendered_files")
     components = {
         "video_sha256": sha256_file(video.video_path),
         "thumbnail_sha256": sha256_file(video.thumbnail_path),
+        "artifacts_sha256": artifact_hashes(video),
         "text": video.post_json.get("text", ""),
         "links": sorted(video.post_json.get("links", [])),
         "platform": platform,
@@ -42,6 +50,21 @@ def approval_digest(video: VideoVersion, platform: str, account: str) -> dict:
 def paused(db: Session) -> bool:
     setting = db.get(Setting, "emergency_stop")
     return bool(setting and setting.value_json.get("enabled"))
+
+
+def editorial_blockers(checks: dict, now: datetime | None = None) -> list[str]:
+    editorial = checks.get("editorial")
+    if not editorial:
+        return []
+    if editorial.get("decision") != "ALLOW":
+        return ["check_not_allowed:editorial"]
+    valid_until = editorial.get("source_valid_until")
+    if valid_until:
+        expiry = datetime.fromisoformat(valid_until.replace("Z", "+00:00"))
+        expiry = expiry.replace(tzinfo=timezone.utc) if expiry.tzinfo is None else expiry.astimezone(timezone.utc)
+        if expiry <= (now or datetime.now(timezone.utc)):
+            return ["editorial_source_refresh_required"]
+    return []
 
 
 def set_pause(db: Session, enabled: bool, actor: str) -> None:
@@ -100,6 +123,9 @@ def approve(
     for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition"):
         if checks.get(name, {}).get("decision") != "ALLOW":
             raise ApprovalError(f"check_not_allowed:{name}")
+    blockers = editorial_blockers(checks)
+    if blockers:
+        raise ApprovalError(blockers[0])
     digest = approval_digest(video, platform, account)
     review = Review(
         video_version_id=video.id,
@@ -134,6 +160,9 @@ def verify_approval(db: Session, video: VideoVersion, platform: str, account: st
     review = latest_approval(db, video.id)
     if review is None:
         raise ApprovalError("owner_approval_required")
+    blockers = editorial_blockers(review.checks_json)
+    if blockers:
+        raise ApprovalError(blockers[0])
     if video.status not in {"APPROVED", "SCHEDULED", "PUBLISHING", "RECONCILE_REQUIRED", "PUBLISHED"}:
         raise ApprovalError("approval_invalidated_by_state")
     destinations = review.digest_json.get("destinations")
@@ -171,6 +200,7 @@ def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
     components = {
         "video_sha256": sha256_file(video.video_path),
         "thumbnail_sha256": sha256_file(video.thumbnail_path),
+        "artifacts_sha256": artifact_hashes(video),
         "text": video.post_json.get("text", ""),
         "links": sorted(video.post_json.get("links", [])),
         "destinations": normalized,
@@ -210,6 +240,9 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
     for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition"):
         if checks.get(name, {}).get("decision") != "ALLOW":
             raise ApprovalError(f"check_not_allowed:{name}")
+    blockers = editorial_blockers(checks)
+    if blockers:
+        raise ApprovalError(blockers[0])
     digest = destinations_digest(video, destinations)
     review = Review(video_version_id=video.id, decision="APPROVED", reviewer=reviewer, digest_json=digest, checks_json=checks)
     transition(video, "APPROVED", reviewer)

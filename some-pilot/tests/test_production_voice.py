@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from app.db.models import VideoVersion
 from app.pipeline.approvals import approve
 from app.pipeline.production_ranking import produce_ranking
@@ -13,9 +15,14 @@ RANK_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7:
 def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, monkeypatch):
     payload = plan().model_dump(mode="json")
     payload["post_text"] = "Editorial ranking, not an FPS benchmark. Independent and unsponsored."
+    payload["quality_dimensions"] = {name: 5 for name in ("viewer_promise", "opening", "evidence", "visual_match", "payoff", "platform_fit", "voice")}
+    from datetime import datetime, timezone
+
     for item in payload["scenes"]:
         item["game"] = f"Game {item['rank']}"
-        item["narration"] = f"At number {RANK_WORDS[item['rank']]}, {item['game']} is our editorial pick."
+        spoken = f"{item['game']} has Very Positive English Steam reception from 100 reviews."
+        item["narration"] = f"At number {RANK_WORDS[item['rank']]}, {item['game']} is our editorial pick. {spoken}"
+        item["reception"] = {"game": item["game"], "platform": "pc", "observed_at": datetime.now(timezone.utc).isoformat(), "spoken_line": spoken, "steam_rating": "Very Positive", "steam_review_count": 100}
         source = tmp_path / item["source_path"]
         source.parent.mkdir(parents=True, exist_ok=True)
         source.write_bytes(b"video")
@@ -69,10 +76,27 @@ def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, 
     assert not (tmp_path / "output" / "avatar_request.json").exists()
     manifest = json.loads((tmp_path / "output" / "manifest.json").read_text(encoding="utf-8"))
     assert "voice_assets.json" in manifest["files_sha256"]
-    assert len(manifest["files_sha256"]) == 12
-    assert "script.json" in manifest["files_sha256"]
+    assert len(manifest["files_sha256"]) == 13
+    assert {"script.json", "editorial.json"} <= set(manifest["files_sha256"])
     assert manifest["real_media_ratio"] == 1.0
 
     review = approve(db, video, "owner", "youtube", "channel-1", True)
     assert review.digest_json["approval_sha256"]
     assert video.status == "APPROVED"
+
+
+def test_ranking_blocks_missing_reception_before_voice_or_render(db, tmp_path, monkeypatch):
+    from datetime import datetime, timezone
+
+    payload = plan().model_dump(mode="json")
+    payload["quality_dimensions"] = {name: 5 for name in ("viewer_promise", "opening", "evidence", "visual_match", "payoff", "platform_fit", "voice")}
+    first = payload["scenes"][0]
+    spoken = "Test game has Very Positive English Steam reception from 100 reviews."
+    first["narration"] += " " + spoken
+    first["reception"] = {"game": first["game"], "platform": "pc", "observed_at": datetime.now(timezone.utc).isoformat(), "spoken_line": spoken, "steam_rating": "Very Positive", "steam_review_count": 100}
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr("app.pipeline.production_ranking.ranking_claim_control", lambda _plan: {"decision": "ALLOW", "issues": []})
+    monkeypatch.setattr("app.pipeline.production_ranking.prepare_voice", lambda *_args, **_kwargs: pytest.fail("voice called despite editorial blocker"))
+    with pytest.raises(ValueError, match="spoken_reception_missing"):
+        produce_ranking(db, path, tmp_path / "output", voice_provider="elevenlabs")

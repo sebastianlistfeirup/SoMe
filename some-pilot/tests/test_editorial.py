@@ -41,3 +41,57 @@ def test_every_game_reception_must_be_spoken_and_match_narration():
     assert "XCOM 2:spoken_reception_missing" in reception_blockers([missing], "No reception")
     retro = GameReception(game="Cannon Fodder", platform="amiga", observed_at=datetime.now(timezone.utc), coverage_exception="I couldn't verify comparable modern coverage for the original Amiga release.")
     assert reception_blockers([retro], "I couldn't verify comparable modern coverage for the original Amiga release.") == []
+
+
+def complete_packet(now):
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "content"
+    packet = json.loads((root / "examples" / "gaming_packet_needs_capture.json").read_text(encoding="utf-8"))
+    packet["state"] = "needs_owner_review"
+    for source in packet["sources"]:
+        source["access_status"] = "inspected"
+        source["retrieved_at"] = now.isoformat()
+        source["expires_at"] = (now + timedelta(days=2)).isoformat()
+    for claim in packet["claims"]:
+        claim["status"] = "verified"
+        claim["evidence_type"] = "documented"
+        claim["expires_at"] = (now + timedelta(days=1)).isoformat()
+    for game in packet["games"]:
+        for kind in ("critic", "steam"):
+            game[kind]["status"] = "verified"
+            game[kind]["reason"] = None
+    return packet
+
+
+def full_quality():
+    return {name: 5 for name in ("viewer_promise", "opening", "evidence", "visual_match", "payoff", "platform_fit", "voice")}
+
+
+def test_editorial_packet_is_a_real_quality_freshness_and_reception_gate():
+    from app.pipeline.editorial import evaluate_editorial_packet
+
+    now = datetime.now(timezone.utc)
+    packet = complete_packet(now)
+    narration = " ".join(segment["voiceover"] for segment in packet["segments"])
+    result = evaluate_editorial_packet(packet, narration, full_quality(), now)
+    assert result["decision"] == "ALLOW"
+    assert result["score"] == 100
+    assert result["games_checked"] == 1
+
+
+def test_editorial_packet_blocks_stale_claims_low_quality_and_missing_spoken_reception():
+    from app.pipeline.editorial import evaluate_editorial_packet
+
+    now = datetime.now(timezone.utc)
+    packet = complete_packet(now)
+    packet["claims"][0]["expires_at"] = (now - timedelta(seconds=1)).isoformat()
+    for segment in packet["segments"]:
+        segment["reception_for"] = []
+    narration = " ".join(segment["voiceover"] for segment in packet["segments"])
+    result = evaluate_editorial_packet(packet, narration, {name: 4 for name in full_quality()}, now)
+    assert result["decision"] == "BLOCK"
+    assert "claim_C01:expired" in result["blockers"]
+    assert "editorial_quality_below_85" in result["blockers"]
+    assert "Into the Breach:spoken_reception_missing" in result["blockers"]

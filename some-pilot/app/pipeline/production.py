@@ -10,6 +10,7 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
 from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
+from app.pipeline.editorial import evaluate_editorial_packet
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
@@ -74,6 +75,23 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     db.add(video)
     db.flush()
     try:
+        editorial = {"decision": "ALLOW", "blockers": [], "score": None, "mode": "demo_no_external_claims", "source_valid_until": None}
+        if not dry_run:
+            if Path(media_plan.editorial_packet).name != media_plan.editorial_packet or media_plan.editorial_packet in {"", ".", ".."}:
+                raise ValueError("editorial_packet_path_invalid")
+            packet_path = media_plan_path.parent / media_plan.editorial_packet
+            if not packet_path.is_file():
+                raise ValueError("editorial_packet_required")
+            packet = json.loads(packet_path.read_text(encoding="utf-8"))
+            expected_lane = "ai" if "ai" in topic.niche.lower() else "gaming"
+            if packet.get("lane") not in {expected_lane, "crossover"}:
+                raise ValueError("editorial_lane_mismatch")
+            editorial = evaluate_editorial_packet(packet, draft.narration, media_plan.quality_dimensions)
+            (output / "editorial.json").write_text(json.dumps(packet, indent=2, ensure_ascii=False), encoding="utf-8")
+            if editorial["decision"] != "ALLOW":
+                transition(video, "BLOCKED")
+                db.commit()
+                raise ValueError("editorial_blocked:" + ",".join(editorial["blockers"]))
         prepared = prepare_media(media_plan, media_plan_path, output)
         assets = []
         licenses = []
@@ -174,7 +192,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         if settings.dashscope_api_key:
             from app.pipeline.visual_review import review_storyboard
             visual_review = review_storyboard(db, board, coverage, f"visual-{video.id}-v{version_number}").model_dump()
-        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "voice": voice, "media_composition": coverage, "visual_media_review": visual_review, "transcription": transcription, "owner_review_required": True}
+        checks = {"rights": rights.model_dump(), "technical": technical, "layout": layout, "safety": safety.model_dump(), "quality": quality, "claim_control": claim_control, "editorial": editorial, "voice": voice, "media_composition": coverage, "visual_media_review": visual_review, "transcription": transcription, "owner_review_required": True}
         (output / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
         if visual_review["decision"] not in {"ALLOW", "NOT_CONFIGURED"}:
             transition(video, "BLOCKED")
@@ -202,7 +220,7 @@ def _write_deliverables(output: Path, video: VideoVersion, script: Script, asset
     (output / "post.json").write_text(json.dumps(video.post_json, indent=2, ensure_ascii=False), encoding="utf-8")
     files = {}
     deliverable_names = ["video.mp4", "captions.srt", "thumbnail.jpg", "script.json", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg", "voice_assets.json", "media_composition.json"]
-    optional_names = ["narration.wav", "alignment.json", "alignment.normalized.json", "transcription.srt"]
+    optional_names = ["narration.wav", "alignment.json", "alignment.normalized.json", "transcription.srt", "editorial.json"]
     for name in deliverable_names + [name for name in optional_names if (output / name).is_file()]:
         files[name] = sha256_file(str(output / name))
     manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id for asset in assets], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "voice": checks.get("voice", {}), "real_media_ratio": checks.get("media_composition", {}).get("real_media_ratio"), "minimum_real_media_ratio": checks.get("media_composition", {}).get("minimum_required_ratio"), "files_sha256": files}

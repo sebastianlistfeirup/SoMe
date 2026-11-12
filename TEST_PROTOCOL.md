@@ -172,9 +172,9 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - TikTok Sandbox/inbox er ikke længere en gyldig published-tilstand i den aktive adapter. Uden alle eligibility-flag er blocker `tiktok_direct_post_not_eligible`. En fuldt mocket eligible test bruger creator_info og Direct Post-endpointet og accepterer kun PUBLISH_COMPLETE. Der er ikke foretaget et nyt TikTok-kald.
 - ElevenLabs mocktests bruger `/with-timestamps`, Base64-PCM, request-ID, rå/normaliseret alignment, varighed, succesfulde kald og tegnbaseret DKK-pris. Alignment skaber faktiske SRT-cues og tekstmismatch blokerer. En fuld syntetisk AI-produktion vælger `8CjmkufHc22WbMZEBHbm`, gemmer cost og artifacts.
 - YouTube mocktest afventer `processingStatus=succeeded` og kalder `thumbnails.set` med godkendt JPEG. Instagram mocktest sender både video_url og cover_url. Signet thumbnail er bundet til multi-approvalhashen og ændringer blokerer.
-- Standardbuild og fuld pakke i frisk container: **173 passed**. Kun Starlette TestClient-deprecationwarning.
+- Standardbuild og fuld pakke i frisk container: **178 passed**. Kun Starlette TestClient-deprecationwarning.
 - Ingen nye ejervideoer er produceret, og `C:/Users/compu/Videos/SoMe-captures` er ikke ændret. Reel pilotproduktion og publicering afventer ejerens eksplicitte go samt platformspecifikke eligibility-forhold.
 
-- Deployment `a0b77ba` på VPS gav ligeledes **173 passed**. Første serverkørsel fangede miljøafhængighed i ElevenLabs-guard-testen; testen sætter nu eksplicit pris/dato/rettigheder til tomme værdier og bestod både lokalt og på VPS efter rettelsen.
+- Deployment `a0b77ba` på VPS gav ligeledes **178 passed**. Første serverkørsel fangede miljøafhængighed i ElevenLabs-guard-testen; testen sætter nu eksplicit pris/dato/rettigheder til tomme værdier og bestod både lokalt og på VPS efter rettelsen.
 - Standarddeployment fuldførte migration 0001 og doctor. Web og worker blev efterfølgende kontrolleret som healthy. `GET /healthz` på loopback og HTTPS returnerede `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
 - VPS doctor: `direct_post_eligible=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`; ElevenLabs konfigureret. Ingen ny ekstern publicering eller betalt produktion blev udført under deployment.
