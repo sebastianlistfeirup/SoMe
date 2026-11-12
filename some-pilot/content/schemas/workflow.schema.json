@@ -1,0 +1,589 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.1.0"
+    },
+    "story_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "is_synthetic": {
+      "type": "boolean"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "bible_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lane": {
+          "enum": [
+            "gaming",
+            "ai",
+            "crossover"
+          ]
+        },
+        "editorial_packet_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "script_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "narration_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "script",
+                  "thumbnail",
+                  "narration",
+                  "video",
+                  "captions"
+                ]
+              },
+              "storage_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sha256": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "content_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "required",
+                  "complete",
+                  "failed"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "storage_path",
+              "sha256",
+              "bytes",
+              "content_type",
+              "status",
+              "provider",
+              "voice_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "destinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "platform": {
+                "enum": [
+                  "facebook",
+                  "instagram",
+                  "youtube",
+                  "tiktok"
+                ]
+              },
+              "account_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "variant_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "video_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "thumbnail_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hashtags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "publication_options": {
+                "type": "object",
+                "properties": {
+                  "timing": {
+                    "enum": [
+                      "immediate",
+                      "scheduled"
+                    ]
+                  },
+                  "publish_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "timing",
+                  "publish_at"
+                ],
+                "additionalProperties": true,
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "timing": {
+                          "const": "scheduled"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "publish_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "else": {
+                      "properties": {
+                        "publish_at": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "script_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "narration_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "captions_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "account_id",
+              "variant_id",
+              "video_artifact_id",
+              "thumbnail_artifact_id",
+              "title",
+              "caption",
+              "hashtags",
+              "publication_options",
+              "script_artifact_id",
+              "narration_artifact_id",
+              "captions_artifact_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "voice_profile": {
+          "enum": [
+            "gaming",
+            "ai"
+          ]
+        }
+      },
+      "required": [
+        "bible_version",
+        "revision",
+        "lane",
+        "editorial_packet_sha256",
+        "script_artifact_id",
+        "narration_artifact_id",
+        "artifacts",
+        "destinations",
+        "voice_profile"
+      ],
+      "additionalProperties": false
+    },
+    "backend": {
+      "type": "object",
+      "properties": {
+        "draft_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "persisted_payload_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "state": {
+          "enum": [
+            "building",
+            "needs_owner_review",
+            "approved",
+            "rejected",
+            "dispatching",
+            "partially_published",
+            "published"
+          ]
+        }
+      },
+      "required": [
+        "draft_id",
+        "revision",
+        "persisted_payload_sha256",
+        "saved_at",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "reviewer_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decided_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "destination_accounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "destination_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "account_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "destination_id",
+              "account_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "backend_event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "decision",
+        "reviewer_id",
+        "decided_at",
+        "revision",
+        "payload_sha256",
+        "destination_accounts",
+        "backend_event_id"
+      ],
+      "additionalProperties": false
+    },
+    "preflight": {
+      "type": "object",
+      "properties": {
+        "editorial_gate_passed": {
+          "type": "boolean"
+        },
+        "actual_media_review_passed": {
+          "type": "boolean"
+        },
+        "source_refresh": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "not_checked",
+                "passed",
+                "changed",
+                "failed"
+              ]
+            },
+            "checked_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "valid_until": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "payload_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "evidence_reference": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "checked_at",
+            "valid_until",
+            "payload_sha256",
+            "evidence_reference"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "editorial_gate_passed",
+        "actual_media_review_passed",
+        "source_refresh"
+      ],
+      "additionalProperties": false
+    },
+    "deliveries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "destination_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "failed",
+              "unknown",
+              "published"
+            ]
+          },
+          "attempt_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "last_attempt_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "failure_retryable": {
+            "type": "boolean"
+          },
+          "platform_post_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reconciliation": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "not_required",
+                  "needs_check",
+                  "confirmed_not_published",
+                  "confirmed_published"
+                ]
+              },
+              "checked_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "receipt_reference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "checked_at",
+              "receipt_reference"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "destination_id",
+          "payload_sha256",
+          "idempotency_key",
+          "status",
+          "attempt_count",
+          "last_attempt_at",
+          "failure_retryable",
+          "platform_post_id",
+          "reconciliation"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "story_id",
+    "is_synthetic",
+    "payload",
+    "backend",
+    "approval",
+    "preflight",
+    "deliveries"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-and-parameters.invalid/schemas/workflow.schema.json",
+  "title": "Pixel and Parameters complete draft and dispatch authorization contract",
+  "description": "Local structural contract only. Protected fields must be supplied by authenticated backend and verification services. Synthetic fixtures cannot dispatch."
+}

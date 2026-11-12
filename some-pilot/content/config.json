@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.1.0",
+  "channel": "Pixel and Parameters",
+  "public_language": "en",
+  "editorial_timezone": "Europe/Copenhagen",
+  "storage_timezone": "UTC",
+  "publish_mode": "automatic_after_owner_approval",
+  "voice_profiles": {
+    "gaming": {
+      "voice_id": null,
+      "intro_asset_id": null
+    },
+    "ai": {
+      "voice_id": null,
+      "intro_asset_id": null
+    }
+  },
+  "capabilities": {
+    "web_retrieval": "not_connected",
+    "media_inventory": "not_connected",
+    "voice_render": "unconfigured",
+    "video_render": "unconfigured",
+    "platform_analytics": "not_connected",
+    "publishing": "unconfigured",
+    "thumbnail_render": "unconfigured",
+    "backend_drafts": "unconfigured"
+  },
+  "required_reception": {
+    "every_featured_game": true,
+    "audible_in_every_narrated_variant": true,
+    "standalone_silent_gaming": false,
+    "critic_provider_requirement": "metacritic_or_opencritic",
+    "steam_if_applicable": true
+  },
+  "planning_weights": {
+    "viewer_value": 20,
+    "footage_fit": 20,
+    "evidence_readiness": 20,
+    "distinctiveness": 15,
+    "timeliness": 10,
+    "platform_fit": 10,
+    "learning_value": 5
+  },
+  "planning_formula": "sum(weight_i * dimension_score_0_to_5 / 5)",
+  "quality_weights": {
+    "viewer_promise": 15,
+    "opening": 10,
+    "evidence": 20,
+    "visual_match": 20,
+    "payoff": 15,
+    "platform_fit": 10,
+    "voice": 10
+  },
+  "review_score_threshold": 85,
+  "max_targeted_revision_cycles": 2,
+  "freshness_hours": {
+    "price_stock": 2,
+    "reception": 24,
+    "model_access": 24,
+    "technical_tutorial": 168,
+    "platform_rules": 720
+  },
+  "learning": {
+    "snapshot_hours": [
+      24,
+      72,
+      168,
+      672
+    ],
+    "baseline_last_n": 10,
+    "minimum_for_nonexploratory_cohort": 5,
+    "automatic_constitution_changes": false,
+    "missing_value": null
+  },
+  "production_budget": {
+    "currency": null,
+    "max_cost_per_parent_story": null,
+    "max_research_calls": null
+  },
+  "configuration_note": "Version 1.1 targets complete automatic production and publishing after Sebastian approves the exact backend draft. This kit implements local contract checks only. Attach real ElevenLabs voices, media/render/backend integrations and verified destination accounts; unconfigured connections and synthetic fixtures cannot dispatch.",
+  "voice_provider": "elevenlabs",
+  "publishing": {
+    "enabled": true,
+    "mode": "automatic_after_owner_approval",
+    "owner_name": "Sebastian",
+    "owner_id": null,
+    "default_destinations": [
+      "facebook",
+      "instagram",
+      "youtube",
+      "tiktok"
+    ],
+    "require_complete_backend_draft": true,
+    "require_immutable_payload_approval": true,
+    "require_source_refresh_before_dispatch": true,
+    "require_verified_destination_capability": true,
+    "retry_policy": "failed_destinations_only; reconcile_unknown_before_retry; never_reupload_published",
+    "live_connections": {
+      "facebook": {
+        "status": "unconfigured",
+        "account_id": null,
+        "connection_reference": null,
+        "capability_checked_at": null,
+        "capability_valid_until": null
+      },
+      "instagram": {
+        "status": "unconfigured",
+        "account_id": null,
+        "connection_reference": null,
+        "capability_checked_at": null,
+        "capability_valid_until": null
+      },
+      "youtube": {
+        "status": "unconfigured",
+        "account_id": null,
+        "connection_reference": null,
+        "capability_checked_at": null,
+        "capability_valid_until": null
+      },
+      "tiktok": {
+        "status": "unconfigured",
+        "account_id": null,
+        "connection_reference": null,
+        "capability_checked_at": null,
+        "capability_valid_until": null
+      }
+    }
+  }
+}

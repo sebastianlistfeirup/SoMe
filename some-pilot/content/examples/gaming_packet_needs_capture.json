@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.1.0",
+  "story_id": "EXAMPLE-ITB-001",
+  "lane": "gaming",
+  "state": "needs_footage",
+  "target_language": "en",
+  "promise": "Explain why one small tactics battlefield can offer a meaningful decision.",
+  "recipe_id": "XF01",
+  "created_at": "2026-11-12T12:00:00Z",
+  "sources": [
+    {
+      "id": "G05",
+      "url": "https://store.steampowered.com/app/590380/Into_the_Breach/?l=english",
+      "title": "Into the Breach on Steam",
+      "source_type": "official",
+      "retrieved_at": "2026-11-12T12:00:00Z",
+      "event_date": null,
+      "expires_at": "2026-11-13T12:00:00Z",
+      "access_status": "inspected",
+      "evidence_note": "Publisher description and English-language review snapshot inspected; all dynamic values require fresh retrieval for a real production.",
+      "limitations": [
+        "Example timestamp is a date-level research fixture, not a platform server measurement.",
+        "No recording supplied."
+      ]
+    },
+    {
+      "id": "G06",
+      "url": "https://www.metacritic.com/game/into-the-breach/critic-reviews/?platform=pc",
+      "title": "Into the Breach PC critic reviews",
+      "source_type": "aggregator",
+      "retrieved_at": "2026-11-12T12:00:00Z",
+      "event_date": null,
+      "expires_at": "2026-11-13T12:00:00Z",
+      "access_status": "indexed_only",
+      "evidence_note": "PC score 90 in indexed material; refresh the actual entry before a publication draft.",
+      "limitations": [
+        "Cached research example. Not publication-ready evidence."
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "C01",
+      "text": "Into the Breach is a turn-based strategy game.",
+      "source_ids": [
+        "G05"
+      ],
+      "status": "verified",
+      "evidence_type": "documented",
+      "expires_at": null,
+      "scope": "PC game description"
+    },
+    {
+      "id": "C02",
+      "text": "PC Metacritic snapshot is 90 and English Steam reception snapshot is Very Positive.",
+      "source_ids": [
+        "G05",
+        "G06"
+      ],
+      "status": "proposed",
+      "evidence_type": "proposed",
+      "expires_at": "2026-11-13T12:00:00Z",
+      "scope": "Research illustration only; refresh before spoken publication."
+    }
+  ],
+  "games": [
+    {
+      "id": "game-itb",
+      "title": "Into the Breach",
+      "edition": "PC release; exact footage build unresolved",
+      "footage_platform": "PC requested",
+      "reviewed_platform": "PC",
+      "official_description_source_id": "G05",
+      "critic": {
+        "status": "requires_refresh",
+        "source_ids": [
+          "G06"
+        ],
+        "value": 90,
+        "scope": "PC critic score",
+        "reason": "Cached evidence must be refreshed."
+      },
+      "steam": {
+        "status": "requires_refresh",
+        "source_ids": [
+          "G05"
+        ],
+        "value": "Very Positive",
+        "scope": "English-language displayed reviews; snapshot 12 November 2026",
+        "reason": "Dynamic reception must be refreshed."
+      }
+    }
+  ],
+  "media": [
+    {
+      "id": "capture-itb",
+      "local_reference": null,
+      "duration_seconds": null,
+      "status": "required",
+      "origin": "own_capture",
+      "rights_status": "needs_review",
+      "rights_evidence": null,
+      "description": "A complete readable decision: board, enemy intent, chosen move and result."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S01",
+      "start": 0,
+      "end": 7,
+      "voiceover": "A tiny battlefield can give you a very big decision. This is Into the Breach.",
+      "claim_ids": [
+        "C01"
+      ],
+      "reception_for": [],
+      "shots": [
+        {
+          "media_id": "capture-itb",
+          "source_in": 0,
+          "source_out": 7,
+          "purpose": "Show the original board with readable threats."
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "start": 7,
+      "end": 18,
+      "voiceover": "The point of this clip is the choice. Show the move, then its consequence, before explaining why it matters.",
+      "claim_ids": [],
+      "reception_for": [],
+      "shots": [
+        {
+          "media_id": "capture-itb",
+          "source_in": 7,
+          "source_out": 18,
+          "purpose": "Requested editorial demonstration; replace this teaching narration for actual publication."
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "start": 18,
+      "end": 28,
+      "voiceover": "On PC, Metacritic lists it at ninety, and Steam's English reviews are Very Positive.",
+      "claim_ids": [
+        "C02"
+      ],
+      "reception_for": [
+        "game-itb"
+      ],
+      "shots": [
+        {
+          "media_id": "capture-itb",
+          "source_in": 18,
+          "source_out": 28,
+          "purpose": "Reception over the visible board; values require refresh."
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "v-short",
+      "platform": "youtube_shorts",
+      "kind": "narrated_video",
+      "parent_variant_id": null,
+      "game_ids": [
+        "game-itb"
+      ],
+      "title": "One Small Board, One Big Decision",
+      "caption": "Integration fixture only. Refresh sources and supply actual footage before production.",
+      "segment_ids": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "target_seconds": 28,
+      "technical_capability_status": "not_checked",
+      "disclosure_status": "needs_review",
+      "disclosure_note": "Actual approved voice and finished media have not been inspected."
+    }
+  ],
+  "blockers": [
+    "Source refresh required.",
+    "Actual footage not supplied.",
+    "Voice render and platform preview missing."
+  ],
+  "analytics_hypothesis": "Opening on the full decision may help viewers understand the later explanation.",
+  "approval": {
+    "owner_approved": false,
+    "approved_revision": null,
+    "revision": "example-1",
+    "evidence_reviewed": false,
+    "actual_media_reviewed": false,
+    "voice_render_timed": false,
+    "approved_at": null
+  }
+}

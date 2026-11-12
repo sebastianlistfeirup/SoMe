@@ -1,0 +1,515 @@
+[
+  {
+    "id": "G01",
+    "title": "Valve Steam User Reviews help",
+    "url": "https://help.steampowered.com/faqs/view/2DA6-9CB3-F84A-643E",
+    "checked_date": "2026-11-12",
+    "role": "official_methodology, review_scope",
+    "status": "official_indexed_content",
+    "note": "Official indexed guidance was available, but the full page was not inspected. Confirm the current methodology when implementing the connector."
+  },
+  {
+    "id": "G02",
+    "title": "Valve Steamworks User Reviews documentation",
+    "url": "https://partner.steamgames.com/doc/store/reviews?l=english&language=english",
+    "checked_date": "2026-11-12",
+    "role": "official_methodology, review_interpretation",
+    "status": "official_indexed_content",
+    "note": "Cached official guidance. Recheck current policy and keep recent and lifetime scopes separate."
+  },
+  {
+    "id": "G03",
+    "title": "Valve Steamworks IUserReviewsService",
+    "url": "https://partner.steamgames.com/doc/webapi/IUserReviewsService",
+    "checked_date": "2026-11-12",
+    "role": "official_api_documentation, connector_implementation",
+    "status": "retrieved_official_page",
+    "note": "Current interface documentation was inspected. The SoMe machine connector still requires a real capability test; older announcements may describe different access conditions."
+  },
+  {
+    "id": "G04",
+    "title": "Valve deprecated User Reviews Get List endpoint",
+    "url": "https://partner.steamgames.com/doc/store/getreviews",
+    "checked_date": "2026-11-12",
+    "role": "official_api_documentation, deprecation_notice",
+    "status": "retrieved_official_page",
+    "note": "Old indexed versions of localised pages can still show the superseded endpoint. Do not infer that the existing SoMe machine has already migrated."
+  },
+  {
+    "id": "G05",
+    "title": "Into the Breach official Steam storefront",
+    "url": "https://store.steampowered.com/app/590380/Into_the_Breach/?l=english",
+    "checked_date": "2026-11-12",
+    "role": "official_game_description, steam_reception_snapshot, game_identity",
+    "status": "retrieved_official_storefront",
+    "note": "Scores and counts are dynamic; refresh immediately before production. English reception must not be relabelled as all-language reception. Storefront data does not establish measured handheld performance."
+  },
+  {
+    "id": "G06",
+    "title": "Into the Breach PC critic reviews on Metacritic",
+    "url": "https://www.metacritic.com/game/into-the-breach/critic-reviews/?platform=pc",
+    "checked_date": "2026-11-12",
+    "role": "critic_reception, edition_platform_matching",
+    "status": "official_indexed_content",
+    "note": "PC score observed in cached indexed material; refresh the exact entry before publication."
+  },
+  {
+    "id": "G07",
+    "title": "XCOM 2 official Steam storefront",
+    "url": "https://store.steampowered.com/app/268500/XCOM_2/?l=english",
+    "checked_date": "2026-11-12",
+    "role": "official_game_description, steam_reception_snapshot, game_identity",
+    "status": "retrieved_official_storefront",
+    "note": "Refresh dynamic figures before production. Base-game reception must not silently stand in for War of the Chosen. Release-day records may differ by regional storefront; avoid an unsupported universal date."
+  },
+  {
+    "id": "G08",
+    "title": "XCOM 2 on Metacritic",
+    "url": "https://www.metacritic.com/game/xcom-2/",
+    "checked_date": "2026-11-12",
+    "role": "critic_reception, edition_platform_matching",
+    "status": "retrieved_aggregator_page",
+    "note": "Cached PC score; inconsistent review counts were omitted. Refresh before publication."
+  },
+  {
+    "id": "G09",
+    "title": "FTL Faster Than Light official Steam storefront",
+    "url": "https://store.steampowered.com/app/212680/FTL_Faster_Than_Light/?l=english",
+    "checked_date": "2026-11-12",
+    "role": "official_game_description, steam_reception_snapshot, game_identity",
+    "status": "retrieved_official_storefront",
+    "note": "Refresh dynamic figures before production. English lifetime and recent sentiment differ and must not be collapsed. No hands-on handheld result was established by this research."
+  },
+  {
+    "id": "G10",
+    "title": "FTL Faster Than Light PC critic reviews on Metacritic",
+    "url": "https://www.metacritic.com/game/ftl-faster-than-light/critic-reviews/",
+    "checked_date": "2026-11-12",
+    "role": "critic_reception, edition_platform_matching",
+    "status": "official_indexed_content",
+    "note": "PC score observed in cached indexed material; refresh before publication and do not substitute the iOS edition."
+  },
+  {
+    "id": "G11",
+    "title": "Cannon Fodder authorised GOG storefront",
+    "url": "https://www.gog.com/en/game/cannon_fodder",
+    "checked_date": "2026-11-12",
+    "role": "authorised_game_description, current_access_discovery",
+    "status": "retrieved_authorised_storefront",
+    "note": "This is not proof of the exact original Amiga box text or build. Current storefront review scores are not original Amiga critic reception. Verify the offered edition and current availability before recommending a purchase."
+  },
+  {
+    "id": "G12",
+    "title": "Amiga Reviews Cannon Fodder archival review transcriptions",
+    "url": "https://www.amigareviews.leveluphost.com/cannonfo.htm",
+    "checked_date": "2026-11-12",
+    "role": "historical_review_transcription, retro_reception",
+    "status": "retrieved_archive_transcription",
+    "note": "Historical review transcription, not a visually verified original scan. Confirm edition and page identity before reproducing archival imagery."
+  },
+  {
+    "id": "G13",
+    "title": "Lemon Amiga Cannon Fodder magazine review index",
+    "url": "https://www.lemonamiga.com/game/cannon-fodder",
+    "checked_date": "2026-11-12",
+    "role": "historical_review_index, corroboration, retro_discovery",
+    "status": "indexed_archive_content",
+    "note": "Historical score corroborated through an indexed review catalogue. The original scanned pages were not visually verified."
+  },
+  {
+    "id": "G14",
+    "title": "Cannon Fodder on Metacritic entity-matching example",
+    "url": "https://www.metacritic.com/game/cannon-fodder/",
+    "checked_date": "2026-11-12",
+    "role": "entity_matching, missing_coverage_example",
+    "status": "official_indexed_content",
+    "note": "A title match alone is insufficient. Absence of a matching verified score in this research is not proof that no relevant coverage exists anywhere."
+  },
+  {
+    "id": "G15",
+    "title": "Valve Steam Deck Verified",
+    "url": "https://www.steamdeck.com/en/verified",
+    "checked_date": "2026-11-12",
+    "role": "official_compatibility_framework, handheld_research",
+    "status": "official_indexed_content",
+    "note": "A compatibility category is not a measured FPS or battery-life guarantee. Current per-game status and device configuration must be checked separately."
+  },
+  {
+    "id": "G16",
+    "title": "MAME Common Issues and Questions",
+    "url": "https://docs.mamedev.org/usingmame/commonissues.html",
+    "checked_date": "2026-11-12",
+    "role": "official_emulator_documentation, authorised_content_guidance",
+    "status": "official_indexed_content",
+    "note": "Do not convert project guidance into a universal statement about all jurisdictions or all platforms. Verify each content licence and the relevant local rules."
+  },
+  {
+    "id": "G17",
+    "title": "Amiga Forever Distribution of CBM Amiga ROM and OS Files",
+    "url": "https://www.amigaforever.com/kb/13-122",
+    "checked_date": "2026-11-12",
+    "role": "official_licensing_guidance, amiga_setup_research",
+    "status": "official_indexed_content",
+    "note": "Specific editions and uses have different licence terms. Do not imply that ownership of hardware universally authorises copying or redistribution."
+  },
+  {
+    "id": "A01",
+    "title": "Alibaba Cloud Qwen4 Max Preview documentation",
+    "url": "https://help.aliyun.com/en/model-studio/qwen4-max-preview",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official current preview access and expiry; start 11 Nov 2026."
+  },
+  {
+    "id": "A02",
+    "title": "Anthropic Claude Fable and Mythos 5.2 announcement",
+    "url": "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official launch dated 9 Nov 2026; model role guidance."
+  },
+  {
+    "id": "A03",
+    "title": "Qwen Code Web Shell and Desktop quickstart",
+    "url": "https://qwenlm.github.io/qwen-code-docs/en/blog/quickstart/web-shell-and-desktop/",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official guide dated 2 Nov 2026."
+  },
+  {
+    "id": "A04",
+    "title": "OpenAI ChatGPT Work and Codex help",
+    "url": "https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Current model availability and account-dependent access; page said updated 6 days ago."
+  },
+  {
+    "id": "A05",
+    "title": "Model Context Protocol introduction",
+    "url": "https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official protocol overview; versioned docs."
+  },
+  {
+    "id": "A06",
+    "title": "Ollama context length documentation",
+    "url": "https://docs.ollama.com/context-length",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Current context/memory guidance; default statement differs from FAQ."
+  },
+  {
+    "id": "A07",
+    "title": "NVIDIA desktop GeForce RTX 5090 specifications",
+    "url": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Manufacturer memory specification; no current price used."
+  },
+  {
+    "id": "A08",
+    "title": "AMD Ryzen AI Max plus 395 specifications",
+    "url": "https://www.amd.com/en/products/processors/laptop/ryzen/ai-300-series/amd-ryzen-ai-max-plus-395.html",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Manufacturer specification for this processor; exact complete system still needs checking."
+  },
+  {
+    "id": "A09",
+    "title": "Public Fable 5.2 launch discussion",
+    "url": "https://www.reddit.com/r/ClaudeAI/comments/1xs0dct/fable_52_just_landed/",
+    "checked_date": "2026-11-12",
+    "role": "community question lead",
+    "status": "opened",
+    "note": "Public launch discussion read; exact original date and current score unconfirmed in retrieved rendering."
+  },
+  {
+    "id": "A10",
+    "title": "Qwen release anticipation discussion with removed original post",
+    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1xt6du9/removed_by_moderator/",
+    "checked_date": "2026-11-12",
+    "role": "community question lead",
+    "status": "opened",
+    "note": "Removed original post; remaining comments used only as qualitative release anticipation."
+  },
+  {
+    "id": "A11",
+    "title": "Public discussion of maintaining agent written code",
+    "url": "https://www.reddit.com/r/ClaudeCode/comments/1xq2n3t/a_year_after_the_100_ai_mandate_nobody/",
+    "checked_date": "2026-11-12",
+    "role": "community question lead",
+    "status": "opened",
+    "note": "Original anecdotal code-maintenance discussion; not an established industry finding."
+  },
+  {
+    "id": "A12",
+    "title": "Public report of a mini PC cluster experiment",
+    "url": "https://www.reddit.com/r/LocalLLM/comments/1xsk8n9/running_glm_53_flash_on_a_40_mini_pc_cluster_via/",
+    "checked_date": "2026-11-12",
+    "role": "community question lead",
+    "status": "opened",
+    "note": "Builder’s self-report; no independent benchmark reproduction."
+  },
+  {
+    "id": "A13",
+    "title": "Public discussion of a generated game demo",
+    "url": "https://www.reddit.com/r/singularity/comments/1xs1y29/claude_fable_52_built_a_playable_gears_of_war/",
+    "checked_date": "2026-11-12",
+    "role": "community question lead",
+    "status": "opened",
+    "note": "Discussion of a demo and work/cost context; follow original creator before using numeric claims."
+  },
+  {
+    "id": "A14",
+    "title": "Ollama frequently asked questions",
+    "url": "https://docs.ollama.com/faq",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official runtime inspection, local/cloud distinction and configuration; some default descriptions conflict with other current docs."
+  },
+  {
+    "id": "A15",
+    "title": "Ollama GPU support documentation",
+    "url": "https://docs.ollama.com/gpu",
+    "checked_date": "2026-11-12",
+    "role": "official product or technical documentation",
+    "status": "opened",
+    "note": "Official hardware support by OS/backend; recheck for a specific tutorial."
+  },
+  {
+    "id": "P01",
+    "title": "YouTube Help, Understand three-minute YouTube Shorts",
+    "url": "https://support.google.com/youtube/answer/15424877?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P02",
+    "title": "Meta, Making it Easier to Create Videos on Facebook, 17 June 2025",
+    "url": "https://about.fb.com/news/2025/06/making-it-easier-create-videos-facebook/",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": "(AMP version)."
+  },
+  {
+    "id": "P03",
+    "title": "TikTok for Developers, Query Creator Info",
+    "url": "https://developers.tiktok.com/docs/en/content-posting-api-reference-query-creator-info",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P04",
+    "title": "YouTube Help, Understand your YouTube content performance",
+    "url": "https://support.google.com/youtube/answer/12220281?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": "Directly opened current page includes the 24 August 2026 change; older search snippets differ."
+  },
+  {
+    "id": "P05",
+    "title": "Meta, New Features on Instagram Reels Trends Editing and Gifts, 14 April 2023",
+    "url": "https://about.fb.com/news/2023/04/instagram-reels-trending-audio-and-gifts-updates/",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": "Historical announcement; current export definitions must be checked."
+  },
+  {
+    "id": "P06",
+    "title": "TikTok Business Help, Video play metrics, last updated November 2025",
+    "url": "https://ads.tiktok.com/resources/help/article/video-play?lang=en-312",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": "Advertising metrics only."
+  },
+  {
+    "id": "P07",
+    "title": "Reddit, Data API Terms, last revised 20 July 2026",
+    "url": "https://redditinc.com/policies/data-api-terms",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P08",
+    "title": "Google Trends Help, FAQ about Google Trends data",
+    "url": "https://support.google.com/trends/answer/4365533",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P09",
+    "title": "Google Trends Help, Export embed and cite Trends data",
+    "url": "https://support.google.com/trends/answer/4365538?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P10",
+    "title": "YouTube Help, YouTube channel monetization policies",
+    "url": "https://support.google.com/youtube/answer/1311392?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P11",
+    "title": "Meta, Rewarding Original Creators on Facebook, March 2026",
+    "url": "https://about.fb.com/news/2026/03/rewarding-original-creators-on-facebook/",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P12",
+    "title": "YouTube Help, Video game and software content",
+    "url": "https://support.google.com/youtube/answer/138161?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P13",
+    "title": "TikTok Help, Commercial use of music on TikTok",
+    "url": "https://support.tiktok.com/en/business-and-creator/creator-and-business-accounts/commercial-use-of-music-on-tiktok",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P14",
+    "title": "YouTube Help, Disclosing use of GenAI content",
+    "url": "https://support.google.com/youtube/answer/14328491?hl=en",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P15",
+    "title": "TikTok Help, AI-generated content",
+    "url": "https://support.tiktok.com/en/using-tiktok/creating-videos/ai-generated-content",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "P16",
+    "title": "Meta, How Meta Is Preparing for the 2026 US Midterm Elections, section Identifying AI-Generated Content Beyond Political Ads",
+    "url": "https://about.fb.com/news/2026/02/meta-prepares-for-2026-us-midterms/",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": "Used only for its explicit organic-content disclosure statement."
+  },
+  {
+    "id": "P17",
+    "title": "TikTok for Developers, Content Sharing Guidelines, updated 4 August 2026",
+    "url": "https://developers.tiktok.com/docs/en/content-sharing-guidelines",
+    "checked_date": "2026-11-12",
+    "role": "official platform or measurement guidance",
+    "status": "checked",
+    "note": ""
+  },
+  {
+    "id": "R01",
+    "title": "Google Trends Trending Now United States",
+    "url": "https://trends.google.com/trending?geo=US",
+    "checked_date": "2026-11-12",
+    "role": "observed discovery view",
+    "status": "opened",
+    "note": "Visible all-category 24-hour view did not establish a topic-level Gaming or AI surge. This is not proof of absent demand."
+  },
+  {
+    "id": "R02",
+    "title": "Google Trends Trending Now United Kingdom",
+    "url": "https://trends.google.com/trending?geo=GB",
+    "checked_date": "2026-11-12",
+    "role": "observed discovery view",
+    "status": "opened",
+    "note": "Same limited scope as R01; no fabricated topic index or rank is used."
+  },
+  {
+    "id": "I01",
+    "title": "ElevenLabs — Create speech with timing",
+    "url": "https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps",
+    "checked_date": "2026-11-12",
+    "role": "Official text-to-speech API reference",
+    "status": "inspected",
+    "note": "POST /v1/text-to-speech/:voice_id/with-timestamps returns audio_base64 plus character alignment and normalized alignment. The voice ID is required; model and voice settings are request inputs. No account, voice access or speech generation was tested."
+  },
+  {
+    "id": "I02",
+    "title": "YouTube Data API — videos.insert",
+    "url": "https://developers.google.com/youtube/data/reference/rest/v3/videos/insert",
+    "checked_date": "2026-11-12",
+    "role": "Official upload and metadata API reference",
+    "status": "inspected",
+    "note": "Uploads video and supports title, description, tags, privacy and publication metadata. The current reference explicitly says unverified API projects are not restricted to private viewing. Authorization and real account capability remain to be tested."
+  },
+  {
+    "id": "I03",
+    "title": "YouTube Data API — thumbnails.set",
+    "url": "https://developers.google.com/youtube/data/reference/rest/v3/thumbnails/set",
+    "checked_date": "2026-11-12",
+    "role": "Official custom-thumbnail API reference",
+    "status": "inspected",
+    "note": "Sets a custom thumbnail, explicitly including Shorts. For Shorts, call after processingDetails.processingStatus is succeeded. The authenticated account must have thumbnail permission. No upload or thumbnail application was performed."
+  },
+  {
+    "id": "I04",
+    "title": "Meta Samples — Instagram Reels Publishing APIs",
+    "url": "https://github.com/fbsamples/reels_publishing_apis/blob/main/insta_reels_publishing_api_sample/README.md",
+    "checked_date": "2026-11-12",
+    "role": "Official Meta implementation sample; limited to the documented publishing and cover mechanics",
+    "status": "inspected_official_sample",
+    "note": "Documents cover_url, frame-based thumb_offset, cover_url precedence and waiting for upload completion before publishing. Meta's main developer pages returned HTTP 429; sample account eligibility and numeric limits are not treated as a current universal specification."
+  },
+  {
+    "id": "I05",
+    "title": "Meta Facebook Postman collection — Publish Reel",
+    "url": "https://www.postman.com/meta/facebook/request/juhnm3q/4-publish-reel",
+    "checked_date": "2026-11-12",
+    "role": "Official Meta request example for Facebook Page Reel publication",
+    "status": "inspected_official_sample",
+    "note": "Shows /me/video_reels with Page access token, video_id, upload_phase=finish, video_state=PUBLISHED, title and description. This inspected request does not establish custom-cover support. The selected connector's cover behavior and account eligibility require verification."
+  },
+  {
+    "id": "I06",
+    "title": "TikTok for Developers — Direct Post",
+    "url": "https://developers.tiktok.com/docs/en/content-posting-api-reference-direct-post",
+    "checked_date": "2026-11-12",
+    "role": "Official Direct Post request and cover-selection reference",
+    "status": "inspected",
+    "note": "Page updated 27 October 2026. Direct Post requires video.publish and explicit user consent; title contains the caption and hashtags, while video_cover_timestamp_ms chooses a frame. Unaudited clients are private-only. Reuse P17 for eligibility and required user controls."
+  }
+]

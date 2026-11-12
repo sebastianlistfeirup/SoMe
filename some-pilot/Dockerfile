@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 HOME=/home/s
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libsndfile1 espeak-ng ca-certificates fonts-dejavu-core curl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY requirements.lock /app/requirements.lock
-RUN pip install --no-cache-dir -r /app/requirements.lock
+RUN pip install --timeout 120 --no-cache-dir -r /app/requirements.lock
 COPY . /app
 RUN groupadd --gid 10001 some && useradd --uid 10001 --gid 10001 --create-home some && chown -R 10001:10001 /app /home/some
 USER 10001:10001

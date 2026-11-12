@@ -81,9 +81,11 @@ def test_long_transcription_similarity_does_not_use_autojunk():
     assert result["decision"] == "ALLOW"
 
 
-def test_production_requires_real_media_plan(db):
+def test_production_requires_real_media_plan(db, monkeypatch):
+    from types import SimpleNamespace
     from app.db.models import Topic
     from app.pipeline.production import produce
+    monkeypatch.setattr("app.pipeline.production.shutil.disk_usage", lambda _path: SimpleNamespace(total=100, used=10, free=90))
     topic = Topic(niche="handheld_gaming", language="en", title="Production")
     db.add(topic)
     db.commit()

@@ -1,0 +1,3597 @@
+[
+  {
+    "id": "GI001",
+    "lane": "gaming",
+    "title": "The Amiga Corner: The Soldier You Wanted to Bring Home",
+    "angle": "Follow one Cannon Fodder recruit to investigate how a tiny character becomes worth protecting.",
+    "recipe_id": "GF01",
+    "hook": "When did this tiny soldier become someone you cared about?",
+    "required_footage": [
+      "Recruit identity",
+      "One complete mission",
+      "Casualty or return"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does following one recruit sustain attention better than a general retrospective?"
+  },
+  {
+    "id": "GI002",
+    "lane": "gaming",
+    "title": "The Amiga Corner: One Duel in Moonstone",
+    "angle": "Explain the decisions inside one encounter, making unfamiliar combat readable before discussing nostalgia.",
+    "recipe_id": "GF01",
+    "hook": "Before the first strike, what would you watch?",
+    "required_footage": [
+      "Uninterrupted duel",
+      "Readable opponent movement",
+      "Outcome replay"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers respond more to explained decisions or remembered spectacle?"
+  },
+  {
+    "id": "GI003",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Opening the Wrong Door in Alien Breed",
+    "angle": "Build a miniature suspense story around preparation, entry and consequence.",
+    "recipe_id": "GF01",
+    "hook": "This door is more interesting before it opens.",
+    "required_footage": [
+      "Approach and supplies",
+      "Door opening",
+      "Encounter aftermath"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does delaying the reveal increase completion without confusing new viewers?"
+  },
+  {
+    "id": "GI004",
+    "lane": "gaming",
+    "title": "The Amiga Corner: A Plan Comes Together in Mega lo Mania",
+    "angle": "Show one production choice becoming a battlefield result so viewers understand the strategic loop.",
+    "recipe_id": "GF01",
+    "hook": "This battle starts with a decision made back at the base.",
+    "required_footage": [
+      "Production choice",
+      "Research or manufacture",
+      "Resulting battle"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers stay through preparation when its eventual payoff is previewed?"
+  },
+  {
+    "id": "GI005",
+    "lane": "gaming",
+    "title": "The Amiga Corner: One Lemming Changes the Whole Plan",
+    "angle": "Explain a single level solution through timing and assigned roles rather than a montage.",
+    "recipe_id": "GF01",
+    "hook": "Which one would you stop to save the others?",
+    "required_footage": [
+      "Untouched level",
+      "Key assignment",
+      "Complete consequence"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a concrete prediction question generate thoughtful comments?"
+  },
+  {
+    "id": "GI006",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Can You Read the Play in Sensible Soccer",
+    "angle": "Use one passage of play to investigate readability, movement and anticipation.",
+    "recipe_id": "GF01",
+    "hook": "Forget the score for a moment. Can you see the pass?",
+    "required_footage": [
+      "Full build-up",
+      "Passing decision",
+      "Goal or interception"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a tactical breakdown attract viewers unfamiliar with the original?"
+  },
+  {
+    "id": "GI007",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Getting Stuck in Monkey Island",
+    "angle": "Explore how one spoiler-light puzzle teaches players to observe and experiment.",
+    "recipe_id": "GF01",
+    "hook": "What does this scene actually want you to notice?",
+    "required_footage": [
+      "Original Amiga scene",
+      "Relevant conversation",
+      "Spoiler-controlled interaction"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers prefer puzzle principles or a fully revealed solution?"
+  },
+  {
+    "id": "GI008",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Another World Without an Explanation",
+    "angle": "Investigate how an early sequence communicates danger through animation and consequences.",
+    "recipe_id": "GF01",
+    "hook": "How much can a game explain without giving you instructions?",
+    "required_footage": [
+      "Original-platform opening",
+      "First clear hazard",
+      "Reaction and retry"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does close visual analysis retain viewers beyond the opening nostalgia?"
+  },
+  {
+    "id": "GI009",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Planning a Job in Syndicate",
+    "angle": "Follow one mission preparation into action and distinguish intended tactics from improvisation.",
+    "recipe_id": "GF01",
+    "hook": "The plan looked simple until the squad arrived.",
+    "required_footage": [
+      "Equipment selection",
+      "Mission approach",
+      "Plan changing mid-mission"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Are preparation and recovery more engaging than uninterrupted action?"
+  },
+  {
+    "id": "GI010",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Reading Speed in Lotus Esprit Turbo Challenge",
+    "angle": "Explain how track information and timing shape a readable racing challenge.",
+    "recipe_id": "GF01",
+    "hook": "At this speed, which detail tells you what comes next?",
+    "required_footage": [
+      "Approach to corner",
+      "Control input capture",
+      "Successful and failed attempts"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do side-by-side attempts make an old racer easier to appreciate?"
+  },
+  {
+    "id": "GI011",
+    "lane": "gaming",
+    "title": "The Amiga Corner: Dungeon Master and the Doorway Decision",
+    "angle": "Investigate one dungeon encounter as a problem of position, resources and timing.",
+    "recipe_id": "GF01",
+    "hook": "Would you step through that doorway with this party?",
+    "required_footage": [
+      "Party condition",
+      "Doorway encounter",
+      "Recovery or retreat"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do resource decisions interest viewers more than a chronology of features?"
+  },
+  {
+    "id": "GI012",
+    "lane": "gaming",
+    "title": "The Amiga Corner: The Promise on the Back of the Box",
+    "angle": "Compare one Amiga game packaging claim with a clearly observed gameplay moment.",
+    "recipe_id": "XF03",
+    "hook": "The box promised this. What did the game actually deliver?",
+    "required_footage": [
+      "Identified original box",
+      "Matching gameplay",
+      "One limitation"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      305,
+      415
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does comparing promise with evidence produce stronger discussion than a review summary?"
+  },
+  {
+    "id": "GI013",
+    "lane": "gaming",
+    "title": "Top 15 SNES RPGs for Different Kinds of Adventurer",
+    "angle": "Rank a scoped candidate pool by distinct player preferences, not fame alone.",
+    "recipe_id": "GF03",
+    "hook": "Which SNES RPG fits the adventure you actually want?",
+    "required_footage": [
+      "Representative scenes per entry",
+      "Combat examples",
+      "Readable version labels"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      920,
+      1240
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do audience-fit recommendations outperform a single universal winner?"
+  },
+  {
+    "id": "GI014",
+    "lane": "gaming",
+    "title": "Top 10 Mega Drive Games Beyond the Usual Mascots",
+    "angle": "Build a researched discovery list for viewers who know the obvious titles.",
+    "recipe_id": "GF03",
+    "hook": "What would you choose after the familiar names?",
+    "required_footage": [
+      "Distinct mechanic per entry",
+      "Original-platform identification",
+      "Complete short encounters"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      610,
+      830
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do lesser-known picks drive saves and requests for follow-up episodes?"
+  },
+  {
+    "id": "GI015",
+    "lane": "gaming",
+    "title": "The PlayStation Memory Test: Original Image or Modern Expectation",
+    "angle": "Compare original-era presentation with a clearly labelled modern viewing setup.",
+    "recipe_id": "XF02",
+    "hook": "Do you remember the game, or the screen you played it on?",
+    "required_footage": [
+      "Same game scene",
+      "Documented display settings",
+      "Unaltered comparison capture"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Documented display configuration; separate reconstruction from original evidence."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers value transparent comparisons over a simple reveal?"
+  },
+  {
+    "id": "GI016",
+    "lane": "gaming",
+    "title": "Dreamcast: One Arcade Session from Start to Finish",
+    "angle": "Use a complete short play session to explain the appeal of a selected arcade-style game.",
+    "recipe_id": "XF01",
+    "hook": "What makes one more attempt feel worth it?",
+    "required_footage": [
+      "Session start",
+      "One escalating challenge",
+      "Result and restart"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a complete session communicate appeal better than highlights?"
+  },
+  {
+    "id": "GI017",
+    "lane": "gaming",
+    "title": "Your First Emulated Game Without the Library Overload",
+    "angle": "Take a defined beginner setup to one working authorised game or demo.",
+    "recipe_id": "GF06",
+    "hook": "One working game is a better start than a thousand icons.",
+    "required_footage": [
+      "Official installation",
+      "Input configuration",
+      "Successful reopen"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official emulator documentation and authorised game and BIOS provenance.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "At which setup step do viewers need the most clarification?"
+  },
+  {
+    "id": "GI018",
+    "lane": "gaming",
+    "title": "The Save State Test: What Actually Survives a Restart",
+    "angle": "Demonstrate the difference between a game save and an emulator state on one setup.",
+    "recipe_id": "GF06",
+    "hook": "Which save would you trust after closing everything?",
+    "required_footage": [
+      "In-game save",
+      "Named emulator state",
+      "Restart and restore"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official emulator documentation and authorised game and BIOS provenance.",
+      "Version-specific saving documentation and observed restore results."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      305,
+      415
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a visible restore test reduce repeated support questions?"
+  },
+  {
+    "id": "GI019",
+    "lane": "gaming",
+    "title": "One Retro Game with Three Control Layouts",
+    "angle": "Compare the same task using keyboard, controller and an appropriate original-style input.",
+    "recipe_id": "GF06",
+    "hook": "The emulator works. Do the controls fit the game?",
+    "required_footage": [
+      "Identical task three ways",
+      "Visible mappings",
+      "Observed mistakes"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official emulator documentation and authorised game and BIOS provenance.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which control comparison generates the most useful setup questions?"
+  },
+  {
+    "id": "GI020",
+    "lane": "gaming",
+    "title": "Original or Reissue: Choose the Version Before You Buy",
+    "angle": "Compare access, presentation and controls for one original game and a current reissue.",
+    "recipe_id": "XF02",
+    "hook": "The name is the same. Is the experience?",
+    "required_footage": [
+      "Matched scenes",
+      "Version menus",
+      "Differences in interaction"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Official reissue feature list and current purchase options."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers use edition comparisons to make a clear choice?"
+  },
+  {
+    "id": "GI021",
+    "lane": "gaming",
+    "title": "Top 10 Tactics Games for People Who Enjoy Difficult Choices",
+    "angle": "Rank games by decision variety, readable consequences and audience fit.",
+    "recipe_id": "GF03",
+    "hook": "Which tactics game makes the choice matter most to you?",
+    "required_footage": [
+      "One meaningful decision per game",
+      "Consequences",
+      "Platform labels"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      665,
+      895
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which kind of tactical decision keeps viewers watching?"
+  },
+  {
+    "id": "GI022",
+    "lane": "gaming",
+    "title": "Top 15 Sci-Fi Games for People Who Want to Explore",
+    "angle": "Separate discovery, navigation and curiosity from combat-heavy space fantasies.",
+    "recipe_id": "GF03",
+    "hook": "What do you want to find when the map runs out?",
+    "required_footage": [
+      "Discovery moments",
+      "Traversal",
+      "Representative exploration loops"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      920,
+      1240
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do specific exploration promises drive saves more than visual spectacle?"
+  },
+  {
+    "id": "GI023",
+    "lane": "gaming",
+    "title": "Top 20 Games Where Preparation Is Half the Fun",
+    "angle": "Rank different kinds of preparation by how clearly they influence play.",
+    "recipe_id": "GF03",
+    "hook": "Which game makes the planning screen part of the adventure?",
+    "required_footage": [
+      "Preparation interface per game",
+      "Resulting action",
+      "One trade-off"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      1225,
+      1655
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers stay when menus are connected directly to consequences?"
+  },
+  {
+    "id": "GI024",
+    "lane": "gaming",
+    "title": "Top 10 Party RPGs for People Who Care About the Team",
+    "angle": "Compare party interaction, meaningful roles and accessible starting points.",
+    "recipe_id": "GF03",
+    "hook": "Are you choosing a combat system, or people to travel with?",
+    "required_footage": [
+      "Spoiler-light party scenes",
+      "Role interactions",
+      "Distinct combat examples"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      715,
+      965
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does character connection or mechanical teamwork drive stronger responses?"
+  },
+  {
+    "id": "GI025",
+    "lane": "gaming",
+    "title": "Top 10 Deckbuilders for Ten Different Decisions",
+    "angle": "Give every entry a distinct decision pattern rather than repeating the same genre praise.",
+    "recipe_id": "GF03",
+    "hook": "What decision do you want to keep making for another hour?",
+    "required_footage": [
+      "Deck choice per game",
+      "Complete card interaction",
+      "Outcome"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      665,
+      895
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers follow recommendations based on decision style?"
+  },
+  {
+    "id": "GI026",
+    "lane": "gaming",
+    "title": "Top 15 Strategy Games Where You Set the Pace",
+    "angle": "Compare strategy games by turn structure, pause, adjustable speed and actual time pressure so viewers can choose how quickly decisions arrive.",
+    "recipe_id": "GF03",
+    "hook": "These games let you think at different speeds. Which pace fits your evening?",
+    "required_footage": [
+      "Matched examples of a turn, pause or speed setting and its effect on the player decision."
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      920,
+      1240
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a problem-first opening sustain attention across a longer list?"
+  },
+  {
+    "id": "GI027",
+    "lane": "gaming",
+    "title": "Top 20 Retro Games for Your Handheld Shortlist",
+    "angle": "Create a researched shortlist with explicit device-specific checks still required.",
+    "recipe_id": "GF03",
+    "hook": "A favourite old game is not automatically a good handheld game.",
+    "required_footage": [
+      "Candidate gameplay",
+      "Actual small-screen readability",
+      "Control checks"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      1275,
+      1725
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do practical caveats improve saves and trust compared with nostalgia alone?"
+  },
+  {
+    "id": "GI028",
+    "lane": "gaming",
+    "title": "Top 10 Games for an Evening with a Clear Stopping Point",
+    "angle": "Compare observed session boundaries without promising unverified completion times.",
+    "recipe_id": "GF03",
+    "hook": "What can you enjoy tonight without losing the whole night?",
+    "required_footage": [
+      "Session start and finish",
+      "Save points",
+      "One satisfying milestone"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Observed session structure; verify any duration claim."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      665,
+      895
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do concrete stopping points make recommendations more actionable?"
+  },
+  {
+    "id": "GI029",
+    "lane": "gaming",
+    "title": "Top 15 Classic Games with a Modern Way In",
+    "angle": "Rank current access routes and explain meaningful edition differences.",
+    "recipe_id": "GF03",
+    "hook": "Which classic is easiest to appreciate on a current setup?",
+    "required_footage": [
+      "Original reference",
+      "Current edition gameplay",
+      "Setup and controls"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Official availability and reissue documentation."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      920,
+      1240
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do access explanations convert interest into qualified follow-up questions?"
+  },
+  {
+    "id": "GI030",
+    "lane": "gaming",
+    "title": "Top 10 Builders for People Who Want a Visible Transformation",
+    "angle": "Compare how player choices turn a starting space into something recognisable.",
+    "recipe_id": "GF03",
+    "hook": "What do you want your first empty plot to become?",
+    "required_footage": [
+      "Matching before-and-after scenes",
+      "Construction decisions",
+      "Progress milestones"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      665,
+      895
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do visible transformations retain viewers better than feature inventories?"
+  },
+  {
+    "id": "GI031",
+    "lane": "gaming",
+    "title": "Top 20 Retro Games to Understand One Mechanic at a Time",
+    "angle": "Build an approachable ranked introduction around clear mechanics across defined platforms.",
+    "recipe_id": "GF03",
+    "hook": "Twenty games, twenty ideas you can understand by watching.",
+    "required_footage": [
+      "One complete mechanic per entry",
+      "Platform identity",
+      "Brief consequence replay"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      1225,
+      1655
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does mechanic-led curation attract viewers without prior nostalgia?"
+  },
+  {
+    "id": "GI032",
+    "lane": "gaming",
+    "title": "Top 10 Idle Games for People Who Want More to Do",
+    "angle": "Compare active choices, waiting, monetisation and practical fit without treating all waiting as fun.",
+    "recipe_id": "GF03",
+    "hook": "When the game plays itself, what is left for you to decide?",
+    "required_footage": [
+      "Early decision loops",
+      "Progression screens",
+      "Visible monetisation menus"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official monetisation details and current player concerns."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      715,
+      965
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers prefer progression promises or monetisation analysis?"
+  },
+  {
+    "id": "GI033",
+    "lane": "gaming",
+    "title": "Into the Breach: The Move That Solves More Than One Problem",
+    "angle": "Explain a verified board interaction as a compact introduction to tactical thinking.",
+    "recipe_id": "XF01",
+    "hook": "Would you take the damage, or change the whole board?",
+    "required_footage": [
+      "Readable threats",
+      "One complete action",
+      "Resulting position"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing the starting problem invite meaningful viewer predictions?"
+  },
+  {
+    "id": "GI034",
+    "lane": "gaming",
+    "title": "XCOM 2: The Extraction Is the Story",
+    "angle": "Follow a documented rescue decision without claiming the footage proves universal balance.",
+    "recipe_id": "GF02",
+    "hook": "Winning this mission might mean knowing when to leave.",
+    "required_footage": [
+      "Mission stakes",
+      "Rescue decision",
+      "Extraction outcome"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do rescue narratives retain viewers better than kill montages?"
+  },
+  {
+    "id": "GI035",
+    "lane": "gaming",
+    "title": "FTL: Too Many Emergencies, One Crew",
+    "angle": "Make one escalating shipboard crisis readable through resource and crew decisions.",
+    "recipe_id": "XF01",
+    "hook": "Which emergency would you solve first?",
+    "required_footage": [
+      "Ship condition",
+      "Competing emergencies",
+      "Crew response and outcome"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does labelling competing priorities improve retention through a complex scene?"
+  },
+  {
+    "id": "GI036",
+    "lane": "gaming",
+    "title": "Dishonored: One Room, More Than One Route",
+    "angle": "Investigate how a single space supports contrasting approaches in the selected edition.",
+    "recipe_id": "GF02",
+    "hook": "Would you fight through this room, or avoid it entirely?",
+    "required_footage": [
+      "Room establishing shot",
+      "Two recorded approaches",
+      "Consequences"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do route comparisons appeal beyond viewers who already know the game?"
+  },
+  {
+    "id": "GI037",
+    "lane": "gaming",
+    "title": "Prey: The Object You Stopped Ignoring",
+    "angle": "Explore how one environmental observation changes the next player action.",
+    "recipe_id": "GF02",
+    "hook": "What would make you look at this room differently?",
+    "required_footage": [
+      "Spoiler-controlled room",
+      "Relevant object",
+      "Verified interaction"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do small environmental discoveries generate curiosity without requiring spoilers?"
+  },
+  {
+    "id": "GI038",
+    "lane": "gaming",
+    "title": "Subnautica: Before the First Deep Dive",
+    "angle": "Show preparation and uncertainty before a clearly bounded exploration attempt.",
+    "recipe_id": "GF02",
+    "hook": "What would you pack before going somewhere you cannot see?",
+    "required_footage": [
+      "Preparation",
+      "Descent",
+      "Return or failed objective"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does preparation make the exploration payoff more engaging?"
+  },
+  {
+    "id": "GI039",
+    "lane": "gaming",
+    "title": "Outer Wilds: A Recommendation Without the Revelation",
+    "angle": "Explain the appeal through spoiler-light curiosity and exploration, with strict reveal boundaries.",
+    "recipe_id": "GF02",
+    "hook": "How do you recommend a discovery without giving it away?",
+    "required_footage": [
+      "Approved spoiler-light traversal",
+      "Environmental questions",
+      "Non-revealing return"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Explicit spoiler review against the chosen scenes."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Can a spoiler-light recommendation produce interest without vague praise?"
+  },
+  {
+    "id": "GI040",
+    "lane": "gaming",
+    "title": "Battle Brothers: Why This Contract Needs a Second Look",
+    "angle": "Investigate one contract decision through visible squad condition and resources.",
+    "recipe_id": "GF02",
+    "hook": "The reward looks good. What is the contract leaving out?",
+    "required_footage": [
+      "Contract screen",
+      "Squad condition",
+      "Observed mission consequence"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do risk explanations outperform general difficulty claims?"
+  },
+  {
+    "id": "GI041",
+    "lane": "gaming",
+    "title": "Monster Train: The Floor That Changed the Plan",
+    "angle": "Use one verified interaction to explain why placement and timing deserve attention.",
+    "recipe_id": "XF01",
+    "hook": "Would you spend the card here, or save it for another floor?",
+    "required_footage": [
+      "Board state",
+      "Card and floor choice",
+      "Complete resolution"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does one complete interaction make deckbuilder footage understandable to newcomers?"
+  },
+  {
+    "id": "GI042",
+    "lane": "gaming",
+    "title": "Slay the Spire: The Reward You Might Want to Skip",
+    "angle": "Investigate a specific deck decision without presenting one choice as universally correct.",
+    "recipe_id": "XF01",
+    "hook": "What if the best reward is the one you leave behind?",
+    "required_footage": [
+      "Current deck",
+      "Reward choice",
+      "Subsequent relevant encounter"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do qualified explanations prompt better discussion than absolute advice?"
+  },
+  {
+    "id": "GI043",
+    "lane": "gaming",
+    "title": "The Handheld Readability Test",
+    "angle": "Examine menus, subtitles and critical combat information on one named device.",
+    "recipe_id": "GF05",
+    "hook": "Can you read the thing you need before the game asks you to act?",
+    "required_footage": [
+      "Actual handheld display",
+      "Important menus",
+      "Normal-distance view"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which readability example produces the most useful viewer feedback?"
+  },
+  {
+    "id": "GI044",
+    "lane": "gaming",
+    "title": "Can This Strategy Game Work Without a Mouse",
+    "angle": "Compare a defined task across native or mapped handheld controls.",
+    "recipe_id": "GF05",
+    "hook": "The game launches. Can you actually make the move?",
+    "required_footage": [
+      "Named device",
+      "Control mapping",
+      "Same task with errors visible"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do task demonstrations outperform controller-support badges as an explanation?"
+  },
+  {
+    "id": "GI045",
+    "lane": "gaming",
+    "title": "The Handheld Pause and Return Test",
+    "angle": "Observe what happens when a real session is interrupted and resumed.",
+    "recipe_id": "GF05",
+    "hook": "You have thirty seconds to stop playing. What happens next?",
+    "required_footage": [
+      "Active session",
+      "Documented interruption",
+      "Resume and save state"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements.",
+      "Official suspend behaviour and observed game-specific results."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do interruption tests attract viewers with practical everyday use cases?"
+  },
+  {
+    "id": "GI046",
+    "lane": "gaming",
+    "title": "One Game on Two Handhelds with the Same Job to Do",
+    "angle": "Compare a defined workload using disclosed configurations and measured outcomes.",
+    "recipe_id": "GF05",
+    "hook": "Same game, same scene, two different compromises.",
+    "required_footage": [
+      "Matched scene",
+      "Settings on both devices",
+      "Recorded outcomes"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do transparent trade-offs produce more trust than declaring a universal winner?"
+  },
+  {
+    "id": "GI047",
+    "lane": "gaming",
+    "title": "The Handheld Battery Claim We Can Actually Measure",
+    "angle": "Design and report a bounded repeatable test instead of brief-glance extrapolation.",
+    "recipe_id": "GF05",
+    "hook": "How long does this setup run this game?",
+    "required_footage": [
+      "Test configuration",
+      "Timed battery record",
+      "Representative workload"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements.",
+      "Repeated test log with brightness, power mode and endpoint."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers watch the measurement context beyond the headline?"
+  },
+  {
+    "id": "GI048",
+    "lane": "gaming",
+    "title": "Choosing a Handheld for the Games You Already Own",
+    "angle": "Build a decision guide from a real game library rather than a specifications contest.",
+    "recipe_id": "GF05",
+    "hook": "Before choosing the device, choose the five games it must run.",
+    "required_footage": [
+      "Candidate device examples",
+      "Game controls",
+      "Compatibility and settings"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements.",
+      "Current official compatibility and software requirements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a library-first framework lead to more specific buying questions?"
+  },
+  {
+    "id": "GI049",
+    "lane": "gaming",
+    "title": "When More Performance Does Not Fix the Handheld Problem",
+    "angle": "Investigate a case where interface, controls or comfort limits a session.",
+    "recipe_id": "GF05",
+    "hook": "What if frame rate is not the reason you stopped playing?",
+    "required_footage": [
+      "Observed friction",
+      "Performance context",
+      "Attempted adjustment"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do non-performance trade-offs resonate with experienced handheld users?"
+  },
+  {
+    "id": "GI050",
+    "lane": "gaming",
+    "title": "Before You Buy a Used Gaming Handheld",
+    "angle": "Create a visible inspection checklist around condition, controls and software support.",
+    "recipe_id": "GF05",
+    "hook": "Which checks could change your buying decision?",
+    "required_footage": [
+      "Device condition",
+      "Control and port checks",
+      "Known test game"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Manufacturer specifications, exact test configuration and recorded device measurements.",
+      "Manufacturer support and current listing details; no invented seller claims."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which inspection steps create useful saves rather than generic engagement?"
+  },
+  {
+    "id": "GI051",
+    "lane": "gaming",
+    "title": "Three Great Games for a Small Budget",
+    "angle": "Produce a shortlist only when exact editions and current regional prices qualify.",
+    "recipe_id": "GF04",
+    "hook": "What can this budget buy in your region today?",
+    "required_footage": [
+      "Gameplay per entry",
+      "Dated official prices",
+      "Edition identification"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Current authorised-store price, region, taxes and promotion expiry."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      75,
+      105
+    ],
+    "freshness": "deal",
+    "research_status": "planned",
+    "learning_question": "Do viewers save price-qualified lists more than broad discount roundups?"
+  },
+  {
+    "id": "GI052",
+    "lane": "gaming",
+    "title": "Is the Complete Edition Actually the Better Deal",
+    "angle": "Compare one base game and bundle using included content and intended player needs.",
+    "recipe_id": "GF04",
+    "hook": "More content changes the price. Does it change your recommendation?",
+    "required_footage": [
+      "Base experience",
+      "Included-content comparison",
+      "Dated prices"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official bundle contents, regional prices and edition requirements."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "deal",
+    "research_status": "planned",
+    "learning_question": "Do clear edition comparisons generate qualified purchase questions?"
+  },
+  {
+    "id": "GI053",
+    "lane": "gaming",
+    "title": "The Anniversary Replay That Earns Its Date",
+    "angle": "Use a verified anniversary to examine one enduring design question.",
+    "recipe_id": "GF01",
+    "hook": "The date is a reason to revisit it. What makes it worthwhile?",
+    "required_footage": [
+      "Identified original release",
+      "One defining mechanic",
+      "Current replay footage"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Verified original release date and region."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "event",
+    "research_status": "planned",
+    "learning_question": "Does an anniversary hook reach beyond the established nostalgia audience?"
+  },
+  {
+    "id": "GI054",
+    "lane": "gaming",
+    "title": "The Tutorial Promise and the First Real Challenge",
+    "angle": "Compare what a game teaches with the first situation that tests that lesson.",
+    "recipe_id": "XF03",
+    "hook": "Did the tutorial prepare you for this moment?",
+    "required_footage": [
+      "Tutorial instruction",
+      "First relevant challenge",
+      "Observed response"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Official manual or tutorial text and reproducible challenge context."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      355,
+      485
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does connecting teaching to consequences produce better discussion than rating tutorials?"
+  },
+  {
+    "id": "GI055",
+    "lane": "gaming",
+    "title": "One Mechanic Across Three Generations",
+    "angle": "Compare a defined mechanic across three releases without assuming direct influence.",
+    "recipe_id": "XF02",
+    "hook": "The idea looks familiar. What actually changed?",
+    "required_footage": [
+      "Same mechanic in three games",
+      "Version labels",
+      "Contrasting outcomes"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Production interviews only if making an influence claim."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers value concrete differences more than chronological nostalgia?"
+  },
+  {
+    "id": "GI056",
+    "lane": "gaming",
+    "title": "The Manual Tip You Might Have Missed",
+    "angle": "Test one specific manual instruction against observed play in the matching edition.",
+    "recipe_id": "XF03",
+    "hook": "Was the missing tutorial sitting in the box all along?",
+    "required_footage": [
+      "Identified manual page",
+      "Matching game action",
+      "Result"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Contemporary reviews and original manuals for retro releases.",
+      "Original manual edition and exact instruction."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do manual discoveries encourage viewers to share substantiated tips?"
+  },
+  {
+    "id": "GI057",
+    "lane": "gaming",
+    "title": "The Failed Attempt That Explains the Game",
+    "angle": "Use one honest failure to show the rules, decision and consequence that make a game interesting.",
+    "recipe_id": "XF01",
+    "hook": "This failure explains more than a perfect run would.",
+    "required_footage": [
+      "Initial situation",
+      "Player decision",
+      "Unedited failure and replay"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      70
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a readable failure attract more thoughtful comments than a victory highlight?"
+  },
+  {
+    "id": "GI058",
+    "lane": "gaming",
+    "title": "When Critics and Players Answer Different Questions",
+    "angle": "Investigate a real reception difference with matching scope and representative evidence.",
+    "recipe_id": "GF02",
+    "hook": "Are these reviews disagreeing about the same thing?",
+    "required_footage": [
+      "Relevant gameplay",
+      "Dated reception comparison",
+      "Concrete issue if reproducible"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Matched review scopes, representative sample and publication dates."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      510,
+      690
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do carefully explained disagreements outperform manufactured controversy?"
+  },
+  {
+    "id": "GI059",
+    "lane": "gaming",
+    "title": "The First Hour Versus the Game You Return For",
+    "angle": "Compare introductory decisions with a documented later loop without inventing playtime.",
+    "recipe_id": "XF02",
+    "hook": "Does the opening show why people keep coming back?",
+    "required_footage": [
+      "Opening loop",
+      "Later loop from known footage",
+      "Progression context"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage.",
+      "Verified footage provenance and spoiler boundaries."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      410,
+      550
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing progression improve interest without revealing too much?"
+  },
+  {
+    "id": "GI060",
+    "lane": "gaming",
+    "title": "Five Games from One Footage Folder and One Good Reason",
+    "angle": "Turn a mixed asset collection into curation around a demonstrable shared experience.",
+    "recipe_id": "GF02",
+    "hook": "These games look unrelated until you watch the decision they share.",
+    "required_footage": [
+      "Distinct proof clip per game",
+      "A common decision pattern",
+      "Clear game labels"
+    ],
+    "source_requirements": [
+      "Official description for every featured game.",
+      "Metacritic and/or OpenCritic matched to each game edition and platform.",
+      "Steam reception for every game; document absent or inapplicable coverage."
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      460,
+      620
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a shared idea outperform grouping games only by age?"
+  },
+  {
+    "id": "AI001",
+    "lane": "ai",
+    "title": "Your First Local Model: One Useful Job, From Start to Finish",
+    "angle": "Guide a beginner through one reproducible local task and show the accepted output before explaining setup.",
+    "recipe_id": "AI-F02",
+    "hook": "Your first local model needs one useful job. Start with this one.",
+    "required_footage": [
+      "Installed runtime and exact model tag",
+      "A fixed sample input and uninterrupted successful output",
+      "A simple output check"
+    ],
+    "source_requirements": [
+      "Current official runtime installation instructions",
+      "Official model card and license",
+      "Recorded run and operating-system version"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing the completed task before installation improve tutorial retention?"
+  },
+  {
+    "id": "AI002",
+    "lane": "ai",
+    "title": "Before You Buy a GPU, Measure These Three Things",
+    "angle": "Diagnose memory, context and useful task latency on the current machine before proposing an upgrade.",
+    "recipe_id": "AI-F03",
+    "hook": "Before spending money on a GPU, check what is slowing your assistant down.",
+    "required_footage": [
+      "Current workload running",
+      "Memory and offloading display",
+      "Timed accepted result"
+    ],
+    "source_requirements": [
+      "Runtime hardware support for the exact OS",
+      "Exact model and quantization",
+      "Original measurement log"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do diagnostic hooks generate more saves than specification-led hooks?"
+  },
+  {
+    "id": "AI003",
+    "lane": "ai",
+    "title": "Can Your Model Fit a Long Conversation?",
+    "angle": "Keep the model fixed and compare two explicit context settings, including memory and correctness.",
+    "recipe_id": "AI-F03",
+    "hook": "The model loads. What happens when the conversation gets longer?",
+    "required_footage": [
+      "Loaded model configuration",
+      "Short-context run",
+      "Long-context run and memory reading"
+    ],
+    "source_requirements": [
+      "Current context-setting documentation",
+      "Recorded configuration and task inputs",
+      "Memory and latency measurements"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a visible failure followed by an explanation help viewers understand context costs?"
+  },
+  {
+    "id": "AI004",
+    "lane": "ai",
+    "title": "Is Your Local Assistant Calling the Cloud?",
+    "angle": "Inspect the actual provider path and demonstrate a documented local-only configuration using sample data.",
+    "recipe_id": "AI-F02",
+    "hook": "A local interface does not tell you where its model is running. Here is how to check.",
+    "required_footage": [
+      "Provider settings with secrets hidden",
+      "Documented local-only controls",
+      "Bounded offline check and its result"
+    ],
+    "source_requirements": [
+      "Official runtime local/cloud documentation",
+      "Installed application configuration",
+      "Recorded verification with limitations"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      300,
+      480
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers prefer a short verification checklist or the full configuration walkthrough?"
+  },
+  {
+    "id": "AI005",
+    "lane": "ai",
+    "title": "Why Your Fast Model Feels Slow",
+    "angle": "Separate model loading, prompt processing and generation, then identify the delay that matters to the user.",
+    "recipe_id": "AI-F03",
+    "hook": "The text scrolls quickly. So why did this simple job take so long?",
+    "required_footage": [
+      "Full task timeline",
+      "Model-loading segment",
+      "First-response and completed-answer timestamps"
+    ],
+    "source_requirements": [
+      "Runtime timing-field definitions",
+      "Original task logs",
+      "Exact model and backend versions"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a task timeline explain perceived speed better than a tokens-per-second overlay?"
+  },
+  {
+    "id": "AI006",
+    "lane": "ai",
+    "title": "The Smallest Model That Can Finish This Job",
+    "angle": "Use a stated task ladder to find the smallest eligible model that meets the same acceptance criteria.",
+    "recipe_id": "AI-F04",
+    "hook": "How small can the model get before it stops doing the job?",
+    "required_footage": [
+      "Identical inputs for each candidate",
+      "Blinded output checks",
+      "Accepted and rejected examples"
+    ],
+    "source_requirements": [
+      "Current candidate model cards and licenses",
+      "Predeclared task rubric",
+      "Full run log including failures"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a personal workload attract more useful questions than a generic model leaderboard?"
+  },
+  {
+    "id": "AI007",
+    "lane": "ai",
+    "title": "Quantization: What Changes on This Task?",
+    "angle": "Compare two representations of one model on memory, speed and output quality without assuming a winner.",
+    "recipe_id": "AI-F04",
+    "hook": "A smaller download is useful. What changes in the answer?",
+    "required_footage": [
+      "Both model identifiers and quantizations",
+      "Matched task recordings",
+      "Memory readings and output differences"
+    ],
+    "source_requirements": [
+      "Official or original quantization metadata",
+      "Same model family and task snapshot",
+      "Recorded evaluation results"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a concrete before-and-after output make quantization easier to understand?"
+  },
+  {
+    "id": "AI008",
+    "lane": "ai",
+    "title": "Laptop, Mini PC or Desktop for a Local Assistant?",
+    "angle": "Build a workload-based shortlist and distinguish mobility, capacity, compatibility and sustained performance.",
+    "recipe_id": "AI-F07",
+    "hook": "Pick the job first. Then decide what kind of AI computer makes sense.",
+    "required_footage": [
+      "Exact candidate systems or cleared product visuals",
+      "The same representative workload where measured",
+      "A transparent comparison matrix"
+    ],
+    "source_requirements": [
+      "Manufacturer specifications for exact configurations",
+      "OS and runtime compatibility",
+      "Comparable independent or original measurements"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which use case drives the most qualified hardware questions?"
+  },
+  {
+    "id": "AI009",
+    "lane": "ai",
+    "title": "Does More RAM Help This AI Workflow?",
+    "angle": "Test whether memory capacity is the actual constraint before recommending a memory upgrade.",
+    "recipe_id": "AI-F03",
+    "hook": "Would more RAM fix this, or is something else holding it back?",
+    "required_footage": [
+      "Baseline workload and memory pressure",
+      "One justified configuration change",
+      "Repeat task and visible outcome"
+    ],
+    "source_requirements": [
+      "Exact hardware and model setup",
+      "Runtime memory guidance",
+      "Before-and-after measurements"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does naming the bottleneck encourage more specific viewer setup descriptions?"
+  },
+  {
+    "id": "AI010",
+    "lane": "ai",
+    "title": "A Local Model for Repetitive Jobs While Your Main Agent Builds",
+    "angle": "Assign a small batch job to a local model and show a clean artifact handoff to the main workflow.",
+    "recipe_id": "AI-F05",
+    "hook": "Could this repetitive job run locally while your main assistant does the difficult part?",
+    "required_footage": [
+      "Small batch input",
+      "Local job execution",
+      "Output check and handoff"
+    ],
+    "source_requirements": [
+      "Current tool and model capabilities",
+      "Versioned task specification",
+      "Recorded handoff and acceptance result"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a concrete division of labor outperform a general multi-agent explanation?"
+  },
+  {
+    "id": "AI011",
+    "lane": "ai",
+    "title": "Your First MCP Connection That Does Something Useful",
+    "angle": "Connect one verified tool to one client and complete a small, observable task.",
+    "recipe_id": "AI-F02",
+    "hook": "Let us make one MCP connection earn its place in your setup.",
+    "required_footage": [
+      "Client and server identity",
+      "Scoped connection setup",
+      "Actual tool call and result in its destination"
+    ],
+    "source_requirements": [
+      "Current official client and server documentation",
+      "Tool permissions and supported operations",
+      "Recorded successful task"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      600
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do beginners stay longer when the destination result appears before the setup?"
+  },
+  {
+    "id": "AI012",
+    "lane": "ai",
+    "title": "MCP Connected Successfully. Why Is the Task Still Failing?",
+    "angle": "Diagnose a real mismatch between connection status, tool availability, permissions and the requested action.",
+    "recipe_id": "AI-F08",
+    "hook": "The connection is green. The task still fails. Check this next.",
+    "required_footage": [
+      "Real error and connection screen",
+      "Available tool or permission inspection",
+      "One change and repeated task"
+    ],
+    "source_requirements": [
+      "Exact client/server version documentation",
+      "Original error log",
+      "Recorded fix and limits"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      45,
+      75
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does starting with a recognizable error attract more relevant viewers than a generic tutorial title?"
+  },
+  {
+    "id": "AI013",
+    "lane": "ai",
+    "title": "One Agent or Three for the Same Small Feature?",
+    "angle": "Compare one agent with a coordinated team on a bounded software task, counting coordination overhead.",
+    "recipe_id": "AI-F04",
+    "hook": "Does adding agents help this feature get finished? Let us measure the whole job.",
+    "required_footage": [
+      "Identical task brief",
+      "Single-agent and team work sessions",
+      "Final checks and coordination time"
+    ],
+    "source_requirements": [
+      "Task snapshot and acceptance criteria",
+      "Actual available model/tool configurations",
+      "Full run and intervention records"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers value accepted-result time more than the number of agents involved?"
+  },
+  {
+    "id": "AI014",
+    "lane": "ai",
+    "title": "A Five-Line Handoff an Agent Can Actually Use",
+    "angle": "Transfer objective, constraints, state, evidence and next action, then check whether the next session resumes correctly.",
+    "recipe_id": "AI-F05",
+    "hook": "Can the next assistant continue without reading the whole conversation?",
+    "required_footage": [
+      "Compact handoff note",
+      "Fresh receiving session",
+      "Continuation and correctness check"
+    ],
+    "source_requirements": [
+      "Actual project state",
+      "Logged handoff fields",
+      "Observed continuation outcome"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing the handoff artifact increase saves and practical follow-up questions?"
+  },
+  {
+    "id": "AI015",
+    "lane": "ai",
+    "title": "Give Your Coding Agent a Finish Line",
+    "angle": "Turn one vague request into observable acceptance criteria and show how the completed change is checked.",
+    "recipe_id": "AI-F02",
+    "hook": "What would prove that this coding task is finished? Write that first.",
+    "required_footage": [
+      "Vague and revised brief",
+      "Small change in progress",
+      "Three explicit acceptance checks"
+    ],
+    "source_requirements": [
+      "Project requirements supplied by the owner",
+      "Current framework documentation if needed",
+      "Recorded test results"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do concrete finish-line examples generate better audience task suggestions?"
+  },
+  {
+    "id": "AI016",
+    "lane": "ai",
+    "title": "Give Each AI Assistant a Different Job",
+    "angle": "Demonstrate a planner, builder and reviewer with bounded responsibilities and one owner resolving disagreements.",
+    "recipe_id": "AI-F05",
+    "hook": "If every assistant gets the same task, what are the others adding?",
+    "required_footage": [
+      "Role assignment",
+      "Actual handoff and diff",
+      "Reviewer finding and owner decision"
+    ],
+    "source_requirements": [
+      "Available account and model capabilities",
+      "Written role boundaries",
+      "Recorded workflow and final validation"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing the exact useful handoff make multi-model workflows more understandable?"
+  },
+  {
+    "id": "AI017",
+    "lane": "ai",
+    "title": "Can a Second Model Catch the First Model’s Mistake?",
+    "angle": "Run a blinded review against independent checks; disclose whether defects were constructed or naturally observed.",
+    "recipe_id": "AI-F04",
+    "hook": "Here is a plausible answer. Can another model find what is wrong with it?",
+    "required_footage": [
+      "Original output without model branding",
+      "Reviewer response",
+      "Independent check and correction"
+    ],
+    "source_requirements": [
+      "Predeclared defect rubric",
+      "Current model versions",
+      "Full review outputs and ground truth"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      75,
+      105
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does revealing model identities after the verdict change the quality of comments?"
+  },
+  {
+    "id": "AI018",
+    "lane": "ai",
+    "title": "What Belongs in an Agent’s Project Instructions?",
+    "angle": "Compare a small task before and after explicit project constraints, focusing on avoidable rework.",
+    "recipe_id": "AI-F08",
+    "hook": "What should your agent know before it touches this project?",
+    "required_footage": [
+      "Project instruction file",
+      "Comparable before/after task",
+      "Diff showing one meaningful change"
+    ],
+    "source_requirements": [
+      "Real project constraints",
+      "Official client instruction-file behavior",
+      "Recorded attempts and corrections"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which instruction example produces the most reusable viewer questions?"
+  },
+  {
+    "id": "AI019",
+    "lane": "ai",
+    "title": "The Cheapest Model That Passes This Test",
+    "angle": "Rank an eligible set by measured cost per accepted outcome, with a fixed task and transparent cost basis.",
+    "recipe_id": "AI-F04",
+    "hook": "The cheapest token is only useful if the task gets finished.",
+    "required_footage": [
+      "Candidate configurations",
+      "Acceptance checks",
+      "Measured charges or labelled cost estimates"
+    ],
+    "source_requirements": [
+      "Current official pricing and access",
+      "Frozen task and run logs",
+      "Disclosed cost formula and retry policy"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does cost per accepted outcome engage viewers more than per-token price?"
+  },
+  {
+    "id": "AI020",
+    "lane": "ai",
+    "title": "When Is Higher Reasoning Effort Worth the Wait?",
+    "angle": "Compare supported effort settings on simple and difficult tasks while recording correctness, time and cost.",
+    "recipe_id": "AI-F04",
+    "hook": "This setting asks the model to think harder. Does our task benefit?",
+    "required_footage": [
+      "Supported effort controls",
+      "Matched task runs",
+      "Outcome, latency and cost table"
+    ],
+    "source_requirements": [
+      "Official effort-setting documentation",
+      "Model and tool versions",
+      "Repeated task measurements"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing a simple and a difficult case prevent viewers from overgeneralizing one result?"
+  },
+  {
+    "id": "AI021",
+    "lane": "ai",
+    "title": "A Model Launch Checklist for People Who Build Things",
+    "angle": "Translate a confirmed release into access conditions, a relevant task and a bounded evaluation plan.",
+    "recipe_id": "AI-F01",
+    "hook": "A new model has arrived. Which part changes your next project?",
+    "required_footage": [
+      "Official dated announcement",
+      "Actual access screen if available",
+      "Relevant original task or labelled test plan"
+    ],
+    "source_requirements": [
+      "Official announcement and current model ID",
+      "Current access and pricing conditions",
+      "Separate vendor claims and observed results"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "event",
+    "research_status": "planned",
+    "learning_question": "Do task-specific launch hooks attract more useful follow-up than benchmark headlines?"
+  },
+  {
+    "id": "AI022",
+    "lane": "ai",
+    "title": "This AI Chart Looks Impressive. What Does It Measure?",
+    "angle": "Reconstruct the metric and test conditions before interpreting a model or hardware chart.",
+    "recipe_id": "AI-F06",
+    "hook": "Before comparing these bars, check what the chart counted.",
+    "required_footage": [
+      "Cleared chart or faithful attributed reconstruction",
+      "Metric definition and footnotes",
+      "A small explanatory example"
+    ],
+    "source_requirements": [
+      "Original benchmark methodology",
+      "Exact chart date and units",
+      "Underlying data when available"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers save methodology explainers when tied to a recognizable chart?"
+  },
+  {
+    "id": "AI023",
+    "lane": "ai",
+    "title": "One Impressive AI Demo and Five Questions to Ask",
+    "angle": "Inspect attempts, editing, tool access, elapsed work and verification without dismissing or endorsing an untested demo.",
+    "recipe_id": "AI-F06",
+    "hook": "The result looks impressive. What would we need to reproduce it?",
+    "required_footage": [
+      "Permitted demo excerpt or original summary",
+      "Visible evidence for each question",
+      "A bounded reproduction plan"
+    ],
+    "source_requirements": [
+      "Original creator account of the demo",
+      "Provider documentation for claimed capabilities",
+      "Rights basis for any reused excerpt"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does an investigation framed around reproducibility encourage more constructive discussion?"
+  },
+  {
+    "id": "AI024",
+    "lane": "ai",
+    "title": "Why a Lower Token Price Can Mean a More Expensive Task",
+    "angle": "Use a clearly labelled illustrative calculation, followed by measured data if available, to explain retries and total usage.",
+    "recipe_id": "AI-F04",
+    "hook": "A lower price per token does not tell us the final bill for this job.",
+    "required_footage": [
+      "Transparent calculation",
+      "Actual usage fields if a test exists",
+      "Accepted-result comparison"
+    ],
+    "source_requirements": [
+      "Official pricing and billing definitions",
+      "Actual task logs or explicitly hypothetical inputs",
+      "Disclosed cache and retry treatment"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a worked calculation improve understanding of task-level cost?"
+  },
+  {
+    "id": "AI025",
+    "lane": "ai",
+    "title": "Your AI Subscription Stack Needs a Job Description",
+    "angle": "Map a week of actual tasks to distinct useful roles and identify overlap without assuming permanent vendor strengths.",
+    "recipe_id": "AI-F05",
+    "hook": "What did each subscription actually help you finish this week?",
+    "required_footage": [
+      "Redacted task log",
+      "Role assignment by observed outcome",
+      "One useful cross-tool handoff"
+    ],
+    "source_requirements": [
+      "Current plan features and limits",
+      "Creator-supplied task history",
+      "Observed outcomes and time spent"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers respond more to a task audit than a generic subscription ranking?"
+  },
+  {
+    "id": "AI026",
+    "lane": "ai",
+    "title": "Build an AI Workflow Around One Repetitive Task",
+    "angle": "Design the smallest end-to-end workflow with one visible human check and a concrete output.",
+    "recipe_id": "AI-F02",
+    "hook": "Choose the task you repeat every week. Build around that.",
+    "required_footage": [
+      "Manual baseline",
+      "Small automation in action",
+      "Destination output and check"
+    ],
+    "source_requirements": [
+      "Current official integration documentation",
+      "Synthetic or approved sample data",
+      "Recorded baseline and result"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "facebook_reels"
+    ],
+    "target_seconds": [
+      360,
+      600
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing the original manual process make the benefit easier to assess?"
+  },
+  {
+    "id": "AI027",
+    "lane": "ai",
+    "title": "Can the Agent Find Its Own Duplicate Code?",
+    "angle": "Review a small repository for duplication and verify one consolidation, without treating every similar function as a defect.",
+    "recipe_id": "AI-F08",
+    "hook": "The feature works. Did the agent build something the project already had?",
+    "required_footage": [
+      "Repository search",
+      "Duplicate candidates in context",
+      "Tested consolidation"
+    ],
+    "source_requirements": [
+      "Actual repository state and requirements",
+      "Relevant framework behavior",
+      "Before-and-after test record"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does maintenance content attract an audience distinct from first-build demos?"
+  },
+  {
+    "id": "AI028",
+    "lane": "ai",
+    "title": "What Changed After the Model Update?",
+    "angle": "Repeat a frozen task set with version stamps and show variability, including unchanged or worse results.",
+    "recipe_id": "AI-F04",
+    "hook": "The model updated. Which of our real tasks changed with it?",
+    "required_footage": [
+      "Version identifiers",
+      "Same task set before and after",
+      "Accepted outputs and failures"
+    ],
+    "source_requirements": [
+      "Official update record",
+      "Preserved earlier test artifacts",
+      "Comparable new run logs"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "event",
+    "research_status": "planned",
+    "learning_question": "Do follow-up tests build more returning viewers than first-day announcements?"
+  },
+  {
+    "id": "AI029",
+    "lane": "ai",
+    "title": "Turn One AI Experiment Into Four Useful Posts",
+    "angle": "Adapt one verified experiment into a tutorial, result short, comparison and question, each with a distinct viewer benefit.",
+    "recipe_id": "AI-F02",
+    "hook": "One experiment can answer four different questions. Here is how to split it.",
+    "required_footage": [
+      "Original complete experiment",
+      "Four clearly different edit timelines",
+      "Finished previews"
+    ],
+    "source_requirements": [
+      "Original evidence packet",
+      "Current platform format guidance",
+      "Actual derivative scripts and claim mapping"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which derivative sends the most qualified viewers to the detailed evidence?"
+  },
+  {
+    "id": "AI030",
+    "lane": "ai",
+    "title": "Can Your Assistant Admit It Does Not Know?",
+    "angle": "Use a small disclosed evaluation containing unanswerable questions and check uncertainty behavior without inventing facts.",
+    "recipe_id": "AI-F04",
+    "hook": "What should the assistant do when the evidence is missing?",
+    "required_footage": [
+      "Known-answer and unanswerable prompts",
+      "Responses with model identities hidden",
+      "Ground-truth explanation"
+    ],
+    "source_requirements": [
+      "Prewritten answer key and uncertainty rubric",
+      "Exact model settings",
+      "Full run outputs"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does uncertainty handling interest viewers more when tied to a practical task?"
+  },
+  {
+    "id": "AI031",
+    "lane": "ai",
+    "title": "The Citation Looked Real. Could We Open It?",
+    "angle": "Trace one genuine or explicitly constructed citation failure back to the source check that catches it.",
+    "recipe_id": "AI-F08",
+    "hook": "This answer has a citation. Let us see whether it supports the claim.",
+    "required_footage": [
+      "Answer containing the citation",
+      "Opening and inspecting the source",
+      "Corrected answer"
+    ],
+    "source_requirements": [
+      "Original source contents",
+      "Recorded model output or labelled teaching example",
+      "Claim-by-claim verification"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      45,
+      75
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do source-check demonstrations increase saves without encouraging blanket distrust?"
+  },
+  {
+    "id": "AI032",
+    "lane": "ai",
+    "title": "Can a Small Local Assistant Organize These Files Correctly?",
+    "angle": "Use a disposable sample folder, a written sorting rule and a reversible output manifest to test a practical local workflow.",
+    "recipe_id": "AI-F02",
+    "hook": "Could an assistant sort this folder without losing anything?",
+    "required_footage": [
+      "Sample folder before",
+      "Proposed changes and review",
+      "Result manifest and restore check"
+    ],
+    "source_requirements": [
+      "Current runtime and tool documentation",
+      "Synthetic sample-file specification",
+      "Recorded dry run and verification"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "facebook_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a reversible everyday task appeal to viewers who do not code?"
+  },
+  {
+    "id": "AI033",
+    "lane": "ai",
+    "title": "What Should Your Agent Remember Between Sessions?",
+    "angle": "Compare a compact decision log with an unfiltered transcript on a single continuation task.",
+    "recipe_id": "AI-F04",
+    "hook": "Which five facts would let a fresh session continue this job?",
+    "required_footage": [
+      "Decision log and transcript inputs",
+      "Fresh sessions performing the same continuation",
+      "Scope and correctness checks"
+    ],
+    "source_requirements": [
+      "Actual project decisions",
+      "Client context/memory behavior",
+      "Recorded comparison"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a visible context artifact make session continuity easier to learn?"
+  },
+  {
+    "id": "AI034",
+    "lane": "ai",
+    "title": "Your Agent’s Test Passed. Did It Test the Right Thing?",
+    "angle": "Show how an implementation-shaped test can miss the user-visible requirement, then add an independent acceptance check.",
+    "recipe_id": "AI-F08",
+    "hook": "A green test is only useful if it checks the behavior you asked for.",
+    "required_footage": [
+      "Passing inadequate test",
+      "User-visible failure",
+      "Independent check and fix"
+    ],
+    "source_requirements": [
+      "Actual feature requirement",
+      "Framework testing documentation",
+      "Recorded execution before and after"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do concrete counterexamples help viewers distinguish test success from task success?"
+  },
+  {
+    "id": "AI035",
+    "lane": "ai",
+    "title": "Can a Browser Assistant Finish a Small Form Correctly?",
+    "angle": "Demonstrate a local sample form with synthetic data, explicit fields and a visible review step.",
+    "recipe_id": "AI-F02",
+    "hook": "Can the assistant complete this form and explain what it entered?",
+    "required_footage": [
+      "Local synthetic form",
+      "Actual agent interaction",
+      "Field-by-field review"
+    ],
+    "source_requirements": [
+      "Current official browser-tool capabilities",
+      "Synthetic test specification",
+      "Recorded outcome and errors"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      300,
+      480
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a complete everyday interaction broaden interest beyond coding tutorials?"
+  },
+  {
+    "id": "AI036",
+    "lane": "ai",
+    "title": "10 Local AI Setup Checks Ranked by What to Do First",
+    "angle": "Produce a beginner checklist ordered by dependency and failure impact; every item must show the check and a recognizable success state.",
+    "recipe_id": "AI-F03",
+    "hook": "Before downloading another model, work through these ten checks in order.",
+    "required_footage": [
+      "Ten short original setup/check captures",
+      "Success and failure examples",
+      "A readable ordered checklist"
+    ],
+    "source_requirements": [
+      "Current official setup and hardware documentation",
+      "Verified installed versions",
+      "Rationale for each priority position"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does priority order make a setup list more actionable than an unordered tips list?"
+  },
+  {
+    "id": "AI037",
+    "lane": "ai",
+    "title": "10 Local AI Hardware Options Ranked for One Workload",
+    "angle": "Compare ten currently eligible configurations for one defined budget and workload; rank using disclosed fit, compatibility, measured performance and delivered cost criteria.",
+    "recipe_id": "AI-F07",
+    "hook": "Ten machines, one job. Which configurations deserve the shortlist?",
+    "required_footage": [
+      "Exact hardware configurations or permitted product assets",
+      "Comparable task results where available",
+      "Criteria, rankings and uncertainty labels"
+    ],
+    "source_requirements": [
+      "Manufacturer SKU specifications",
+      "Current regional retailer offers",
+      "Comparable independent or original benchmarks",
+      "Disclosed candidate pool and ranking weights"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      600,
+      900
+    ],
+    "freshness": "deal",
+    "research_status": "planned",
+    "learning_question": "Does a workload-specific ranking lead to more useful buying questions than an overall best-PC list?"
+  },
+  {
+    "id": "AI038",
+    "lane": "ai",
+    "title": "15 MCP Tools Ranked for a Beginner’s First Workflow",
+    "angle": "Select fifteen maintained tools with a demonstrable beginner task; rank by useful outcome, setup burden, documentation and access scope rather than popularity.",
+    "recipe_id": "AI-F02",
+    "hook": "Your first MCP tool should make one job easier. These fifteen are ordered by where I would start.",
+    "required_footage": [
+      "Actual or permitted demonstrations for each selected tool",
+      "Setup and permission summaries",
+      "One visible outcome per entry"
+    ],
+    "source_requirements": [
+      "Current official client and server documentation",
+      "Maintenance and compatibility checks",
+      "Recorded demonstrations or clearly attributed official examples",
+      "Explicit selection and ranking rubric"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      720,
+      1080
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which tool category earns the most qualified tutorial requests?"
+  },
+  {
+    "id": "AI039",
+    "lane": "ai",
+    "title": "10 Ways to Divide Work Across Your AI Subscriptions",
+    "angle": "Rank ten distinct handoff patterns by usefulness to a solo builder and coordination cost; validate the applicable plans and show concrete artifacts.",
+    "recipe_id": "AI-F05",
+    "hook": "Before adding another subscription, see whether these ten handoffs improve the work.",
+    "required_footage": [
+      "Role and artifact handoffs",
+      "Representative workflow captures",
+      "Ranking criteria and observed limitations"
+    ],
+    "source_requirements": [
+      "Current plan capabilities and billing boundaries",
+      "Creator-supplied workflow records",
+      "Disclosed usefulness and overhead criteria"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      600,
+      840
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do role-based combinations generate more practical responses than a vendor-by-vendor comparison?"
+  },
+  {
+    "id": "AI040",
+    "lane": "ai",
+    "title": "20 AI Tasks Ranked by How Easy They Are to Verify",
+    "angle": "Order twenty realistic tasks from easiest to hardest to validate, explaining the required evidence rather than claiming that all are suitable for unattended use.",
+    "recipe_id": "AI-F06",
+    "hook": "Want a dependable first AI task? Start with an outcome you can check.",
+    "required_footage": [
+      "Twenty compact task examples",
+      "Visible acceptance checks",
+      "An ordered verification ladder"
+    ],
+    "source_requirements": [
+      "Current tool capabilities for the selected examples",
+      "Task-specific verification criteria",
+      "Explicitly labelled constructed demonstrations"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      900,
+      1200
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a verification ladder help beginners choose more successful first projects?"
+  },
+  {
+    "id": "AI041",
+    "lane": "ai",
+    "title": "10 Coding Assistant Settings Ranked by What to Test First",
+    "angle": "Prioritize ten settings or configuration decisions for a stated client and audience using failure impact and ease of verification, with version-specific labels.",
+    "recipe_id": "AI-F08",
+    "hook": "These ten configuration checks can tell you more than another prompt rewrite.",
+    "required_footage": [
+      "Current settings interface",
+      "Small before/after examples",
+      "Readable priority list"
+    ],
+    "source_requirements": [
+      "Official documentation for the exact client version",
+      "Actual available settings",
+      "Recorded effects or clearly stated test plans",
+      "Disclosed priority criteria"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a client-specific configuration list outperform a broad prompt-tips list?"
+  },
+  {
+    "id": "AI042",
+    "lane": "ai",
+    "title": "15 Questions to Ask Before Paying for an AI Tool",
+    "angle": "Rank purchase questions by their effect on task fit, total cost, access, data handling and exit options; show where answers are found for current examples.",
+    "recipe_id": "AI-F07",
+    "hook": "Before paying for another AI tool, answer these fifteen questions.",
+    "required_footage": [
+      "Current pricing and feature pages",
+      "Redacted real task requirements",
+      "A fillable decision checklist"
+    ],
+    "source_requirements": [
+      "Official pricing, limits and product documentation",
+      "Applicable terms for the selected service",
+      "Explicit audience and question-priority rationale"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      600,
+      900
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which decision questions produce the most saves and follow-up requests?"
+  },
+  {
+    "id": "AI043",
+    "lane": "ai",
+    "title": "10 AI Model Choices Ranked for One Small Coding Task",
+    "angle": "Compare ten eligible model/configuration choices using the same task, tools, intervention policy and acceptance rubric; withhold or shorten the list if the pool or evidence is insufficient.",
+    "recipe_id": "AI-F04",
+    "hook": "One coding task, ten eligible choices, and a finish line defined before the test.",
+    "required_footage": [
+      "All candidate run records",
+      "Same acceptance checks",
+      "Ranked results with cost, time and uncertainty"
+    ],
+    "source_requirements": [
+      "Current model IDs and availability",
+      "Predeclared benchmark and ranking criteria",
+      "Full results including failed attempts",
+      "Current pricing with actual-versus-estimated charges separated"
+    ],
+    "recommended_platforms": [
+      "youtube_long"
+    ],
+    "target_seconds": [
+      720,
+      1080
+    ],
+    "freshness": "event",
+    "research_status": "planned",
+    "learning_question": "Does a narrow task ranking draw better repeat viewers than broad intelligence rankings?"
+  },
+  {
+    "id": "AI044",
+    "lane": "ai",
+    "title": "Is This AI Mini PC Offer Actually Good Value?",
+    "angle": "Assess one current offer against two eligible alternatives and the buyer’s workload, with exact configuration, region and delivered cost.",
+    "recipe_id": "AI-F07",
+    "hook": "The discount looks good. Does this exact configuration fit the job?",
+    "required_footage": [
+      "Dated retailer listing",
+      "Exact configuration comparison",
+      "Relevant workload evidence"
+    ],
+    "source_requirements": [
+      "Current retailer price, stock, shipping and tax",
+      "Manufacturer configuration documentation",
+      "Comparable measurements or explicit untested status"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "deal",
+    "research_status": "planned",
+    "learning_question": "Does delivered-price clarity improve qualified engagement on deal posts?"
+  },
+  {
+    "id": "AI045",
+    "lane": "ai",
+    "title": "Qwen4 Preview: What Can You Actually Use Today?",
+    "angle": "Refresh the official access and expiry details, distinguish hosted preview access from downloadable weights, and propose one useful test without claiming a result.",
+    "recipe_id": "AI-F01",
+    "hook": "Waiting for Qwen4? First check which kind of access has actually arrived.",
+    "required_footage": [
+      "Current official release/access page",
+      "Actual available access screen if permitted",
+      "Existing local setup or explicitly labelled test plan"
+    ],
+    "source_requirements": [
+      "Current Alibaba/Qwen official release documentation",
+      "Fresh access and preview-expiry check",
+      "Official model repository if downloadable weights are claimed"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      50,
+      80
+    ],
+    "freshness": "event",
+    "research_status": "planned",
+    "learning_question": "Do access-focused explanations serve viewers better than general release excitement?"
+  },
+  {
+    "id": "AI046",
+    "lane": "crossover",
+    "title": "Can AI Fix One Broken Godot Mechanic?",
+    "angle": "Keep the original game mechanic tiny and show a failing interaction, a bounded repair and a repeatable acceptance check.",
+    "recipe_id": "AI-F08",
+    "hook": "This mechanic is broken. Can the agent fix it without changing the rest of the game?",
+    "required_footage": [
+      "Original failing gameplay",
+      "Task brief and code diff",
+      "Same interaction after the repair"
+    ],
+    "source_requirements": [
+      "Owner’s game requirements",
+      "Current official Godot documentation",
+      "Recorded agent run and validation"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      360,
+      600
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does the visible gameplay outcome draw gamers into a practical AI comparison?"
+  },
+  {
+    "id": "AI047",
+    "lane": "crossover",
+    "title": "From One Game Idea to One Playable Room",
+    "angle": "Build an original miniature room with a clear interaction, win condition and time budget, recording human interventions.",
+    "recipe_id": "XF05",
+    "hook": "One room. One mechanic. Can we get to something playable?",
+    "required_footage": [
+      "Initial sketch and bounded brief",
+      "Build milestones",
+      "Playable result and remaining defects"
+    ],
+    "source_requirements": [
+      "Original design brief and asset permissions",
+      "Current engine documentation",
+      "Complete attempt and intervention log"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do narrow finishable builds retain viewers better than ambitious game promises?"
+  },
+  {
+    "id": "AI048",
+    "lane": "crossover",
+    "title": "The AI Build Looks Good. Can We Change the Rules?",
+    "angle": "Add one requirement to a previously recorded original prototype and assess repair effort and unintended changes.",
+    "recipe_id": "AI-F08",
+    "hook": "The first build worked. Now let us change one rule.",
+    "required_footage": [
+      "Original working prototype",
+      "New requirement and diff",
+      "Regression checks and final gameplay"
+    ],
+    "source_requirements": [
+      "Original project snapshot",
+      "Written new requirement",
+      "Recorded modifications and test results"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does maintainability create a compelling follow-up to a first-build video?"
+  },
+  {
+    "id": "AI049",
+    "lane": "crossover",
+    "title": "A Three-Line Prompt Versus a Clear Game Brief",
+    "angle": "Compare the same original mechanic under two instruction styles with equal tool access, time and intervention rules.",
+    "recipe_id": "XF04",
+    "hook": "Same mechanic. Two briefs. Which gets us closer to playable?",
+    "required_footage": [
+      "Both exact briefs",
+      "Build processes under identical rules",
+      "Blinded gameplay and acceptance checks"
+    ],
+    "source_requirements": [
+      "Predeclared original mechanic and rubric",
+      "Current model/engine versions",
+      "Full attempts and assistance logs"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a fair prompt comparison interest both builders and players?"
+  },
+  {
+    "id": "AI050",
+    "lane": "crossover",
+    "title": "Can a Local Model Write Consistent NPC Dialogue?",
+    "angle": "Evaluate a small original cast for voice, lore consistency and edit effort using a disclosed rubric.",
+    "recipe_id": "AI-F04",
+    "hook": "Can this NPC stay in character when the player asks something unexpected?",
+    "required_footage": [
+      "Original character notes",
+      "Local dialogue generation",
+      "In-game delivery and consistency checks"
+    ],
+    "source_requirements": [
+      "Owner-created lore and character constraints",
+      "Model card and runtime details",
+      "Full outputs and blinded evaluation rubric"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do players care more about character voice or factual consistency in AI dialogue?"
+  },
+  {
+    "id": "AI051",
+    "lane": "crossover",
+    "title": "Can AI Make This Game Menu Readable on a Handheld?",
+    "angle": "Improve one original interface for a specific screen size and verify readability and controller navigation on the target device.",
+    "recipe_id": "XF05",
+    "hook": "This menu works on a monitor. Can we make it comfortable on a handheld?",
+    "required_footage": [
+      "Original UI on target-sized screen",
+      "Bounded redesign and implementation",
+      "Real controller navigation and readability check"
+    ],
+    "source_requirements": [
+      "Current engine UI documentation",
+      "Target display and input specifications",
+      "Original project and asset permissions",
+      "Recorded usability observations"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_reels"
+    ],
+    "target_seconds": [
+      360,
+      600
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does target-device footage make UI improvement more convincing than desktop previews?"
+  },
+  {
+    "id": "AI052",
+    "lane": "crossover",
+    "title": "Teach an Agent One Combat Rule and See What It Builds",
+    "angle": "Implement one original turn-based interaction with explicit rules and visual tests, without expanding into a full game.",
+    "recipe_id": "XF05",
+    "hook": "Give the agent one combat rule. Then make it prove the rule works.",
+    "required_footage": [
+      "Rule sketch",
+      "Implementation progress",
+      "Edge cases in playable combat"
+    ],
+    "source_requirements": [
+      "Original rule specification",
+      "Current engine documentation",
+      "Recorded edge-case results"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "tiktok"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does showing edge cases make a small mechanic more engaging than a feature montage?"
+  },
+  {
+    "id": "AI053",
+    "lane": "crossover",
+    "title": "Can AI Explain Why This Tactics Move Works?",
+    "angle": "Compare the same tactics position with and without an explicit rule sheet, then verify both explanations against the actual game state.",
+    "recipe_id": "XF04",
+    "hook": "The move looks clever. Does the assistant understand why it works?",
+    "required_footage": [
+      "Exact game state and rules",
+      "Model explanation",
+      "Recorded move and counterexample",
+      "Two recorded explanations from the same model and position, differing only by the supplied rule sheet, followed by the gameplay check."
+    ],
+    "source_requirements": [
+      "Official game rules or manual",
+      "Relevant version and reception sources for the featured published game",
+      "Actual gameplay outcome",
+      "Model and prompt record",
+      "For every featured published game: official description, matching Metacritic and/or OpenCritic, Steam reception or documented exception, and audible reception in each narrated variant."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do explanation-versus-outcome clips appeal to strategy players who rarely use AI?"
+  },
+  {
+    "id": "AI054",
+    "lane": "crossover",
+    "title": "Turn a Gameplay Clip Into a Bug Report an Agent Can Use",
+    "angle": "Translate one original recording into reproduction steps, expected behavior and evidence, then verify a focused repair.",
+    "recipe_id": "XF05",
+    "hook": "Can one gameplay clip become a bug report that leads to a real fix?",
+    "required_footage": [
+      "Original bug clip",
+      "Structured report with timecodes",
+      "Repair diff and repeated test"
+    ],
+    "source_requirements": [
+      "Original game requirements",
+      "Current engine documentation",
+      "Recorded issue and repair evidence"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "facebook_reels"
+    ],
+    "target_seconds": [
+      360,
+      540
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a footage-first workflow make technical development content more accessible?"
+  },
+  {
+    "id": "AI055",
+    "lane": "crossover",
+    "title": "Can an Agent Balance a Tiny Deck Without Breaking the Fun?",
+    "angle": "Test one declared card parameter proposed by an agent against fixed small-deck scenarios, checking balance tradeoffs and preserving the rest of the rules.",
+    "recipe_id": "XF04",
+    "hook": "The numbers look balanced. What happens when somebody actually plays?",
+    "required_footage": [
+      "Original cards and rules",
+      "Agent-proposed changes",
+      "Simulated cases and observed play sessions",
+      "A baseline and changed version with exactly one declared card parameter altered; identical scenarios and observed outcomes."
+    ],
+    "source_requirements": [
+      "Original design constraints",
+      "Disclosed simulation assumptions",
+      "Recorded play observations and change history"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do viewers prefer to inspect the numbers first or see the surprising play outcome?"
+  },
+  {
+    "id": "AI056",
+    "lane": "crossover",
+    "title": "An Amiga Mechanic Rebuilt as a Tiny Original Prototype",
+    "angle": "Study one documented classic mechanic, then create an original small interpretation with permitted assets and explain the design lesson.",
+    "recipe_id": "XF05",
+    "hook": "What made this old mechanic memorable? Let us build a tiny experiment around the idea.",
+    "required_footage": [
+      "Verified classic gameplay",
+      "Original design sketch",
+      "New prototype and side-by-side mechanic explanation"
+    ],
+    "source_requirements": [
+      "Official or archived game description and historical context",
+      "Correct-version reception searches and audible reception",
+      "Source attribution for the design analysis",
+      "Rights-cleared original and classic footage",
+      "For every featured published game: official description, matching Metacritic and/or OpenCritic, Steam reception or documented exception, and audible reception in each narrated variant."
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "facebook_reels"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a classic-to-prototype bridge encourage retro viewers to watch practical AI development?"
+  },
+  {
+    "id": "AI057",
+    "lane": "crossover",
+    "title": "Can AI Find the Accessibility Problem in This Game Screen?",
+    "angle": "Review one original screen against explicit accessibility criteria, then verify one change with realistic viewing and input conditions.",
+    "recipe_id": "AI-F08",
+    "hook": "The interface looks finished. Which players might still struggle with it?",
+    "required_footage": [
+      "Original screen at target scale",
+      "Criteria-led review",
+      "Improved screen and interaction check"
+    ],
+    "source_requirements": [
+      "Authoritative accessibility guidance relevant to the issue",
+      "Current engine UI documentation",
+      "Recorded comparison with limitations"
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      60,
+      90
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do specific accessibility fixes generate more useful feedback than general visual polish?"
+  },
+  {
+    "id": "AI058",
+    "lane": "crossover",
+    "title": "You Choose the Mechanic, We Define the Finish Line",
+    "angle": "Invite viewers to choose among three bounded original mechanics after showing small concept demonstrations and clear success rules. This is the invitation episode; the result is a separate follow-up.",
+    "recipe_id": "XF06",
+    "hook": "Choose one mechanic. We will show the brief, the attempts and the playable result.",
+    "required_footage": [
+      "Three short original concept demonstrations labeled as concepts.",
+      "A readable choice screen with the proposed budget and finish criteria."
+    ],
+    "source_requirements": [
+      "Creator-approved original concepts and asset provenance.",
+      "No claim of audience votes before they exist; the follow-up needs actual response records and recorded results."
+    ],
+    "recommended_platforms": [
+      "youtube_shorts",
+      "instagram_reels",
+      "facebook_reels",
+      "tiktok"
+    ],
+    "target_seconds": [
+      45,
+      75
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Which clearly explained concept receives substantive audience suggestions? Produce the separate outcome episode only after the choice and actual build."
+  },
+  {
+    "id": "AI059",
+    "lane": "crossover",
+    "title": "One Gaming PC, Two Jobs: Playing and Local AI",
+    "angle": "Measure a defined game workload and local assistant workload on one exact configuration, including resource contention when both run.",
+    "recipe_id": "AI-F07",
+    "hook": "Can this machine comfortably do both jobs you bought it for?",
+    "required_footage": [
+      "Exact hardware configuration",
+      "Separate gaming and local AI runs",
+      "Combined workload with visible settings"
+    ],
+    "source_requirements": [
+      "Manufacturer specifications and runtime support",
+      "Game version, official description and correct reception sources",
+      "Original comparable performance logs",
+      "Power and background-process conditions",
+      "For every featured published game: official description, matching Metacritic and/or OpenCritic, Steam reception or documented exception, and audible reception in each narrated variant."
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts"
+    ],
+    "target_seconds": [
+      480,
+      720
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Does a combined gamer-and-builder workload make hardware advice more relevant to this channel?"
+  },
+  {
+    "id": "AI060",
+    "lane": "crossover",
+    "title": "Can AI Turn a Playtest into Three Useful Priorities?",
+    "angle": "Use a consented or synthetic playtest, extract a small prioritized issue list, and implement one verifiable improvement.",
+    "recipe_id": "XF05",
+    "hook": "The playtest gave us ten complaints. Which three should we tackle first?",
+    "required_footage": [
+      "Playtest evidence with permission",
+      "Issue extraction and prioritization",
+      "One implemented fix and repeat playtest"
+    ],
+    "source_requirements": [
+      "Approved playtest material",
+      "Original game goals and severity rubric",
+      "Recorded issue decisions and follow-up results"
+    ],
+    "recommended_platforms": [
+      "youtube_long",
+      "youtube_shorts",
+      "instagram_carousel"
+    ],
+    "target_seconds": [
+      420,
+      660
+    ],
+    "freshness": "evergreen",
+    "research_status": "planned",
+    "learning_question": "Do audience-selected fixes encourage more returning viewers than a developer-selected feature list?"
+  }
+]

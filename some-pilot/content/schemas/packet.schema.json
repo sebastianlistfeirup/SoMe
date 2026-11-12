@@ -1,0 +1,653 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.1.0"
+    },
+    "story_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": [
+        "gaming",
+        "ai",
+        "crossover"
+      ]
+    },
+    "state": {
+      "enum": [
+        "research_example",
+        "needs_evidence",
+        "needs_footage",
+        "needs_revision",
+        "needs_owner_review",
+        "approved_draft"
+      ]
+    },
+    "target_language": {
+      "const": "en"
+    },
+    "promise": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recipe_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_type": {
+            "enum": [
+              "official",
+              "aggregator",
+              "independent_review",
+              "archive",
+              "community",
+              "own_record"
+            ]
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "access_status": {
+            "enum": [
+              "inspected",
+              "indexed_only",
+              "blocked",
+              "not_found"
+            ]
+          },
+          "evidence_note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "title",
+          "source_type",
+          "retrieved_at",
+          "event_date",
+          "expires_at",
+          "access_status",
+          "evidence_note",
+          "limitations"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "status": {
+            "enum": [
+              "verified",
+              "attributed",
+              "proposed",
+              "unsupported",
+              "expired"
+            ]
+          },
+          "evidence_type": {
+            "enum": [
+              "documented",
+              "observed",
+              "reported",
+              "proposed"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "source_ids",
+          "status",
+          "evidence_type",
+          "expires_at",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "edition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "footage_platform": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reviewed_platform": {
+            "type": "string",
+            "minLength": 1
+          },
+          "official_description_source_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "critic": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "verified",
+                  "not_found_after_search",
+                  "not_applicable",
+                  "blocked",
+                  "requires_refresh"
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0
+              },
+              "value": {
+                "type": [
+                  "number",
+                  "string",
+                  "null"
+                ]
+              },
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "source_ids",
+              "value",
+              "scope",
+              "reason"
+            ],
+            "additionalProperties": false
+          },
+          "steam": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "verified",
+                  "not_found_after_search",
+                  "not_applicable",
+                  "blocked",
+                  "requires_refresh"
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0
+              },
+              "value": {
+                "type": [
+                  "number",
+                  "string",
+                  "null"
+                ]
+              },
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "source_ids",
+              "value",
+              "scope",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "edition",
+          "footage_platform",
+          "reviewed_platform",
+          "official_description_source_id",
+          "critic",
+          "steam"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "local_reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration_seconds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "available",
+              "required"
+            ]
+          },
+          "origin": {
+            "enum": [
+              "own_capture",
+              "licensed",
+              "official_promo",
+              "archive",
+              "generated",
+              "unknown"
+            ]
+          },
+          "rights_status": {
+            "enum": [
+              "cleared",
+              "needs_review",
+              "not_cleared"
+            ]
+          },
+          "rights_evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "local_reference",
+          "duration_seconds",
+          "status",
+          "origin",
+          "rights_status",
+          "rights_evidence",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
+          },
+          "voiceover": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "reception_for": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "shots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "media_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_in": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "source_out": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "purpose": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "media_id",
+                "source_in",
+                "source_out",
+                "purpose"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "start",
+          "end",
+          "voiceover",
+          "claim_ids",
+          "reception_for",
+          "shots"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "platform": {
+            "enum": [
+              "youtube_long",
+              "youtube_shorts",
+              "instagram_reels",
+              "instagram_carousel",
+              "facebook_reels",
+              "tiktok"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "narrated_video",
+              "silent_companion"
+            ]
+          },
+          "parent_variant_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "game_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "caption": {
+            "type": "string",
+            "minLength": 1
+          },
+          "segment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "target_seconds": {
+            "type": "number",
+            "minimum": 1
+          },
+          "technical_capability_status": {
+            "enum": [
+              "verified",
+              "not_checked"
+            ]
+          },
+          "disclosure_status": {
+            "enum": [
+              "reviewed",
+              "needs_review"
+            ]
+          },
+          "disclosure_note": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "platform",
+          "kind",
+          "parent_variant_id",
+          "game_ids",
+          "title",
+          "caption",
+          "segment_ids",
+          "target_seconds",
+          "technical_capability_status",
+          "disclosure_status",
+          "disclosure_note"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "analytics_hypothesis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "owner_approved": {
+          "type": "boolean"
+        },
+        "approved_revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_reviewed": {
+          "type": "boolean"
+        },
+        "actual_media_reviewed": {
+          "type": "boolean"
+        },
+        "voice_render_timed": {
+          "type": "boolean"
+        },
+        "approved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "owner_approved",
+        "approved_revision",
+        "revision",
+        "evidence_reviewed",
+        "actual_media_reviewed",
+        "voice_render_timed",
+        "approved_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "story_id",
+    "lane",
+    "state",
+    "target_language",
+    "promise",
+    "recipe_id",
+    "created_at",
+    "sources",
+    "claims",
+    "games",
+    "media",
+    "segments",
+    "variants",
+    "blockers",
+    "analytics_hypothesis",
+    "approval"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-and-parameters.invalid/schemas/packet.schema.json",
+  "title": "Pixel and Parameters editorial draft packet"
+}

@@ -1,0 +1,181 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.1.0"
+    },
+    "post_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "story_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": [
+        "gaming",
+        "ai",
+        "crossover"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "minLength": 1
+    },
+    "duration_seconds": {
+      "type": "number",
+      "minimum": 1
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "post_age_hours": {
+      "type": "number",
+      "minimum": 0
+    },
+    "measurement_window": {
+      "type": "string",
+      "minLength": 1
+    },
+    "traffic": {
+      "enum": [
+        "organic",
+        "paid",
+        "mixed",
+        "unknown"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "experiment_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name_native": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "population": {
+            "type": "string",
+            "minLength": 1
+          },
+          "denominator_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "definition_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "definition_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "availability_status": {
+            "enum": [
+              "available",
+              "not_available_in_export",
+              "insufficient_data",
+              "permission_not_granted"
+            ]
+          }
+        },
+        "required": [
+          "name_native",
+          "value",
+          "unit",
+          "population",
+          "denominator_name",
+          "definition_url",
+          "definition_version",
+          "availability_status"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "availability_status": {
+                  "const": "available"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "value": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "post_id",
+    "story_id",
+    "platform",
+    "lane",
+    "format",
+    "duration_seconds",
+    "published_at",
+    "observed_at",
+    "post_age_hours",
+    "measurement_window",
+    "traffic",
+    "source",
+    "content_revision",
+    "experiment_id",
+    "metrics"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

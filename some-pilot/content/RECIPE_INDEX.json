@@ -1,0 +1,102 @@
+[
+  {
+    "id": "GF01",
+    "title": "The Amiga Corner",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "GF02",
+    "title": "Great Games That Are Not New",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "GF03",
+    "title": "The Ranked Top 10 15 or 20",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "GF04",
+    "title": "Games Under a Real Budget",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "GF05",
+    "title": "The Handheld Reality Check",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "GF06",
+    "title": "Emulation First Session",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F01",
+    "title": "The launch translated into a decision",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F02",
+    "title": "One useful task from start to finish",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F03",
+    "title": "The local AI fit test",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F04",
+    "title": "The fair task duel",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F05",
+    "title": "Build a tiny agent team",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F06",
+    "title": "A public question becomes an investigation",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F07",
+    "title": "The hardware decision in context",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "AI-F08",
+    "title": "One failed attempt made useful",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF01",
+    "title": "One mechanic explained",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF02",
+    "title": "Then versus now",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF03",
+    "title": "What the manual promised",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF04",
+    "title": "Myth into a small test",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF05",
+    "title": "One task from start to finish",
+    "detail_file": "RECIPES.md"
+  },
+  {
+    "id": "XF06",
+    "title": "Audience challenge with recorded outcome",
+    "detail_file": "RECIPES.md"
+  }
+]

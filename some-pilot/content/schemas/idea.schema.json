@@ -1,0 +1,96 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": [
+        "gaming",
+        "ai",
+        "crossover"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "angle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recipe_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hook": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_footage": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "source_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "recommended_platforms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "target_seconds": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "freshness": {
+      "enum": [
+        "evergreen",
+        "deal",
+        "event"
+      ]
+    },
+    "research_status": {
+      "const": "planned"
+    },
+    "learning_question": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "id",
+    "lane",
+    "title",
+    "angle",
+    "recipe_id",
+    "hook",
+    "required_footage",
+    "source_requirements",
+    "recommended_platforms",
+    "target_seconds",
+    "freshness",
+    "research_status",
+    "learning_question"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

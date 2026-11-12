@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.1.0",
+  "post_id": "FICTIONAL-ANALYTICS-001",
+  "story_id": "FICTIONAL-STORY-001",
+  "platform": "youtube_shorts",
+  "lane": "ai",
+  "format": "one_task_demo",
+  "duration_seconds": 60,
+  "published_at": "2026-11-01T12:00:00Z",
+  "observed_at": "2026-11-08T12:00:00Z",
+  "post_age_hours": 168,
+  "measurement_window": "first_7_days",
+  "traffic": "organic",
+  "source": "synthetic_test_fixture_not_channel_data",
+  "content_revision": "fixture-1",
+  "experiment_id": "example-outcome-first",
+  "metrics": [
+    {
+      "name_native": "example_average_percentage_viewed",
+      "value": 120,
+      "unit": "percent",
+      "population": "illustrative engaged-view population",
+      "denominator_name": "native_population_not_reconstructed",
+      "definition_url": null,
+      "definition_version": "fixture_only",
+      "availability_status": "available"
+    },
+    {
+      "name_native": "saves",
+      "value": null,
+      "unit": "count",
+      "population": "unknown",
+      "denominator_name": null,
+      "definition_url": null,
+      "definition_version": "unavailable",
+      "availability_status": "not_available_in_export"
+    }
+  ]
+}

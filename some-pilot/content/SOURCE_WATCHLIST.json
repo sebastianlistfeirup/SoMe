@@ -1,0 +1,322 @@
+[
+  {
+    "id": "SW01",
+    "name": "Steam Store",
+    "url": "https://store.steampowered.com/",
+    "purpose": "Resolve the exact product, read its official description, and inspect scoped player reception.",
+    "evidence_role": "official_product_description_and_player_reception",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW02",
+    "name": "Epic Games Store",
+    "url": "https://store.epicgames.com/",
+    "purpose": "Find official product descriptions and current offers for the correct market and edition.",
+    "evidence_role": "official_product_description_and_offer",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW03",
+    "name": "Metacritic Games",
+    "url": "https://www.metacritic.com/game/",
+    "purpose": "Find the matching edition and platform; separate critic and user scores.",
+    "evidence_role": "critic_aggregation",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW04",
+    "name": "OpenCritic",
+    "url": "https://opencritic.com/",
+    "purpose": "Find matching critic coverage; preserve average scores and recommendation percentages as distinct measures.",
+    "evidence_role": "critic_aggregation",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW05",
+    "name": "IGN Nordic",
+    "url": "https://nordic.ign.com/",
+    "purpose": "Discover gaming news and original reviews; inspect the specific article before citing it.",
+    "evidence_role": "editorial_discovery_and_attributed_review",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW06",
+    "name": "GameSpot",
+    "url": "https://www.gamespot.com/",
+    "purpose": "Find original reviews, interviews and reported gaming stories relevant to available footage.",
+    "evidence_role": "editorial_discovery_and_attributed_review",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW07",
+    "name": "Polygon",
+    "url": "https://www.polygon.com/",
+    "purpose": "Discover cultural and design angles; trace factual claims to their underlying sources.",
+    "evidence_role": "editorial_discovery_and_attributed_analysis",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW08",
+    "name": "Game Informer",
+    "url": "https://gameinformer.com/",
+    "purpose": "Look for identifiable reviews, interviews and historical context after checking the destination.",
+    "evidence_role": "editorial_discovery_and_attributed_review",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW09",
+    "name": "Hall of Light Amiga database",
+    "url": "https://hol.abime.net/",
+    "purpose": "Candidate archive for identifying original Amiga releases, editions, manuals and credits.",
+    "evidence_role": "historical_reference_to_corroborate",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW10",
+    "name": "Amiga Magazine Rack",
+    "url": "https://amr.abime.net/",
+    "purpose": "Candidate archive for locating identifiable contemporary issues, pages and review scans.",
+    "evidence_role": "historical_source_locator",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW11",
+    "name": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Main_Page",
+    "purpose": "Orient historical research and follow references for important dates, development claims and interviews.",
+    "evidence_role": "background_orientation",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW12",
+    "name": "YouTube essays and interviews",
+    "url": "https://www.youtube.com/",
+    "purpose": "Discover interpretations and original interviews; inspect the relevant segment and attribute its creator.",
+    "evidence_role": "essay_leads_and_attributed_analysis",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW13",
+    "name": "OpenAI News",
+    "url": "https://openai.com/da-DK/news/",
+    "purpose": "Discover official announcements, then inspect the linked release and current documentation.",
+    "evidence_role": "primary_provider_announcement",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW14",
+    "name": "Anthropic Newsroom",
+    "url": "https://www.anthropic.com/news",
+    "purpose": "Discover official announcements and follow current model documentation for access and implementation details.",
+    "evidence_role": "primary_provider_announcement",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW15",
+    "name": "Qwen official model documentation",
+    "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/qwen4-max-preview",
+    "purpose": "Inspect exact model identity, access and preview status; locate newer official documentation when this preview expires.",
+    "evidence_role": "primary_provider_release_index",
+    "status": "inspected_reference"
+  },
+  {
+    "id": "SW16",
+    "name": "Ollama hardware support documentation",
+    "url": "https://docs.ollama.com/gpu",
+    "purpose": "Check runtime support for the exact hardware, operating system and backend used in a tutorial.",
+    "evidence_role": "primary_product_documentation",
+    "status": "inspected_reference"
+  },
+  {
+    "id": "SW17",
+    "name": "Model Context Protocol documentation",
+    "url": "https://modelcontextprotocol.io/docs/getting-started/intro",
+    "purpose": "Establish protocol concepts and navigate to current client/server-specific guidance.",
+    "evidence_role": "primary_protocol_documentation",
+    "status": "inspected_reference"
+  },
+  {
+    "id": "SW18",
+    "name": "Meta AI Blog",
+    "url": "https://ai.meta.com/blog/",
+    "purpose": "Discover official AI research and product announcements, then inspect their papers, model cards or release records.",
+    "evidence_role": "primary_provider_announcement",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW19",
+    "name": "The Rundown AI",
+    "url": "https://www.therundown.ai/",
+    "purpose": "Collect potential stories and follow the original announcement, documentation or research.",
+    "evidence_role": "newsletter_discovery_only",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW20",
+    "name": "Superhuman AI",
+    "url": "https://www.superhuman.ai/",
+    "purpose": "Collect tutorial and workflow leads, then verify the underlying tools and claims.",
+    "evidence_role": "newsletter_discovery_only",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW21",
+    "name": "The Neuron",
+    "url": "https://www.theneurondaily.com/",
+    "purpose": "Collect accessible explanations and news leads; use primary sources for technical assertions.",
+    "evidence_role": "newsletter_discovery_only",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW22",
+    "name": "AI Weekly",
+    "url": "https://aiweekly.co/",
+    "purpose": "Discover research and product stories and trace them to original sources.",
+    "evidence_role": "newsletter_discovery_only",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW23",
+    "name": "Ben’s Bites archive",
+    "url": "https://www.bensbites.com/archive",
+    "purpose": "Discover product and workflow ideas; verify actual access, features and evidence separately.",
+    "evidence_role": "newsletter_discovery_only",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW24",
+    "name": "Zapier Blog",
+    "url": "https://zapier.com/blog/",
+    "purpose": "Find automation use cases and tutorial leads; verify each current integration with official documentation.",
+    "evidence_role": "workflow_discovery_and_tutorial_leads",
+    "status": "seed_from_brief"
+  },
+  {
+    "id": "SW25",
+    "name": "r/emulation",
+    "url": "https://www.reddit.com/r/emulation/",
+    "purpose": "Identify recurring setup questions and retro-use cases; verify instructions with official emulator documentation.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW26",
+    "name": "r/ClaudeGameDev",
+    "url": "https://www.reddit.com/r/ClaudeGameDev/",
+    "purpose": "Discover game-development questions, scoped experiments and creator demos to investigate.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW27",
+    "name": "r/aigamedev",
+    "url": "https://www.reddit.com/r/aigamedev/",
+    "purpose": "Discover discussions connecting AI tools with game-development tasks.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW28",
+    "name": "r/ClaudeAI",
+    "url": "https://www.reddit.com/r/ClaudeAI/",
+    "purpose": "Identify Claude user questions and launch discussions; verify product claims with Anthropic.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW29",
+    "name": "r/Qwen_AI",
+    "url": "https://www.reddit.com/r/Qwen_AI/",
+    "purpose": "Identify Qwen user questions and release anticipation; verify releases through official records.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW30",
+    "name": "r/LocalLLM",
+    "url": "https://www.reddit.com/r/LocalLLM/",
+    "purpose": "Discover local-model setup questions, hardware anecdotes and candidate experiments.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW31",
+    "name": "r/vibecoding",
+    "url": "https://www.reddit.com/r/vibecoding/",
+    "purpose": "Identify recurring prototyping and maintenance problems suitable for a bounded demonstration.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW32",
+    "name": "r/TopologyAI",
+    "url": "https://www.reddit.com/r/TopologyAI/",
+    "purpose": "Validate the community and its relevance before treating it as a discovery source.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW33",
+    "name": "r/AI_Agents",
+    "url": "https://www.reddit.com/r/AI_Agents/",
+    "purpose": "Discover questions about agent handoffs, reliability and useful workflows.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW34",
+    "name": "r/cursor",
+    "url": "https://www.reddit.com/r/cursor/",
+    "purpose": "Identify client-specific questions and problems; verify behavior with official Cursor documentation.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW35",
+    "name": "r/Anthropic",
+    "url": "https://www.reddit.com/r/Anthropic/",
+    "purpose": "Discover provider-related discussions; distinguish community statements from official announcements.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW36",
+    "name": "r/ChatGPT",
+    "url": "https://www.reddit.com/r/ChatGPT/",
+    "purpose": "Identify practical user questions and confusion; verify features against current official documentation.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW37",
+    "name": "r/aigamerdevs",
+    "url": "https://www.reddit.com/r/aigamerdevs/",
+    "purpose": "Validate the community and look for original game-development experiments.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW38",
+    "name": "r/BestGitHubRepos",
+    "url": "https://www.reddit.com/r/BestGitHubRepos/",
+    "purpose": "Find repository leads; inspect original repositories, maintainers, licenses and documentation.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW39",
+    "name": "r/codex",
+    "url": "https://www.reddit.com/r/codex/",
+    "purpose": "Discover coding-workflow questions; verify features and access against official OpenAI sources.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  },
+  {
+    "id": "SW40",
+    "name": "r/LocalLLaMA",
+    "url": "https://www.reddit.com/r/LocalLLaMA/",
+    "purpose": "Additional editorial candidate for local-model discussions, hardware experiments and recurring questions.",
+    "evidence_role": "community_question_or_anecdote",
+    "status": "candidate_to_validate"
+  }
+]
