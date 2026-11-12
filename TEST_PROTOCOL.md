@@ -174,3 +174,7 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - YouTube mocktest afventer `processingStatus=succeeded` og kalder `thumbnails.set` med godkendt JPEG. Instagram mocktest sender både video_url og cover_url. Signet thumbnail er bundet til multi-approvalhashen og ændringer blokerer.
 - Standardbuild og fuld pakke i frisk container: **173 passed**. Kun Starlette TestClient-deprecationwarning.
 - Ingen nye ejervideoer er produceret, og `C:/Users/compu/Videos/SoMe-captures` er ikke ændret. Reel pilotproduktion og publicering afventer ejerens eksplicitte go samt platformspecifikke eligibility-forhold.
+
+- Deployment `a0b77ba` på VPS gav ligeledes **173 passed**. Første serverkørsel fangede miljøafhængighed i ElevenLabs-guard-testen; testen sætter nu eksplicit pris/dato/rettigheder til tomme værdier og bestod både lokalt og på VPS efter rettelsen.
+- Standarddeployment fuldførte migration 0001 og doctor. Web og worker blev efterfølgende kontrolleret som healthy. `GET /healthz` på loopback og HTTPS returnerede `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
+- VPS doctor: `direct_post_eligible=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`; ElevenLabs konfigureret. Ingen ny ekstern publicering eller betalt produktion blev udført under deployment.

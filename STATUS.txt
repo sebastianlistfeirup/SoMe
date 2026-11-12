@@ -27,6 +27,11 @@ VERIFICERET LOKALT
 - Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost og AI-lane-valg.
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
+VERIFICERET PÅ VPS
+- Commit `a0b77ba` er deployet med standardscriptet. Hele pakken består også på VPS: 173/173 tests.
+- Migration 0001 og doctor er OK. Web og worker er healthy, og både loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
+- Doctor viser `direct_post_eligible=false` og `direct_post_blocker=tiktok_direct_post_not_eligible`. ElevenLabs er konfigureret; der er ikke foretaget nye betalte produktionskald.
+
 OMKOSTNINGSESTIMAT PR. OPSLAG
 - Claude baseline pr. parent story: ca. 0,207 DKK. Fire ekstra platformadapteringer kan medføre ca. 0,240 DKK ekstra, afhængigt af promptlængde og revisioner.
 - ElevenLabs: 0,533288 DKK pr. 1.000 tegn. Ved ca. 845–1.273 tegn/minut er det ca. 0,45–0,68 DKK/minut.
