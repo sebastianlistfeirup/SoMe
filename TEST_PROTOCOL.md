@@ -162,3 +162,15 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 ## Regel
 
 “Bestået” betyder udført i det angivne miljø. Der gives ingen 100 % fejlfriheds-, integrations- eller performancegaranti. Manglende ekstern adgang og ejergodkendelse rapporteres som åbne punkter, aldrig som succes.
+
+
+## Content Bible v1.1, immutable multi-publicering og ElevenLabs — 2026-11-12
+
+- Content Bible/Kimi Kit er integreret med 20 recipes, 120 idéer, 57 kilder og 46 kit-kontrakttests. Steam reception og friskheds-/receptionsgates har separate negative tests.
+- Multi-approval dækker alle fire destinationer, konkrete konto-ID'er, YouTube-synlighed og UTC-schedule. Tests beviser at afvisning ikke opretter jobs, dubletapproval ikke opretter dubletjobs, og ændret video/thumbnail/destination/konto/visibility/tidspunkt blokerer dispatch.
+- Delvis succes og delvis fejl er testet. Pakken bliver først PUBLISHED når alle valgte destination/konto-par er bekræftet. YouTube-coverfejl efter upload giver RECONCILE_REQUIRED fremfor blind reupload.
+- TikTok Sandbox/inbox er ikke længere en gyldig published-tilstand i den aktive adapter. Uden alle eligibility-flag er blocker `tiktok_direct_post_not_eligible`. En fuldt mocket eligible test bruger creator_info og Direct Post-endpointet og accepterer kun PUBLISH_COMPLETE. Der er ikke foretaget et nyt TikTok-kald.
+- ElevenLabs mocktests bruger `/with-timestamps`, Base64-PCM, request-ID, rå/normaliseret alignment, varighed, succesfulde kald og tegnbaseret DKK-pris. Alignment skaber faktiske SRT-cues og tekstmismatch blokerer. En fuld syntetisk AI-produktion vælger `8CjmkufHc22WbMZEBHbm`, gemmer cost og artifacts.
+- YouTube mocktest afventer `processingStatus=succeeded` og kalder `thumbnails.set` med godkendt JPEG. Instagram mocktest sender både video_url og cover_url. Signet thumbnail er bundet til multi-approvalhashen og ændringer blokerer.
+- Standardbuild og fuld pakke i frisk container: **173 passed**. Kun Starlette TestClient-deprecationwarning.
+- Ingen nye ejervideoer er produceret, og `C:/Users/compu/Videos/SoMe-captures` er ikke ændret. Reel pilotproduktion og publicering afventer ejerens eksplicitte go samt platformspecifikke eligibility-forhold.

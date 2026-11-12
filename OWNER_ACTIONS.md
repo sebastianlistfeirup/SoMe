@@ -45,6 +45,17 @@ Kilder: https://platform.claude.com/docs/en/about-claude/pricing og https://cont
 
 DKK-beregningen bruger 7,45 DKK/EUR og referencekursen 6,6661 DKK/USD fra 2026-11-10. Det er et estimat, ikke faktura eller prisgaranti. Samlet kendt Claude-testforbrug inklusive én live opslagsrevision er cirka **0,155439 DKK** af 50 DKK.
 
+### Estimat pr. 1 og 2 minutters opslag
+
+Claude-baseline er ca. **0,207 DKK pr. parent story**: Sonnet-manuskript ca. 0,187 DKK, Haiku claimkontrol ca. 0,010 DKK og researchallokering ca. 0,020 DKK. Fire separate platformadapteringer kan lægges oveni med et skøn på ca. **0,240 DKK**. ElevenLabs koster 0,533288 DKK pr. 1.000 tegn; de målte stemmeeksempler og en almindelig talehastighed giver et arbejdsinterval på ca. 845–1.273 tegn/minut.
+
+| Varighed | Claude-baseline + ElevenLabs | Med fire platformadapteringer + ElevenLabs |
+|---|---:|---:|
+| 1 minut | ca. 0,76–0,89 DKK | ca. 1,00–1,13 DKK |
+| 2 minutter | ca. 1,31–1,57 DKK | ca. 1,55–1,81 DKK |
+
+Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af stemme, valutakurs og moms kan ændre dem. ElevenLabs-opkrævning kan desuden afhænge af abonnementets kvote og faktureringsregler.
+
 ## 3. YouTube/Google — verificeret
 
 - Kanal-ID `UCZQSuChELmq1_j676dszTqg`; OAuth og kanaladgang er verificeret.
@@ -104,12 +115,14 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - Lokal test beviste remux, kontaktark, manifest og upload. Serverens testmappe er slettet. Ingen reel spiloptagelse er publiceret. **Der produceres ingen nye videoer, før ejeren siger “Nu må du begynde”.**
 - Lokale Grok/Gemini/Qwen CLI-processer kræver tændt computer. De er ikke cloud-API'er og kan ikke køre på VPS uden computeren. Grok CLI viser ingen videogenerering. Separate Veo/Imagine API'er kræver egen pris- og rettighedsafklaring.
 
-## 10. Review-center — klar til ejerens vurdering
+## 10. Review-center og automatisk publicering
 
-- Åbn `https://62.171.167.243.sslip.io/review`. Se video, thumbnail, titel, tekst, hashtags, kilder, platform, konto og medieprocent.
-- Platform forhånds vælges, og konto-ID udfyldes. **Godkend opslag** registrerer kun godkendelse; der sker ingen automatisk publicering.
-- **Afvis med kommentar** gemmer feedback. **Ret opslag med AI** ændrer kun titel, caption og hashtags; video, lyd og visuals genbruges. Ny version kræver ny godkendelse.
-- Demo 8 ligger under `/review/8` som den eneste nye mediedemo. Den er ikke godkendt eller publiceret.
+- Åbn `https://62.171.167.243.sslip.io/review`. Se video, thumbnail, titel, tekst, hashtags, kilder, konto og medieprocent. ElevenLabs-narration kan afspilles separat, når den findes.
+- Alle fire destinationer er valgt som standard. Fjern markeringen for uønskede platforme, vælg YouTube-synlighed og eventuelt et fremtidigt tidspunkt. Alle valgte destinationer kræver et reelt forbundet konto-ID.
+- **Godkend opslag og publicér** låser den præcise revision og opretter automatisk ét idempotent job pr. destination. `DRY_RUN=true` og `PUBLISH_ENABLED=false` blokerer stadig reelle kald; jobs med blokeringer viser den præcise fejlkode.
+- Ændret video, thumbnail, tekst, konto, destination, synlighed eller tidspunkt invaliderer godkendelsen. En destination, der allerede er publiceret, uploades ikke igen ved fejl på en anden.
+- **Afvis med kommentar** opretter ingen publiceringsjobs. **Ret opslag med AI** ændrer kun titel, caption og hashtags; video, lyd og visuals genbruges. Ny version kræver ny godkendelse.
+- TikTok kræver desuden production-review og eksplicit Direct Post-consent. Indtil da er blocker `tiktok_direct_post_not_eligible`; en inbox-kladde er ikke et offentligt opslag.
 
 ## 11. Backup og offsite lager
 
@@ -126,13 +139,6 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - ElevenLabs kræver særskilt ejeraccept af voice, kommercielle vilkår og pris. HeyGen og synlige avatarer er udfaset.
 - Reelle læringsforbedringer er ikke dokumenteret endnu. Fuld automatisk research → medieplan → rendering → multiplatformsplanlægning er ikke færdig.
 
-## Præcis næste handling — ElevenLabs-nøgle
+## Præcis næste handling — start produktion når footage er klar
 
-Læg nøglen direkte på serveren uden at sende den i chat:
-
-1. Kør `ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy` fra `C:\Users\compu\Documents\SoMe`.
-2. Kør `sudo nano /opt/some/secrets/app.env`.
-3. Tilføj `ELEVENLABS_API_KEY=din-nøgle` som ny linje. Gem med Ctrl+O, Enter og Ctrl+X.
-4. Skriv `exit` og derefter “nøglen er lagt på serveren” i chatten.
-
-Derefter hentes stemmeliste og abonnementsinformation uden at vise nøglen. Officiel API-pris for multilingual TTS er $0,08/1.000 tegn; abonnementets faktiske kvote og kommercielle licens kontrolleres før generering.
+ElevenLabs-nøglen og begge stemmer er allerede konfigureret; der skal ikke ændres i secrets nu. Fortsæt optagelserne som planlagt. Når biblioteket er fyldt, og du vil have den første rigtige pilotproduceret, skriv præcis: **“Nu må du begynde”**. Før det sker, produceres ingen nye videoer og eksisterende footage ændres ikke. TikTok production-demo/review og Direct Post-consent håndteres som et separat efterfølgende punkt.

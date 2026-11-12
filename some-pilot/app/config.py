@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     tiktok_client_secret: str = ""
     tiktok_access_token: str = ""
     tiktok_open_id: str = ""
+    tiktok_direct_post_enabled: bool = False
+    tiktok_direct_post_reviewed: bool = False
+    tiktok_direct_post_consent_confirmed: bool = False
     public_base_url: str = ""
     signed_media_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     secure_cookies: bool = False

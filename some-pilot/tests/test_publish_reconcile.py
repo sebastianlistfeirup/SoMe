@@ -137,7 +137,7 @@ def test_failed_publication_can_be_rescheduled_without_duplicate(db, awaiting_vi
     assert db.query(Publication).count() == 1
 
 
-def test_tiktok_draft_upload_uses_file_upload_and_publish_status(db, awaiting_video, monkeypatch):
+def test_tiktok_inbox_draft_cannot_be_reported_as_publication(db, awaiting_video, monkeypatch):
     from app.pipeline.platforms import TikTokPublisher
 
     settings = get_settings()
@@ -146,29 +146,143 @@ def test_tiktok_draft_upload_uses_file_upload_and_publish_status(db, awaiting_vi
     monkeypatch.setattr(settings, "tiktok_access_token", "test-token")
     monkeypatch.setattr(settings, "tiktok_open_id", "open-1")
     approve(db, awaiting_video, "owner", "tiktok", "open-1", True)
+    monkeypatch.setattr(
+        "app.pipeline.platforms.httpx.post",
+        lambda *_args, **_kwargs: pytest.fail("ineligible Direct Post reached TikTok"),
+    )
+
+    with pytest.raises(PublishError, match="tiktok_direct_post_not_eligible"):
+        TikTokPublisher().publish(db, awaiting_video, "open-1")
+    assert db.query(Publication).count() == 0
+
+
+class JsonResponse:
+    status_code = 200
+    headers = {}
+
+    def __init__(self, body):
+        self.body = body
+
+    def json(self):
+        return self.body
+
+    def raise_for_status(self):
+        return None
+
+
+def test_youtube_waits_for_processing_and_sets_approved_thumbnail(db, awaiting_video, monkeypatch):
+    settings = get_settings()
+    monkeypatch.setattr(settings, "dry_run", False)
+    monkeypatch.setattr(settings, "publish_enabled", True)
+    approve(db, awaiting_video, "owner", "youtube", "channel", True)
+    publisher = YouTubePublisher()
+    monkeypatch.setattr(publisher, "_access_token", lambda: "test-token")
+    posts = []
+
+    def post(url, **kwargs):
+        posts.append((url, kwargs))
+        if "thumbnails/set" in url:
+            return JsonResponse({"items": [{"snippet": {}}]})
+        return StartResponse()
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
+    monkeypatch.setattr("app.pipeline.platforms.httpx.put", lambda *_args, **_kwargs: JsonResponse({"id": "youtube-1", "status": {"privacyStatus": "private"}}))
+    monkeypatch.setattr("app.pipeline.platforms.httpx.get", lambda *_args, **_kwargs: JsonResponse({"items": [{"processingDetails": {"processingStatus": "succeeded"}}]}))
+    publication = publisher.publish(db, awaiting_video, "channel", "private")
+    assert publication.status == "PUBLISHED"
+    assert publication.response_json["cover"] == "custom_thumbnail_set"
+    cover_call = next(call for call in posts if "thumbnails/set" in call[0])
+    assert cover_call[1]["params"] == {"videoId": "youtube-1"}
+    assert cover_call[1]["files"]["media"][2] == "image/jpeg"
+
+
+def test_youtube_cover_failure_requires_reconciliation_not_reupload(db, awaiting_video, monkeypatch):
+    settings = get_settings()
+    monkeypatch.setattr(settings, "dry_run", False)
+    monkeypatch.setattr(settings, "publish_enabled", True)
+    approve(db, awaiting_video, "owner", "youtube", "channel", True)
+    publisher = YouTubePublisher()
+    monkeypatch.setattr(publisher, "_access_token", lambda: "test-token")
+
+    def post(url, **kwargs):
+        if "thumbnails/set" in url:
+            raise httpx.HTTPError("cover rejected")
+        return StartResponse()
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
+    monkeypatch.setattr("app.pipeline.platforms.httpx.put", lambda *_args, **_kwargs: JsonResponse({"id": "youtube-1"}))
+    monkeypatch.setattr("app.pipeline.platforms.httpx.get", lambda *_args, **_kwargs: JsonResponse({"items": [{"processingDetails": {"processingStatus": "succeeded"}}]}))
+    with pytest.raises(httpx.HTTPError):
+        publisher.publish(db, awaiting_video, "channel", "private")
+    assert db.query(Publication).one().status == "RECONCILE_REQUIRED"
+    assert awaiting_video.status == "RECONCILE_REQUIRED"
+
+
+def test_instagram_reel_uses_signed_video_and_thumbnail(db, awaiting_video, monkeypatch):
+    from app.pipeline.platforms import InstagramPublisher
+
+    settings = get_settings()
+    for name, value in {
+        "dry_run": False,
+        "publish_enabled": True,
+        "meta_access_token": "token",
+        "meta_instagram_account_id": "instagram-1",
+        "meta_graph_version": "v27.0",
+        "public_base_url": "https://example.com",
+    }.items():
+        monkeypatch.setattr(settings, name, value)
+    approve(db, awaiting_video, "owner", "instagram", "instagram-1", True)
+    signed = []
+
+    def link(_db, _video, _platform, _account, asset="video"):
+        signed.append(asset)
+        return f"https://example.com/{asset}"
+
+    monkeypatch.setattr("app.pipeline.platforms.create_link", link)
     calls = []
-
-    class JsonResponse:
-        status_code = 200
-
-        def __init__(self, body):
-            self.body = body
-
-        def json(self):
-            return self.body
 
     def post(url, **kwargs):
         calls.append((url, kwargs))
+        return JsonResponse({"id": "remote-1"})
+
+    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
+    monkeypatch.setattr("app.pipeline.platforms.httpx.get", lambda *_args, **_kwargs: JsonResponse({"status_code": "FINISHED"}))
+    publication = InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    assert publication.status == "PUBLISHED"
+    assert signed == ["video", "thumbnail"]
+    assert calls[0][1]["data"]["cover_url"] == "https://example.com/thumbnail"
+
+
+def test_eligible_tiktok_direct_post_never_uses_inbox_endpoint(db, awaiting_video, monkeypatch):
+    from app.pipeline.platforms import TikTokPublisher
+
+    settings = get_settings()
+    for name, value in {
+        "dry_run": False,
+        "publish_enabled": True,
+        "tiktok_access_token": "token",
+        "tiktok_open_id": "open-1",
+        "tiktok_direct_post_enabled": True,
+        "tiktok_direct_post_reviewed": True,
+        "tiktok_direct_post_consent_confirmed": True,
+    }.items():
+        monkeypatch.setattr(settings, name, value)
+    approve(db, awaiting_video, "owner", "tiktok", "open-1", True)
+    calls = []
+
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        assert "/inbox/" not in url
+        if "creator_info" in url:
+            return JsonResponse({"data": {"privacy_level_options": ["PUBLIC_TO_EVERYONE"]}})
         if url.endswith("/init/"):
             return JsonResponse({"data": {"publish_id": "publish-1", "upload_url": "https://upload.example/file"}})
-        return JsonResponse({"data": {"status": "SEND_TO_USER_INBOX"}})
+        return JsonResponse({"data": {"status": "PUBLISH_COMPLETE"}})
 
     monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
     monkeypatch.setattr("app.pipeline.platforms.httpx.put", lambda *_args, **_kwargs: JsonResponse({}))
     publication = TikTokPublisher().publish(db, awaiting_video, "open-1")
-
     assert publication.status == "PUBLISHED"
-    assert publication.remote_id == "publish-1"
-    assert publication.upload_session == "publish-1"
-    assert publication.response_json["external_visibility"] == "tiktok_draft_inbox"
-    assert calls[0][1]["json"]["source_info"]["source"] == "FILE_UPLOAD"
+    assert publication.response_json["external_visibility"] == "public"
+    init = next(call for call in calls if call[0].endswith("/video/init/"))
+    assert init[1]["json"]["post_info"]["privacy_level"] == "PUBLIC_TO_EVERYONE"

@@ -44,7 +44,7 @@ Al ny produktion kræver `--media-plan`. Den gamle Pillow-slide-produktion er ik
 
 Mindst 80 % af varigheden skal være real_video/real_image. Planens `minimum_real_ratio` kan være højere, men aldrig lavere. Andelen måles pr. varighed, ikke pr. antal scener. `ai_generated=true` kan ikke bruges til at tælle AI-video som reel. Filsignatur, kildepath, videostream og source duration valideres. Hvert asset har kontekst, HTTPS source/policy URL, rettighedshaver, bevis, kreditering og aldersmetadata. Rettigheder og medieprocent skal være ALLOW før rendering og ved godkendelse.
 
-`media_composition.json` dokumenterer procent, varighed, scenetyper og kontekst. Manifestet har 11 hashed leverancefiler. Thumbnail vælges som et rent frame fra originalkilden uden undertekster/titeloverlay. Review-kort og detailvisning viser reel medieprocent; ældre formater markeres som ældre.
+`media_composition.json` dokumenterer procent, varighed, scenetyper og kontekst. Manifestet hasher dynamisk alle faktiske leveranceartifacts, herunder script, subtitles, voice report og eventuelle ElevenLabs narration/alignment/transcription-filer. Thumbnail vælges som et rent frame fra originalkilden uden undertekster/titeloverlay. Review-kort og detailvisning viser reel medieprocent; ældre formater markeres som ældre.
 
 CLI-kontrakt
 ------------
@@ -62,7 +62,7 @@ Review-center, godkendelse og publicering
 -----------------------------------------
 `/review` samler færdige opslag med video, thumbnail, titel, opslagstekst, hashtags, kilder, platform, konto og medieprocent. Platform forhånds vælges fra metadata, og konto-ID udfyldes fra integrationen. Ejeren kan godkende eller afvise med konkret kommentar. `revise_post` omskriver kun titel, caption og hashtags, genbruger video/lyd/visuals og kræver ny godkendelse. Selve afvisningen eller rettelsen publicerer aldrig noget.
 
-Kun en autentificeret ejer kan godkende. Hele videoen skal bekræftes set. Godkendelsen binder SHA-256 for video/thumbnail samt tekst, links, platform og konto. Checks inkluderer media_composition. Enhver ændring kræver ny godkendelse. PUBLISH_ENABLED=false, DRY_RUN=true og nødstop kontrolleres centralt før upload. Upload-timeout giver RECONCILE_REQUIRED, ikke blind retry. Revisionsjobs er idempotente pr. afvisning.
+Kun en autentificeret ejer kan godkende. Hele videoen skal bekræftes set. Alle fire destinationer er valgt som standard og kan fravælges. Godkendelsen binder SHA-256 for video/thumbnail samt tekst, links, destinationer, konto-ID'er, synlighed og tidspunkt. Enhver ændring kræver ny godkendelse. Godkendelse opretter automatisk ét idempotent publiceringsjob pr. destination med separat status/retry. PUBLISH_ENABLED=false, DRY_RUN=true og nødstop kontrolleres centralt før upload. Upload-timeout eller andet usikkert resultat giver RECONCILE_REQUIRED, ikke blind retry. Revisionsjobs er idempotente pr. afvisning, og afvisning opretter ingen publiceringsjobs.
 
 Lærende hjerne
 --------------
@@ -81,15 +81,15 @@ Tests
   docker compose build
   docker compose run --rm --no-deps worker pytest -q
 
-Den aktuelle pakke har 89 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+Den aktuelle pakke har 173 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
-Gameplay-ranking (internetklip og lokal voiceover)
--------------------------------------------------
-Top-10-videoer bruger voiceover uden avatar. **Kokoro `af_bella` er afvist kreativt af ejeren og må ikke bruges til nye produktionsopslag.** Den tekniske provider findes til tidligere tests, men der skal vælges en ny godkendt stemme før ny produktion. En eksisterende stemmemappe genbruges kun når alle 11 segmenter har matchende manuskriptmetadata, gyldig WAV, lydstream, varighed, sample rate, teksthash og SHA-256. Den eksisterende tekniske CLI-kontrakt er:
+Gameplay-ranking (internetklip og ElevenLabs-voiceover)
+------------------------------------------------------
+Top-10-videoer bruger voiceover uden avatar. **Kokoro `af_bella` er afvist kreativt af ejeren og må ikke bruges til nye produktionsopslag.** Den tekniske provider findes kun til tidligere tests. Gaming bruger ElevenLabs `HfRP3cIhYLmeNHeTvkWK`; AI bruger `8CjmkufHc22WbMZEBHbm`. Den tekniske CLI-kontrakt er:
 
-  python -m app.cli ranking --plan /research/plan.json --platform reels --mobile-style zoom --voice-provider kokoro --output /data/versions/NY-VERSION
+  python -m app.cli ranking --plan /research/plan.json --platform reels --mobile-style zoom --voice-provider elevenlabs --output /data/versions/NY-VERSION
 
-Når `voice_dir` udelades, genereres nye segmenter lokalt. `voice_assets.json` dokumenterer provider, teksthash, varighed, sample rate, filhash og licens og indgår i de 11 manifestfiler. ElevenLabs er valgfri og kræver eksplicit provider, paid jobs, API-nøgle, voice-ID og dateret pris inden for budget. Der er ikke verificeret et betalt ElevenLabs-kald.
+`voice_assets.json` dokumenterer provider, teksthash, varighed, sample rate, filhash, voice/model, request-ID når det returneres, succesfulde kald og DKK-omkostning. Almindelig ikke-demo-produktion bruger `/with-timestamps`; alignment gemmes og danner SRT, mens Whisper kontrollerer udtalen. ElevenLabs kræver paid jobs, API-nøgle, voice-ID, rettighedsbekræftelse og dateret pris inden for budget. Korte live stemmeeksempler er verificeret; fulde produktionsvideoer afventer ejerens go.
 
 Rankingplanen kræver ti unikke spil og officielle klip-/politik-URL'er, rettighedshaver, bevis, kreditering og claims. Den skriver 100 % reel mediedækning for de ti rigtige videoklip. Manglende eller ugyldige filer stopper produktionen. Platformvarianter er TikTok 9:16, Reels 9:16 og YouTube 16:9 med forskellige crops og thumbnails. Rigtige klipfiler og stemme-WAV er udelukket fra Git.
 

@@ -1,3 +1,5 @@
+import base64
+import binascii
 import hashlib
 import json
 import re
@@ -144,15 +146,53 @@ def _new_kokoro(segments: list[VoiceSegment], output_dir: Path) -> dict:
     return _base_report("kokoro", reasons, files, paid_call=False, cost_dkk=0, model_evidence=KOKORO_EVIDENCE)
 
 
-def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path) -> dict:
+def write_alignment_srt(segment: VoiceSegment, alignment_path: Path, output: Path) -> list[dict]:
+    from app.pipeline.media import write_srt
+
+    payload = json.loads(alignment_path.read_text(encoding="utf-8"))
+    alignment = payload.get("alignment", {})
+    characters = alignment.get("characters", [])
+    starts = alignment.get("character_start_times_seconds", [])
+    ends = alignment.get("character_end_times_seconds", [])
+    if not characters or not (len(characters) == len(starts) == len(ends)):
+        raise ValueError("elevenlabs_alignment_missing_or_invalid")
+    if "".join(characters) != segment.text.strip():
+        raise ValueError("elevenlabs_alignment_text_mismatch")
+    tokens = list(re.finditer(r"\S+\s*", segment.text.strip()))
+    cues = []
+    current = []
+    for token in tokens:
+        current.append(token)
+        text = "".join(item.group() for item in current).strip()
+        if current[-1].group().rstrip().endswith((".", "!", "?")) or len(current) >= 8 or len(text) >= 42:
+            start = float(starts[current[0].start()])
+            end = float(ends[current[-1].end() - 1])
+            if end <= start:
+                raise ValueError("elevenlabs_alignment_timing_invalid")
+            cues.append({"start": start, "end": end, "text": text})
+            current = []
+    if current:
+        cues.append({
+            "start": float(starts[current[0].start()]),
+            "end": float(ends[current[-1].end() - 1]),
+            "text": "".join(item.group() for item in current).strip(),
+        })
+    if not cues:
+        raise ValueError("elevenlabs_alignment_empty")
+    write_srt(cues, output)
+    return cues
+
+
+def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path, voice_id: str | None = None) -> dict:
     settings = get_settings()
     reasons = []
     files = []
+    selected_voice = voice_id or settings.elevenlabs_voice_id
     if not settings.paid_jobs_enabled:
         reasons.append("paid_jobs_disabled")
     if not settings.elevenlabs_api_key:
         reasons.append("elevenlabs_api_key_missing")
-    if not settings.elevenlabs_voice_id:
+    if not selected_voice:
         reasons.append("elevenlabs_voice_id_missing")
     if not settings.elevenlabs_voice_rights_confirmed:
         reasons.append("elevenlabs_voice_rights_confirmation_required")
@@ -167,12 +207,16 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path) -> dict:
         return _base_report("elevenlabs", reasons, files, paid_call=False, estimated_cost_dkk=estimated_cost, actual_cost_dkk=None)
     output_dir.mkdir(parents=True, exist_ok=False)
     successful_calls = 0
+    successful_characters = 0
+    total_duration = 0.0
     for segment in segments:
         raw_path = output_dir / f"{segment.segment_id}.pcm"
         path = output_dir / f"{segment.segment_id}.wav"
+        alignment_path = output_dir / f"{segment.segment_id}.alignment.json"
+        normalized_path = output_dir / f"{segment.segment_id}.alignment.normalized.json"
         try:
             response = httpx.post(
-                f"https://api.elevenlabs.io/v1/text-to-speech/{settings.elevenlabs_voice_id}",
+                f"https://api.elevenlabs.io/v1/text-to-speech/{selected_voice}/with-timestamps",
                 params={"output_format": "pcm_24000"},
                 headers={"xi-api-key": settings.elevenlabs_api_key, "Content-Type": "application/json"},
                 json={"text": segment.text.strip(), "model_id": settings.elevenlabs_model_id},
@@ -180,16 +224,31 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path) -> dict:
             )
             response.raise_for_status()
             successful_calls += 1
-            raw_path.write_bytes(response.content)
+            successful_characters += len(segment.text.strip())
+            body = response.json()
+            audio = base64.b64decode(body["audio_base64"], validate=True)
+            if not audio:
+                raise ValueError("elevenlabs_audio_empty")
+            if not body.get("alignment"):
+                raise ValueError("elevenlabs_alignment_missing")
+            raw_path.write_bytes(audio)
             run(["ffmpeg", "-y", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", str(raw_path), "-ar", "48000", str(path)])
-            files.append(_audio_file(segment, path, reasons, voice=settings.elevenlabs_voice_id, model=settings.elevenlabs_model_id, request_id=response.headers.get("x-request-id"), reused=False))
+            raw_path.unlink(missing_ok=True)
+            alignment_path.write_text(json.dumps({"alignment": body["alignment"]}, indent=2, ensure_ascii=False), encoding="utf-8")
+            normalized_path.write_text(json.dumps({"alignment": body.get("normalized_alignment") or body["alignment"]}, indent=2, ensure_ascii=False), encoding="utf-8")
+            row = _audio_file(segment, path, reasons, voice=selected_voice, model=settings.elevenlabs_model_id, request_id=response.headers.get("request-id") or response.headers.get("x-request-id"), reused=False, alignment_path=str(alignment_path), normalized_alignment_path=str(normalized_path))
+            total_duration += row.get("duration_seconds", 0)
+            files.append(row)
+        except (KeyError, ValueError, binascii.Error) as exc:
+            reasons.append(f"voice_provider_response_invalid:{segment.segment_id}:{type(exc).__name__}")
         except Exception as exc:
             reasons.append(f"voice_provider_request_failed:{segment.segment_id}:{type(exc).__name__}")
     paid_call = successful_calls > 0
-    return _base_report("elevenlabs", reasons, files, paid_call=paid_call, estimated_cost_dkk=estimated_cost, actual_cost_dkk=estimated_cost if paid_call else None, successful_provider_calls=successful_calls, cost_basis="configured_verified_character_unit_price")
+    actual_cost = round(successful_characters * settings.elevenlabs_cost_per_1000_chars_dkk / 1000, 6) if paid_call else None
+    return _base_report("elevenlabs", reasons, files, paid_call=paid_call, estimated_cost_dkk=estimated_cost, actual_cost_dkk=actual_cost, successful_provider_calls=successful_calls, duration_seconds=round(total_duration, 3), cost_basis="configured_verified_character_unit_price")
 
 
-def prepare_voice(segments: list[VoiceSegment], provider: str, output_dir: Path, existing_dir: Path | None = None) -> dict:
+def prepare_voice(segments: list[VoiceSegment], provider: str, output_dir: Path, existing_dir: Path | None = None, voice_id: str | None = None) -> dict:
     reasons = []
     if not segments:
         reasons.append("voice_segments_required")
@@ -209,7 +268,7 @@ def prepare_voice(segments: list[VoiceSegment], provider: str, output_dir: Path,
     if provider == "kokoro":
         return _new_kokoro(segments, output_dir)
     if provider == "elevenlabs":
-        return _new_elevenlabs(segments, output_dir)
+        return _new_elevenlabs(segments, output_dir, voice_id)
     return _base_report(provider, ["unsupported_voice_provider"], [])
 
 

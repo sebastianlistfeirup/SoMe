@@ -9,8 +9,9 @@ from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
 from app.db.models import Setting
 from app.db.session import SessionLocal, init_database
-from app.pipeline.approvals import paused
+from app.pipeline.approvals import ApprovalError, paused
 from app.pipeline.backup import create_backup
+from app.pipeline.dispatch import publish_destination
 from app.pipeline.jobs import claim, complete, enqueue, fail, recover_expired_leases
 from app.pipeline.learning import weekly_learning
 from app.pipeline.maintenance import cleanup_temporary_files, prune_backups
@@ -63,6 +64,8 @@ def execute(db, job) -> Path:
     elif job.kind == "revise_post":
         video = create_post_revision(db, job.payload["video_id"], job.payload["review_id"], job.id)
         result = {"status": "AWAITING_OWNER", "video_id": video.id, "source_video_id": job.payload["video_id"], "scope": "title_caption_hashtags"}
+    elif job.kind == "publish":
+        result = publish_destination(db, job.payload)
     else:
         raise ValueError("unsupported_job_kind")
     path = output / "result.json"
@@ -91,7 +94,10 @@ def run() -> None:
                 path = execute(db, job)
                 complete(db, job, str(path))
             except Exception as exc:
-                fail(db, job, type(exc).__name__)
+                from app.pipeline.platforms import PublishError
+
+                error_code = str(exc) if isinstance(exc, (ApprovalError, PublishError)) else type(exc).__name__
+                fail(db, job, error_code)
         finally:
             db.close()
 

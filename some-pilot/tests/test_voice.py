@@ -92,11 +92,24 @@ def test_elevenlabs_adapter_converts_pcm_and_records_cost(tmp_path, monkeypatch)
     calls = []
 
     class Response:
-        content = b"pcm"
-        headers = {}
+        headers = {"request-id": "request-1"}
 
         def raise_for_status(self):
             return None
+
+        def json(self):
+            import base64
+
+            text = "Premium voice."
+            return {
+                "audio_base64": base64.b64encode(b"pcm").decode(),
+                "alignment": {
+                    "characters": list(text),
+                    "character_start_times_seconds": [index * 0.1 for index in range(len(text))],
+                    "character_end_times_seconds": [index * 0.1 + 0.08 for index in range(len(text))],
+                },
+                "normalized_alignment": None,
+            }
 
     def post(*args, **kwargs):
         calls.append((args, kwargs))
@@ -109,8 +122,12 @@ def test_elevenlabs_adapter_converts_pcm_and_records_cost(tmp_path, monkeypatch)
     assert result["paid_call"] is True
     assert result["actual_cost_dkk"] == 0.0014
     assert result["successful_provider_calls"] == 1
-    assert result["files"][0]["request_id"] is None
+    assert result["duration_seconds"] == 4.25
+    assert result["files"][0]["request_id"] == "request-1"
+    assert calls[0][0][0].endswith("/voice-1/with-timestamps")
     assert calls[0][1]["params"] == {"output_format": "pcm_24000"}
+    assert Path(result["files"][0]["alignment_path"]).is_file()
+    assert Path(result["files"][0]["normalized_alignment_path"]).is_file()
 
 
 def test_ranking_voice_segments_cover_hook_and_all_games_in_render_order():
@@ -138,3 +155,35 @@ def test_doctor_reports_voice_provider_without_secrets(db):
     assert result["integrations"]["voice"]["local_available"] is True
     assert result["integrations"]["voice"]["avatar_required"] is False
     assert "api_key" not in result["integrations"]["voice"]
+
+
+def test_alignment_generates_real_timed_subtitles(tmp_path):
+    from app.pipeline.voice import write_alignment_srt
+
+    segment = VoiceSegment("full", "One two. Three four.")
+    text = segment.text
+    path = tmp_path / "alignment.json"
+    path.write_text(json.dumps({"alignment": {
+        "characters": list(text),
+        "character_start_times_seconds": [index * 0.1 for index in range(len(text))],
+        "character_end_times_seconds": [index * 0.1 + 0.08 for index in range(len(text))],
+    }}), encoding="utf-8")
+    output = tmp_path / "captions.srt"
+    cues = write_alignment_srt(segment, path, output)
+    assert [cue["text"] for cue in cues] == ["One two.", "Three four."]
+    assert cues[1]["start"] == 0.9
+    assert "00:00:00,900 --> 00:00:01,980" in output.read_text(encoding="utf-8")
+
+
+def test_alignment_rejects_text_that_does_not_match_audio_request(tmp_path):
+    from app.pipeline.voice import write_alignment_srt
+
+    segment = VoiceSegment("full", "Expected narration")
+    path = tmp_path / "alignment.json"
+    path.write_text(json.dumps({"alignment": {
+        "characters": list("Different"),
+        "character_start_times_seconds": [0] * 9,
+        "character_end_times_seconds": [1] * 9,
+    }}), encoding="utf-8")
+    with pytest.raises(ValueError, match="alignment_text_mismatch"):
+        write_alignment_srt(segment, path, tmp_path / "captions.srt")

@@ -33,7 +33,10 @@ def new_publication(db: Session, video: VideoVersion, platform: str, account: st
     verify_approval(db, video, platform, account)
     publication = Publication(video_version_id=video.id, platform=platform, account=account, idempotency_key=key)
     db.add(publication)
-    transition(video, "SCHEDULED")
+    if video.status == "APPROVED":
+        transition(video, "SCHEDULED")
+    else:
+        publication.status = "PUBLISHING"
     db.commit()
     db.refresh(publication)
     return publication
@@ -58,17 +61,40 @@ def manual_export(video: VideoVersion, platform: str, output_root: Path) -> Path
     return target
 
 
-def _mark_timeout(db: Session, publication: Publication, video: VideoVersion) -> None:
+def _mark_success(db: Session, publication: Publication, video: VideoVersion) -> None:
+    from app.pipeline.approvals import latest_approval
+    review = latest_approval(db, video.id)
+    expected = {(item["platform"], item["account"]) for item in review.digest_json.get("destinations", [])} if review else set()
+    if not expected:
+        expected = {(publication.platform, publication.account)}
+    published = {(row.platform, row.account) for row in db.query(Publication).filter(Publication.video_version_id == video.id, Publication.status == "PUBLISHED").all()}
+    if expected <= published:
+        if video.status != "PUBLISHED":
+            transition(video, "PUBLISHED")
+    else:
+        video.status = "PUBLISHING"
+    db.commit()
+
+
+def _mark_timeout(db: Session, publication: Publication, video: VideoVersion, error_code: str = "upload_timeout_reconcile_required") -> None:
     publication.status = "RECONCILE_REQUIRED"
-    publication.error_code = "upload_timeout_reconcile_required"
-    transition(video, "RECONCILE_REQUIRED")
+    publication.error_code = error_code
+    review = __import__("app.pipeline.approvals", fromlist=["latest_approval"]).latest_approval(db, video.id)
+    if review and len(review.digest_json.get("destinations", [])) > 1:
+        video.status = "PUBLISHING"
+    else:
+        transition(video, "RECONCILE_REQUIRED")
     db.commit()
 
 
 def _mark_failure(db: Session, publication: Publication, video: VideoVersion, exc: Exception) -> None:
     publication.status = "FAILED"
     publication.error_code = type(exc).__name__
-    transition(video, "FAILED")
+    review = __import__("app.pipeline.approvals", fromlist=["latest_approval"]).latest_approval(db, video.id)
+    if review and len(review.digest_json.get("destinations", [])) > 1:
+        video.status = "PUBLISHING"
+    else:
+        transition(video, "FAILED")
     db.commit()
 
 
@@ -118,18 +144,52 @@ class YouTubePublisher:
                 uploaded = httpx.put(session_url, content=handle, headers={"Authorization": f"Bearer {token}", "Content-Type": "video/mp4"}, timeout=120)
             uploaded.raise_for_status()
             body = uploaded.json()
-            publication.remote_id = body.get("id")
-            publication.response_json = {"id": body.get("id"), "status": body.get("status", {})}
+            remote_id = body.get("id")
+            if not remote_id:
+                raise PublishError("youtube_remote_video_id_missing")
+            publication.remote_id = remote_id
+            db.commit()
+            processing = ""
+            for _ in range(30):
+                status_response = httpx.get(
+                    "https://www.googleapis.com/youtube/v3/videos",
+                    headers={"Authorization": f"Bearer {token}"},
+                    params={"part": "status,processingDetails", "id": remote_id},
+                    timeout=20,
+                )
+                status_response.raise_for_status()
+                items = status_response.json().get("items", [])
+                processing = items[0].get("processingDetails", {}).get("processingStatus", "") if items else ""
+                if processing == "succeeded":
+                    break
+                if processing in {"failed", "terminated"}:
+                    raise PublishError("youtube_processing_failed_reconcile_required")
+                time.sleep(2)
+            if processing != "succeeded":
+                raise PublishError("youtube_processing_not_finished_reconcile_required")
+            with Path(video.thumbnail_path).open("rb") as handle:
+                cover = httpx.post(
+                    "https://www.googleapis.com/upload/youtube/v3/thumbnails/set",
+                    headers={"Authorization": f"Bearer {token}"},
+                    params={"videoId": remote_id},
+                    files={"media": (Path(video.thumbnail_path).name, handle, "image/jpeg")},
+                    timeout=60,
+                )
+            cover.raise_for_status()
+            publication.response_json = {"id": remote_id, "status": body.get("status", {}), "processing_status": processing, "cover": "custom_thumbnail_set"}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
-            transition(video, "PUBLISHED")
+            _mark_success(db, publication, video)
             db.commit()
             return publication
         except httpx.TimeoutException:
             _mark_timeout(db, publication, video)
             raise PublishError("upload_timeout_reconcile_required")
         except Exception as exc:
-            _mark_failure(db, publication, video, exc)
+            if publication.remote_id:
+                _mark_timeout(db, publication, video, "youtube_cover_or_processing_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
             raise
 
 
@@ -150,7 +210,8 @@ class InstagramPublisher:
         if account != settings.meta_instagram_account_id:
             raise PublishError("instagram_account_mismatch")
         media_url = media_url or create_link(db, video, "instagram", account)
-        if not media_url.startswith("https://"):
+        cover_url = create_link(db, video, "instagram", account, asset="thumbnail")
+        if not media_url.startswith("https://") or not cover_url.startswith("https://"):
             raise PublishError("signed_https_media_url_required")
         publication = new_publication(db, video, "instagram", account)
         if publication.status == "PUBLISHED":
@@ -164,7 +225,7 @@ class InstagramPublisher:
         base = f"https://graph.facebook.com/{settings.meta_graph_version}"
         headers = {"Authorization": f"Bearer {settings.meta_access_token}"}
         try:
-            created = httpx.post(f"{base}/{account}/media", headers=headers, data={"media_type": "REELS", "video_url": media_url, "caption": video.post_json.get("text", "")}, timeout=30)
+            created = httpx.post(f"{base}/{account}/media", headers=headers, data={"media_type": "REELS", "video_url": media_url, "cover_url": cover_url, "caption": video.post_json.get("text", "")}, timeout=30)
             if created.status_code in {401, 403}:
                 raise PublishError("instagram_authorization_required")
             created.raise_for_status()
@@ -190,7 +251,7 @@ class InstagramPublisher:
             publication.response_json = {"container_id": container_id, "id": remote_id}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
-            transition(video, "PUBLISHED")
+            _mark_success(db, publication, video)
             db.commit()
             return publication
         except (httpx.TimeoutException, PublishError) as exc:
@@ -200,7 +261,10 @@ class InstagramPublisher:
             _mark_failure(db, publication, video, exc)
             raise
         except Exception as exc:
-            _mark_failure(db, publication, video, exc)
+            if publication.upload_session:
+                _mark_timeout(db, publication, video, "instagram_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
             raise
 
 
@@ -250,10 +314,10 @@ class FacebookPublisher:
             if not remote_id:
                 raise PublishError("facebook_remote_video_id_missing")
             publication.remote_id = remote_id
-            publication.response_json = {"id": remote_id}
+            publication.response_json = {"id": remote_id, "cover": "source_frame", "custom_cover_supported": False}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
-            transition(video, "PUBLISHED")
+            _mark_success(db, publication, video)
             db.commit()
             return publication
         except httpx.TimeoutException:
@@ -272,7 +336,8 @@ class TikTokPublisher:
         configured = bool(settings.tiktok_access_token and settings.tiktok_open_id)
         connection = db.get(Setting, "tiktok_connection") if db is not None else None
         state = connection.value_json if connection else {}
-        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "draft_upload_verified": bool(state.get("draft_upload_verified")), "open_id_configured": bool(settings.tiktok_open_id), "manual_export": True}
+        direct_post_eligible = all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed))
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "draft_upload_verified": bool(state.get("draft_upload_verified")), "open_id_configured": bool(settings.tiktok_open_id), "direct_post_eligible": direct_post_eligible, "direct_post_blocker": None if direct_post_eligible else "tiktok_direct_post_not_eligible", "manual_export": True}
 
     def publish(self, db: Session, video: VideoVersion, account: str) -> Publication:
         settings = get_settings()
@@ -280,6 +345,8 @@ class TikTokPublisher:
             raise PublishError("tiktok_not_configured; use_manual_export")
         if account != settings.tiktok_open_id:
             raise PublishError("tiktok_open_id_mismatch")
+        if not all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)):
+            raise PublishError("tiktok_direct_post_not_eligible")
         verify_approval(db, video, "tiktok", account)
         publication = new_publication(db, video, "tiktok", account)
         if publication.status == "PUBLISHED":
@@ -293,10 +360,25 @@ class TikTokPublisher:
         size = video_path.stat().st_size
         headers = {"Authorization": f"Bearer {settings.tiktok_access_token}", "Content-Type": "application/json; charset=UTF-8"}
         try:
+            creator = httpx.post(f"{self.api_base}/post/publish/creator_info/query/", headers=headers, json={}, timeout=30)
+            self._raise_for_tiktok_error(creator, "creator_info")
+            creator_data = creator.json().get("data", {})
+            if "PUBLIC_TO_EVERYONE" not in creator_data.get("privacy_level_options", []):
+                raise PublishError("tiktok_public_direct_post_not_permitted")
             started = httpx.post(
-                f"{self.api_base}/post/publish/inbox/video/init/",
+                f"{self.api_base}/post/publish/video/init/",
                 headers=headers,
-                json={"source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": size, "total_chunk_count": 1}},
+                json={
+                    "post_info": {
+                        "title": video.post_json.get("text", ""),
+                        "privacy_level": "PUBLIC_TO_EVERYONE",
+                        "disable_duet": False,
+                        "disable_comment": False,
+                        "disable_stitch": False,
+                        "video_cover_timestamp_ms": 1000,
+                    },
+                    "source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": size, "total_chunk_count": 1},
+                },
                 timeout=30,
             )
             self._raise_for_tiktok_error(started, "init")
@@ -306,6 +388,7 @@ class TikTokPublisher:
             if not publish_id or not upload_url:
                 raise PublishError("tiktok_upload_session_missing")
             publication.upload_session = publish_id
+            publication.remote_id = publish_id
             db.commit()
             with video_path.open("rb") as handle:
                 uploaded = httpx.put(
@@ -326,25 +409,30 @@ class TikTokPublisher:
                 )
                 self._raise_for_tiktok_error(checked, "status")
                 status = checked.json().get("data", {}).get("status", "")
-                if status in {"PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"}:
+                if status == "PUBLISH_COMPLETE":
                     break
+                if status == "SEND_TO_USER_INBOX":
+                    raise PublishError("tiktok_unexpected_inbox_status_reconcile_required")
                 if status in {"FAILED", "CANCELLED"}:
-                    raise PublishError("tiktok_draft_upload_failed")
+                    raise PublishError("tiktok_direct_post_failed")
                 time.sleep(2)
-            if status not in {"PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"}:
-                raise PublishError(f"tiktok_draft_upload_not_finished_reconcile:{status or 'unknown'}")
+            if status != "PUBLISH_COMPLETE":
+                raise PublishError(f"tiktok_direct_post_not_finished_reconcile:{status or 'unknown'}")
             publication.remote_id = publish_id
-            publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": "tiktok_draft_inbox"}
+            publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": "public", "cover": "source_frame_1000ms"}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
-            transition(video, "PUBLISHED")
+            _mark_success(db, publication, video)
             db.commit()
             return publication
         except httpx.TimeoutException:
             _mark_timeout(db, publication, video)
             raise PublishError("tiktok_reconcile_required")
         except Exception as exc:
-            _mark_failure(db, publication, video, exc)
+            if publication.upload_session:
+                _mark_timeout(db, publication, video, "tiktok_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
             raise
 
     def _raise_for_tiktok_error(self, response: httpx.Response, step: str) -> None:

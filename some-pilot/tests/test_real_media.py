@@ -111,7 +111,13 @@ def test_produce_end_to_end_with_real_media(db, tmp_path, monkeypatch):
     topic = Topic(niche="handheld_gaming", language="en", title="Real media production")
     db.add(topic)
     db.commit()
-    monkeypatch.setattr("app.pipeline.production.synthesize", lambda _text, path, _language: shutil.copyfile(narration, path))
+    def fake_voice(_segments, provider, output_dir, **_kwargs):
+        output_dir.mkdir(parents=True)
+        generated = output_dir / "full.wav"
+        shutil.copyfile(narration, generated)
+        return {"decision": "ALLOW", "reasons": [], "provider": provider, "files": [{"segment_id": "full", "path": str(generated), "voice": "test-voice", "duration_seconds": 2}]}
+
+    monkeypatch.setattr("app.pipeline.production.prepare_voice", fake_voice)
     from app.pipeline.ai import demo_draft
     narration_text = demo_draft(topic).narration
     words = narration_text.split()
@@ -132,7 +138,69 @@ def test_produce_end_to_end_with_real_media(db, tmp_path, monkeypatch):
     assert composition["real_media_percent"] == 100.0
     assert composition["real_video_scenes"] == 1
     assert composition["real_image_scenes"] == 1
-    assert len(manifest["files_sha256"]) == 11
+    assert len(manifest["files_sha256"]) == 13
+    assert "narration.wav" in manifest["files_sha256"]
+    assert "script.json" in manifest["files_sha256"]
     assert manifest["real_media_ratio"] == 1.0
     assert result.features_json["real_media_required"] is True
     assert Path(result.video_path).stat().st_size > 10_000
+
+
+def test_live_production_uses_ai_elevenlabs_voice_and_records_cost(db, tmp_path, monkeypatch):
+    from app.db.models import Cost
+    from app.pipeline.ai import ControlResult, demo_draft
+
+    _image, _video, narration = make_media(tmp_path)
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps({"platform": "youtube", "scenes": [scene_payload("real_image", "photo.jpg", "zoom_in"), scene_payload()]}))
+    monkeypatch.setattr(get_settings(), "data_dir", tmp_path)
+    topic = Topic(niche="ai", language="en", title="AI production")
+    db.add(topic)
+    db.commit()
+    monkeypatch.setattr("app.pipeline.production.claude_draft", lambda *_args: demo_draft(topic))
+    monkeypatch.setattr("app.pipeline.production.review_draft", lambda *_args: ControlResult(decision="ALLOW"))
+    monkeypatch.setattr("app.pipeline.production.current_prompt_version", lambda _db: "test-prompt")
+    selected = {}
+
+    def fake_voice(_segments, provider, output_dir, **kwargs):
+        selected.update({"provider": provider, **kwargs})
+        output_dir.mkdir(parents=True)
+        generated = output_dir / "full.wav"
+        shutil.copyfile(narration, generated)
+        alignment = output_dir / "full.alignment.json"
+        normalized = output_dir / "full.alignment.normalized.json"
+        alignment.write_text("{}")
+        normalized.write_text("{}")
+        return {
+            "decision": "ALLOW",
+            "reasons": [],
+            "provider": provider,
+            "estimated_cost_dkk": 0.1,
+            "actual_cost_dkk": 0.1,
+            "files": [{"segment_id": "full", "path": str(generated), "voice": kwargs["voice_id"], "alignment_path": str(alignment), "normalized_alignment_path": str(normalized), "duration_seconds": 2}],
+        }
+
+    monkeypatch.setattr("app.pipeline.production.prepare_voice", fake_voice)
+    draft = demo_draft(topic)
+    words = draft.narration.split()
+    midpoint = len(words) // 2
+    segments = [{"start": 0, "end": 1, "text": " ".join(words[:midpoint])}, {"start": 1, "end": 2, "text": " ".join(words[midpoint:])}]
+
+    def alignment(_segment, _path, output):
+        write_srt(segments, output)
+        return segments
+
+    monkeypatch.setattr("app.pipeline.production.write_alignment_srt", alignment)
+
+    def transcribe(_audio, output):
+        write_srt(segments, output)
+        return {"language": "en", "language_probability": 0.99, "segments": 2, "model": "mock", "segments_detail": segments}
+
+    monkeypatch.setattr("app.pipeline.production.transcribe", transcribe)
+    result = produce(db, topic.id, False, plan_path)
+    assert selected == {"provider": "elevenlabs", "voice_id": "8CjmkufHc22WbMZEBHbm"}
+    assert result.features_json["voice"] == "elevenlabs"
+    assert result.features_json["voice_lane"] == "ai"
+    assert db.query(Cost).filter_by(kind="ELEVENLABS", actual_amount=0.1).count() == 1
+    manifest = json.loads((Path(result.output_dir) / "manifest.json").read_text())
+    assert {"narration.wav", "alignment.json", "alignment.normalized.json", "transcription.srt", "script.json"} <= set(manifest["files_sha256"])

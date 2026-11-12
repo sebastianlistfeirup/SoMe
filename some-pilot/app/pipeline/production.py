@@ -10,11 +10,11 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
 from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
-from app.pipeline.media import probe, require_tools, storyboard, synthesize, technical_checks, transcribe
+from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
 from app.pipeline.real_media import load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
-from app.pipeline.voice import VoiceSegment, voice_asset_report
+from app.pipeline.voice import VoiceSegment, prepare_voice, write_alignment_srt
 
 
 def transcription_quality(script: str, transcription: dict) -> dict:
@@ -112,16 +112,35 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         transition(video, "RIGHTS_CHECKED")
         transition(video, "SCRIPTED")
         narration = output / "narration.wav"
-        synthesize(draft.narration, narration, topic.language)
-        voice = voice_asset_report(VoiceSegment("full", draft.narration), narration, "espeak-ng", voice="espeak-ng", reused=False)
+        segment = VoiceSegment("full", draft.narration, topic.language)
+        lane = "ai" if "ai" in topic.niche.lower() else "gaming"
+        provider = settings.voice_provider if dry_run else "elevenlabs"
+        voice_id = settings.elevenlabs_ai_voice_id if lane == "ai" else settings.elevenlabs_gaming_voice_id
+        voice = prepare_voice([segment], provider, output / "voice", voice_id=voice_id if provider == "elevenlabs" else None)
         (output / "voice_assets.json").write_text(json.dumps(voice, indent=2, ensure_ascii=False), encoding="utf-8")
         if voice["decision"] != "ALLOW":
             transition(video, "BLOCKED")
             db.commit()
             raise ValueError("voice_assets_blocked:" + ",".join(voice["reasons"]))
+        voice_file = next((Path(row["path"]) for row in voice["files"] if row["segment_id"] == "full"), None)
+        if voice_file is None or not voice_file.is_file():
+            raise ValueError("voice_assets_blocked:full_audio_missing")
+        shutil.copyfile(voice_file, narration)
+        if voice.get("actual_cost_dkk") is not None:
+            db.add(Cost(job_id=f"voice-{topic_id}-v{next_script_version}", kind="ELEVENLABS", estimated_amount=voice["estimated_cost_dkk"], actual_amount=voice["actual_cost_dkk"], status="ACTUAL"))
+            production_cost += voice["actual_cost_dkk"]
+        video.features_json = {**video.features_json, "voice": provider, "voice_lane": lane, "voice_id": voice["files"][0].get("voice"), "production_cost": production_cost}
         captions = output / "captions.srt"
-        transcription = transcribe(narration, captions)
-        durations = [max(0.2, segment["end"] - segment["start"]) for segment in transcription["segments_detail"]]
+        if provider == "elevenlabs":
+            alignment_path = Path(voice["files"][0]["alignment_path"])
+            shutil.copyfile(alignment_path, output / "alignment.json")
+            shutil.copyfile(voice["files"][0]["normalized_alignment_path"], output / "alignment.normalized.json")
+            caption_segments = write_alignment_srt(segment, alignment_path, captions)
+            transcription = transcribe(narration, output / "transcription.srt")
+        else:
+            transcription = transcribe(narration, captions)
+            caption_segments = transcription["segments_detail"]
+        durations = [max(0.2, item["end"] - item["start"]) for item in caption_segments]
         coverage = media_coverage(media_plan, durations, prepared)
         write_media_composition(output, media_plan, coverage)
         if coverage["decision"] != "ALLOW":
@@ -129,7 +148,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
             db.commit()
             raise ValueError("real_media_coverage_below_required_ratio")
         audio_duration = float(probe(narration)["format"]["duration"])
-        clip_plan = build_clip_plan(transcription["segments_detail"], [asset.id for asset in assets], audio_duration, [claim.id for claim in draft.claims])
+        clip_plan = build_clip_plan(caption_segments, [asset.id for asset in assets], audio_duration, [claim.id for claim in draft.claims])
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
         rendered = output / "video.mp4"
         layout = render_real_media(prepared, narration, captions, draft.title, rendered, coverage)
@@ -177,13 +196,15 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
 
 def _write_deliverables(output: Path, video: VideoVersion, script: Script, assets: list[Asset], licenses: list[License], checks: dict) -> None:
     (output / "claims.json").write_text(json.dumps(script.claims_json, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output / "script.json").write_text(json.dumps({"id": script.id, "version": script.version, "narration": script.content, "language": video.language, "prompt_version": script.prompt_version, "model": script.model}, indent=2, ensure_ascii=False), encoding="utf-8")
     rights = {"assets": [{"asset_id": asset.id, "source_url": asset.source_url, "sha256": asset.sha256, "rights_holder": license_.rights_holder, "license": license_.license_text, "commercial": license_.commercial_allowed, "derivatives": license_.derivative_allowed, "platforms": license_.platforms_json, "territories": license_.territories_json, "age_clearance": license_.age_clearance, "status": license_.status} for asset, license_ in zip(assets, licenses)]}
     (output / "rights.json").write_text(json.dumps(rights, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "post.json").write_text(json.dumps(video.post_json, indent=2, ensure_ascii=False), encoding="utf-8")
     files = {}
-    deliverable_names = ["video.mp4", "captions.srt", "thumbnail.jpg", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg", "voice_assets.json", "media_composition.json"]
-    for name in deliverable_names:
+    deliverable_names = ["video.mp4", "captions.srt", "thumbnail.jpg", "script.json", "post.json", "claims.json", "rights.json", "checks.json", "clip_plan.json", "storyboard.jpg", "voice_assets.json", "media_composition.json"]
+    optional_names = ["narration.wav", "alignment.json", "alignment.normalized.json", "transcription.srt"]
+    for name in deliverable_names + [name for name in optional_names if (output / name).is_file()]:
         files[name] = sha256_file(str(output / name))
-    manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id for asset in assets], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "real_media_ratio": checks.get("media_composition", {}).get("real_media_ratio"), "minimum_real_media_ratio": checks.get("media_composition", {}).get("minimum_required_ratio"), "files_sha256": files}
+    manifest = {"video_version_id": video.id, "script_id": script.id, "script_version": script.version, "prompt_version": script.prompt_version, "model": script.model, "asset_ids": [asset.id for asset in assets], "status": video.status, "is_demo": video.features_json.get("is_demo", False), "voice": checks.get("voice", {}), "real_media_ratio": checks.get("media_composition", {}).get("real_media_ratio"), "minimum_real_media_ratio": checks.get("media_composition", {}).get("minimum_required_ratio"), "files_sha256": files}
     video.manifest_json = manifest
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -145,3 +145,53 @@ def test_revision_is_idempotent_and_rejects_non_rejected_source(db, awaiting_vid
     from app.pipeline.revisions import create_post_revision
     with pytest.raises(ValueError, match="rejected_source_and_review_required"):
         create_post_revision(db, awaiting_video.id, 999, "job-without-rejection")
+
+
+def test_http_multi_approval_dispatches_exact_accounts_once(db, awaiting_video, monkeypatch):
+    from app.db.models import Job
+
+    complete_source_files(awaiting_video)
+    db.add(Setting(key="youtube_connection", value_json={"channel_id": "channel-1"}))
+    db.add(Setting(key="meta_connection", value_json={"instagram_account_id": "instagram-1", "facebook_page_id": "page-1"}))
+    db.add(Setting(key="tiktok_connection", value_json={"open_id": "open-id-1"}))
+    db.commit()
+    monkeypatch.setattr(get_settings(), "dry_run", False)
+    monkeypatch.setattr(get_settings(), "publish_enabled", True)
+    client, csrf = authenticated_client(db)
+    try:
+        data = {
+            "csrf_token": csrf,
+            "platforms": ["youtube", "instagram", "facebook", "tiktok"],
+            "visibility": "unlisted",
+            "watched": "true",
+        }
+        response = client.post(f"/review/{awaiting_video.id}/approve", data=data, follow_redirects=False)
+        assert response.status_code == 303
+        jobs = db.query(Job).filter_by(kind="publish").all()
+        assert len(jobs) == 4
+        youtube = next(job for job in jobs if job.payload["platform"] == "youtube")
+        assert youtube.payload["visibility"] == "unlisted"
+        assert {job.payload["account"] for job in jobs} == {"channel-1", "instagram-1", "page-1", "open-id-1"}
+        duplicate = client.post(f"/review/{awaiting_video.id}/approve", data=data, follow_redirects=False)
+        assert duplicate.status_code == 409
+        assert db.query(Job).filter_by(kind="publish").count() == 4
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_http_rejection_creates_no_publication_jobs(db, awaiting_video):
+    from app.db.models import Job
+
+    complete_source_files(awaiting_video)
+    db.commit()
+    client, csrf = authenticated_client(db)
+    try:
+        response = client.post(
+            f"/review/{awaiting_video.id}/reject",
+            data={"csrf_token": csrf, "note": "Replace the opening"},
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+        assert db.query(Job).filter_by(kind="publish").count() == 0
+    finally:
+        app.dependency_overrides.clear()

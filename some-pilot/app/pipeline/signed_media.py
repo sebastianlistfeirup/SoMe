@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.models import Setting, VideoVersion
-from app.pipeline.approvals import approval_digest, latest_approval
+from app.pipeline.approvals import approval_digest, destinations_digest, latest_approval
 
 
 class SignedMediaError(ValueError):
@@ -33,17 +33,28 @@ def _encode(value: bytes) -> str:
     return base64.urlsafe_b64encode(value).rstrip(b"=").decode()
 
 
-def create_link(db: Session, video: VideoVersion, platform: str, account: str) -> str:
+def _approval_digest(video: VideoVersion, review, platform: str, account: str) -> dict:
+    destinations = review.digest_json.get("destinations")
+    if destinations:
+        if not any(item["platform"] == platform and item["account"] == account for item in destinations):
+            raise SignedMediaError("approval_destination_mismatch")
+        return destinations_digest(video, destinations)
+    return approval_digest(video, platform, account)
+
+
+def create_link(db: Session, video: VideoVersion, platform: str, account: str, asset: str = "video") -> str:
     if video.status not in {"APPROVED", "SCHEDULED", "PUBLISHING", "PUBLISHED"}:
         raise SignedMediaError("video_not_approved")
+    if asset not in {"video", "thumbnail"}:
+        raise SignedMediaError("unsupported_media_asset")
     review = latest_approval(db, video.id)
     if not review:
         raise SignedMediaError("owner_approval_required")
-    digest = approval_digest(video, platform, account)
+    digest = _approval_digest(video, review, platform, account)
     if digest["approval_sha256"] != review.digest_json.get("approval_sha256"):
         raise SignedMediaError("approval_invalidated_by_change")
     settings = get_settings()
-    payload = {"video_id": video.id, "platform": platform, "account": account, "approval": digest["approval_sha256"], "exp": int(time.time()) + settings.signed_media_ttl_seconds, "nonce": secrets.token_urlsafe(12)}
+    payload = {"video_id": video.id, "platform": platform, "account": account, "asset": asset, "approval": digest["approval_sha256"], "exp": int(time.time()) + settings.signed_media_ttl_seconds, "nonce": secrets.token_urlsafe(12)}
     encoded = _encode(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
     signature = _encode(hmac.new(_key(db), encoded.encode(), hashlib.sha256).digest())
     path = f"/public-media/{encoded}.{signature}"
@@ -64,10 +75,15 @@ def resolve_link(db: Session, token: str) -> Path:
         video = db.get(VideoVersion, payload["video_id"])
         if not video or video.status not in {"APPROVED", "SCHEDULED", "PUBLISHING", "PUBLISHED"}:
             raise SignedMediaError("video_not_available")
+        asset = payload.get("asset", "video")
+        if asset not in {"video", "thumbnail"}:
+            raise SignedMediaError("unsupported_media_asset")
         review = latest_approval(db, video.id)
-        current = approval_digest(video, payload["platform"], payload["account"])
-        if not review or review.digest_json.get("approval_sha256") != payload["approval"] or current["approval_sha256"] != payload["approval"]:
+        if not review:
             raise SignedMediaError("approval_changed")
-        return Path(video.video_path)
+        current = _approval_digest(video, review, payload["platform"], payload["account"])
+        if review.digest_json.get("approval_sha256") != payload["approval"] or current["approval_sha256"] != payload["approval"]:
+            raise SignedMediaError("approval_changed")
+        return Path(video.thumbnail_path if asset == "thumbnail" else video.video_path)
     except (KeyError, ValueError, json.JSONDecodeError) as exc:
         raise SignedMediaError("invalid_or_expired_link") from exc

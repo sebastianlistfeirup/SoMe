@@ -17,7 +17,8 @@ from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
 from app.db.models import AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
-from app.pipeline.approvals import ApprovalError, approve, paused, set_pause, transition
+from app.pipeline.approvals import ApprovalError, approve, approve_destinations, paused, set_pause, transition
+from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
 from app.pipeline.posts import format_duration, platform_label, post_view, preferred_platform, status_label
@@ -271,6 +272,7 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
     latest_rejection = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "REJECTED").order_by(Review.created_at.desc(), Review.id.desc()).first()
     latest_approval = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "APPROVED").order_by(Review.created_at.desc(), Review.id.desc()).first()
     revision_job = next((job for job in db.query(Job).filter(Job.kind == "revise_post").order_by(Job.created_at.desc()).limit(100).all() if job.payload.get("video_id") == video.id), None)
+    publication_jobs = [job for job in db.query(Job).filter(Job.kind == "publish").order_by(Job.created_at.desc()).limit(100).all() if job.payload.get("video_id") == video.id]
     revisions = [item for item in db.query(VideoVersion).filter(VideoVersion.topic_id == video.topic_id).order_by(VideoVersion.created_at.desc()).all() if item.features_json.get("revision_of") == video.id]
     return render(
         request,
@@ -288,24 +290,36 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         latest_rejection=latest_rejection,
         latest_approval=latest_approval,
         revision_job=revision_job,
+        publication_jobs=publication_jobs,
         revisions=revisions,
     )
 
 
 @app.post("/review/{video_id}/approve")
-def approve_video(video_id: int, request: Request, platform: str = Form(...), account: str = Form(""), watched: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+def approve_video(video_id: int, request: Request, platform: str = Form(""), platforms: list[str] | None = Form(None), account: str = Form(""), visibility: str = Form("public"), publish_at: str = Form(""), watched: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
     if not video:
         raise HTTPException(404)
+    selected = platforms or ([platform] if platform else [preferred_platform(video)])
+    destinations = []
     try:
-        destination = selected_destination(db, platform)
-        account = account.strip() or destination["account"]
-        if not account:
-            raise ApprovalError("connected_account_required")
-        approve(db, video, auth[0].username, platform, account, watched)
+        scheduled_at = normalize_publish_at(publish_at)
+        for selected_platform in selected:
+            option = selected_destination(db, selected_platform)
+            destination_account = account.strip() if len(selected) == 1 and account.strip() else option["account"]
+            if not destination_account:
+                raise ApprovalError("connected_account_required")
+            destinations.append({
+                "platform": selected_platform,
+                "account": destination_account,
+                "visibility": visibility if selected_platform == "youtube" else "public",
+                "publish_at": scheduled_at,
+            })
+        review = approve_destinations(db, video, auth[0].username, destinations, watched)
+        jobs = enqueue_publication_jobs(db, review)
     except ApprovalError as exc:
         raise HTTPException(409, str(exc)) from exc
-    return RedirectResponse(f"/review/{video_id}?approved=1", status_code=303)
+    return RedirectResponse(f"/review/{video_id}?approved=1&queued={len(jobs)}", status_code=303)
 
 
 @app.post("/review/{video_id}/reject")
@@ -342,7 +356,7 @@ def revise_video(video_id: int, db: Session = Depends(get_db), auth=Depends(csrf
 
 @app.get("/media/{video_id}/{name}")
 def protected_media(video_id: int, name: str, db: Session = Depends(get_db), auth=Depends(require_user)):
-    if name not in {"video.mp4", "thumbnail.jpg", "storyboard.jpg", "captions.srt"}:
+    if name not in {"video.mp4", "narration.wav", "thumbnail.jpg", "storyboard.jpg", "captions.srt"}:
         raise HTTPException(404)
     video = db.get(VideoVersion, video_id)
     if not video:
@@ -373,7 +387,8 @@ def public_signed_media(token: str, db: Session = Depends(get_db)):
         raise HTTPException(410, str(exc)) from exc
     if not path.exists():
         raise HTTPException(404)
-    return FileResponse(path, media_type="video/mp4", headers={"Cache-Control": "private, max-age=60", "X-Content-Type-Options": "nosniff"})
+    media_type = "image/jpeg" if path.suffix.lower() in {".jpg", ".jpeg"} else "video/mp4"
+    return FileResponse(path, media_type=media_type, headers={"Cache-Control": "private, max-age=60", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/export/{video_id}/{platform}")

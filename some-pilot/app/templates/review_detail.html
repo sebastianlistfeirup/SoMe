@@ -7,6 +7,7 @@
       <div class="video-frame"><video controls preload="metadata" poster="/media/{{ video.id }}/thumbnail.jpg" src="/media/{{ video.id }}/video.mp4">Din browser kan ikke afspille videoen.</video></div>
       <div class="preview-info"><div><strong>Forhåndsvisning</strong><span>{{ video.duration_seconds | duration }} · {{ video.language | upper }} · {{ video.features_json.get('aspect_ratio', '9:16') }}</span></div><span class="platform-chip" data-platform-name>{{ selected_platform | platform_label }}</span></div>
       <details class="thumbnail-toggle"><summary>Se thumbnail i fuld størrelse</summary><img src="/media/{{ video.id }}/thumbnail.jpg" alt="Thumbnail til {{ post.title }}"></details>
+      {% if video.manifest_json.get('files_sha256', {}).get('narration.wav') %}<details class="thumbnail-toggle"><summary>Hør ElevenLabs-narration</summary><audio controls preload="metadata" src="/media/{{ video.id }}/narration.wav" style="width:100%;margin-top:12px">Din browser kan ikke afspille lyden.</audio></details>{% endif %}
       <div class="asset-links"><a href="/media/{{ video.id }}/captions.srt">Undertekster</a><a href="/media/{{ video.id }}/storyboard.jpg">Storyboard</a><a href="/export/{{ video.id }}/{{ selected_platform }}">Download ZIP</a></div>
     </section>
   </div>
@@ -24,15 +25,15 @@
 
     {% if video.status == 'AWAITING_OWNER' %}
     <section class="decision-card" id="decision">
-      <div class="decision-heading"><div><p class="eyebrow">Din beslutning</p><h2>Er opslaget klar?</h2></div><span class="secure-note">Ingen automatisk publicering</span></div>
+      <div class="decision-heading"><div><p class="eyebrow">Din beslutning</p><h2>Er opslaget klar?</h2></div><span class="secure-note">Godkendelse opretter publiceringsjobs</span></div>
       <form method="post" action="/review/{{ video.id }}/approve" class="approval-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="account" value="{{ selected_account }}" data-account-input>
-        <label for="platform">Platform</label>
-        <div class="select-wrap"><select id="platform" name="platform" data-platform-select>{% for option in platforms %}<option value="{{ option.value }}" data-account="{{ option.account }}" data-account-label="{{ option.account_label }}" {% if option.value == selected_platform %}selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div>
-        <div class="account-preview"><span class="account-avatar">@</span><div><small>Publiceres på</small><strong data-account-name>{{ selected_account_label }}</strong></div><span class="connected-dot">{{ 'Forbundet' if selected_account else 'Ikke forbundet' }}</span></div>
-        <label class="watch-check"><input type="checkbox" name="watched" value="true" required><span><strong>Jeg har set hele videoen</strong><small>Jeg har kontrolleret thumbnail, tekst, hashtags og kilder.</small></span></label>
-        <button class="button approve-button" type="submit">Godkend opslag</button>
+        <input type="hidden" name="account" value="{{ selected_account }}">
+        <fieldset class="destination-picker"><legend>Destinationer</legend>{% for option in platforms %}<label class="destination-option" data-account="{{ option.account }}"><input type="checkbox" name="platforms" value="{{ option.value }}" checked><span><strong>{{ option.label }}</strong><small>{{ option.account_label }}</small></span></label>{% endfor %}</fieldset>
+        <div class="approval-settings"><label for="visibility">YouTube-synlighed<select id="visibility" name="visibility"><option value="public" selected>Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label><label for="publish_at">Publicér senere (valgfrit)<input id="publish_at" name="publish_at" type="datetime-local"></label></div>
+        <p class="field-help">Alle fire er valgt som standard. Fjern markeringen af en destination for at springe den over. Hvis tidspunktet er tomt, publiceres efter godkendelse.</p>
+        <label class="watch-check"><input type="checkbox" name="watched" value="true" required><span><strong>Jeg har set hele videoen</strong><small>Jeg har kontrolleret thumbnail, tekst, hashtags, kilder og destinationer.</small></span></label>
+        <button class="button approve-button" type="submit">Godkend opslag og publicér</button>
       </form>
       <details class="reject-details" {% if request.query_params.get('reject') %}open{% endif %}><summary>Ikke klar? Afvis og fortæl hvad der skal ændres</summary><form method="post" action="/review/{{ video.id }}/reject" class="reject-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="note">Hvad skal vi rette?</label><textarea id="note" name="note" rows="4" minlength="3" maxlength="2000" required placeholder="Fx: Gør overskriften kortere, og gør teksten mere direkte." data-character-count="note-count"></textarea><div class="field-help"><span>Din kommentar bruges til næste version.</span><span id="note-count"></span></div><button class="button reject-button" type="submit">Afvis med kommentar</button></form></details>
     </section>
@@ -44,7 +45,7 @@
       {% if not revisions and (not revision_job or revision_job.status == 'FAILED') %}<form method="post" action="/review/{{ video.id }}/revise"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><p class="muted">AI retter overskrift, opslagstekst og hashtags ud fra din kommentar. Selve videoen og stemmen genbruges.</p><button class="button" type="submit">Ret opslag med AI</button></form>{% endif %}
     </section>
     {% elif latest_approval %}
-    <section class="decision-card approved-panel"><div class="approved-mark">✓</div><div><p class="eyebrow">Beslutning registreret</p><h2>Opslaget er godkendt</h2><p>Godkendt til <strong>{{ latest_approval.digest_json.get('platform') | platform_label }}</strong> på den valgte konto. Der sker ingen ny publicering fra denne side.</p></div></section>
+    <section class="decision-card approved-panel"><div class="approved-mark">✓</div><div class="approval-result"><p class="eyebrow">Beslutning registreret</p><h2>Opslaget er godkendt</h2><p>Denne revision og dens destinationer er låst. Publiceringsstatus pr. destination:</p><div class="publication-jobs">{% for job in publication_jobs %}<div class="publication-job"><span class="job-platform">{{ job.payload.get('platform') | platform_label }}</span><span class="status status-{{ job.status | lower }}">{{ job.status | status_label }}</span><small>{{ job.payload.get('account') }}{% if job.error_code %} · {{ job.error_code }}{% endif %}</small></div>{% endfor %}</div></div></section>
     {% endif %}
 
     <details class="evidence-panel"><summary><span>Kontrol og dokumentation</span><span class="evidence-summary">Se checks og filer</span></summary><div class="evidence-content"><p>Godkendelsen er knyttet til præcis denne videofil, tekst, platform og konto. Enhver ændring kræver ny godkendelse.</p><details><summary>Påstande og kilder</summary><pre>{{ evidence.get('claims.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Rettighedsbevis</summary><pre>{{ evidence.get('rights.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Teknisk og redaktionel kontrol</summary><pre>{{ evidence.get('checks.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Versionsmanifest</summary><pre>{{ video.manifest_json | tojson(indent=2) }}</pre></details></div></details>
