@@ -175,6 +175,8 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Standardbuild og fuld pakke i frisk container: **178 passed**. Kun Starlette TestClient-deprecationwarning.
 - Ingen nye ejervideoer er produceret, og `C:/Users/compu/Videos/SoMe-captures` er ikke ændret. Reel pilotproduktion og publicering afventer ejerens eksplicitte go samt platformspecifikke eligibility-forhold.
 
-- Deployment `a0b77ba` på VPS gav ligeledes **178 passed**. Første serverkørsel fangede miljøafhængighed i ElevenLabs-guard-testen; testen sætter nu eksplicit pris/dato/rettigheder til tomme værdier og bestod både lokalt og på VPS efter rettelsen.
+- Deployment `0fcc524` på VPS gav ligeledes **178 passed**. Første serverkørsel fangede miljøafhængighed i ElevenLabs-guard-testen; testen sætter nu eksplicit pris/dato/rettigheder til tomme værdier og bestod både lokalt og på VPS efter rettelsen.
 - Standarddeployment fuldførte migration 0001 og doctor. Web og worker blev efterfølgende kontrolleret som healthy. `GET /healthz` på loopback og HTTPS returnerede `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
 - VPS doctor: `direct_post_eligible=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`; ElevenLabs konfigureret. Ingen ny ekstern publicering eller betalt produktion blev udført under deployment.
+
+- Endelig auditrevision `0fcc524`: Editorial-pakke er koblet til ikke-demo-produktion med JSON Schema, lane-match, 85-pointsgate, inspected sources og receptionskrav. Ranking har samme gates pr. featured game. Tests dækker research-state, udløb, manglende spoken reception, ændret narrationartifact og blokeret dispatch efter evidensudløb. Resultat lokalt og på VPS: **178 passed**; web/worker healthy.
