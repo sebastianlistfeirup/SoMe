@@ -325,7 +325,7 @@ Regler:
 - SSH bruger separat ED25519-nøgle.
 - Root- og passwordlogin over SSH er slået fra.
 - UFW og Fail2ban er aktive.
-- Caddy giver HTTPS.
+- Caddy giver HTTPS. Siden 2026-11-13 er dashboardet åbent for alle IP-adresser, men login kræver password og 2-faktor (`REQUIRE_TOTP=true`, ADR 0011). Caddy-backup med den gamle IP-whitelist: `/etc/caddy/Caddyfile.bak-20261113T223531Z`.
 - Web bindes til loopback på serveren.
 - Krypteret lokal backup er verificeret.
 - Offsite backup er ikke konfigureret.

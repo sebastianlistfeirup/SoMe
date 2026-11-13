@@ -312,3 +312,12 @@ Commit `24447828`: **295 passed** lokalt (23 nye tests). Pushet, **ikke deployet
   - QR-kode (`segno==1.6.1`, ren Python) og fejlside i HTML med vejledning.
   - Knap til ny nøgle før tilmelding og ±60 sek. tolerance ved tilmelding.
   - 297 passed lokalt og på VPS, backup `some-backup-20261113T222407Z.zip.enc`, healthy, rollback-mål `71d87757b448`.
+- **Ekstern adgang (ejerens OK efter 2-faktor-tilmelding):**
+  - Ejeren har 2-faktor slået til (bekræftet i databasen: 8 gendannelseskoder, `TOTP_ENABLED`-hændelse).
+  - `REQUIRE_TOTP=true` og `PUBLIC_DASHBOARD_URL` er sat; backup `app.env.bak-20261113T223429Z`. Containerne er genskabt og healthy.
+  - Caddy: kun `@owner remote_ip`-blokken og `respond 403` er fjernet. Konfigurationen er valideret og genindlæst; backup `Caddyfile.bak-20261113T223531Z`.
+- **Test fra ikke-whitelistet adresse** (serverens egen offentlige IP, før ændringen 403):
+  - `/login` 200, `/healthz` 200.
+  - `/review`, `/account/security`, `/operations` og `/media/...` sender til login med `next`.
+  - Forkert password giver 401.
+  - Ejerens computer: `/login` 200.

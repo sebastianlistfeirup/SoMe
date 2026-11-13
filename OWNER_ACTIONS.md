@@ -179,8 +179,8 @@ Deployet 2026-11-13 som `71d87757` (295 tests på VPS).
 
 Ekstern adgang, i denne rækkefølge:
 - [x] Deploy udført 2026-11-13 (`71d87757`, 295 tests på VPS, backup før migration 0003, healthy).
-- [ ] Log ind hjemmefra, åbn **Sikkerhed**, tilføj nøglen i din authenticator-app, bekræft med en kode, og gem de 8 gendannelseskoder et sikkert sted.
-- [ ] Sig til, når det er gjort. Så sætter jeg `REQUIRE_TOTP=true` og `PUBLIC_DASHBOARD_URL`, fjerner IP-begrænsningen i Caddy og tester login udefra.
+- [x] 2-faktor tilmeldt af ejeren 2026-11-13 22:33 UTC, med 8 gendannelseskoder.
+- [x] Ekstern adgang åbnet 2026-11-13: `REQUIRE_TOTP=true`, `PUBLIC_DASHBOARD_URL` sat, IP-begrænsningen fjernet i Caddy (backup `/etc/caddy/Caddyfile.bak-20261113T223531Z`). Dashboardet kræver nu password og 2-faktor-kode fra alle steder. Mister du telefonen, bruger du en gendannelseskode.
 - [ ] Beslut, om SSH (port 22) fortsat skal være åben fra hele internettet. Den er i dag beskyttet af nøgle-login og Fail2ban.
 
 YouTube:
