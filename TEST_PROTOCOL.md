@@ -282,3 +282,4 @@ Ikke verificeret: rigtige API-kald til retention, kommentarer, kontotjek, alarme
 - **CI på GitHub:** De første kørsler fejlede med `PermissionError` under `/data`, fordi runneren opretter bind-mappen som root, mens containeren kører som uid 10001. Rettet i `4e42e9cc`.
 - **STATUS:** Genereret på VPS med `status-report --environment vps`.
 - **Stemme:** `VOICE_PROVIDER` i serverens `app.env` er ændret fra `kokoro` til `elevenlabs`, og kun den linje er rørt. Backup: `app.env.bak-20261113T212216Z`, rettigheder 600. Web og worker er genskabt på `some-pilot:32f8ada43552`. Doctor viser `provider=elevenlabs`, og health er ok lokalt og via HTTPS.
+- **Oprydning:** Den ubrugte linje `VOICE_PRESET` er slettet fra `app.env`. Backup: `app.env.bak-20261113T212412Z`. Nøgle-diff bekræfter, at præcis den ene nøgle er fjernet. Containerne er genskabt; de er healthy, migration 0002 er OK, og `VOICE_PRESET` findes ikke i containermiljøet.

@@ -163,7 +163,7 @@ Alt nedenfor er deployet (272 tests på VPS). Intet er slået til uden dig.
 
 - [x] **Push og deploy:** Udført 2026-11-13 (272 tests på VPS, backup før migration 0002, healthy).
 - [x] **GitHub CI:** Workflowet er pushet og kører ved hver push.
-- [x] **Serverens app.env:** `VOICE_PROVIDER=elevenlabs` sat 2026-11-13 (backup af filen ligger ved siden af). Den ubrugte linje `VOICE_PRESET` er urørt og kan slettes, når det passer.
+- [x] **Serverens app.env:** `VOICE_PROVIDER=elevenlabs` sat 2026-11-13 (backup af filen ligger ved siden af). Den ubrugte linje `VOICE_PRESET` er slettet samme dag (backup `app.env.bak-20261113T212412Z`).
 - [ ] **Alarmkanal:** Vælg webhook (fx Discord) og/eller e-mail, og sæt `ALERT_*` i `/opt/some/secrets/app.env`.
 - [ ] **Offsite backup:** Vælg en udbyder med WebDAV over HTTPS (fx en storage box). Godkend prisen, og sæt `OFFSITE_*`. Kun krypterede backups sendes.
 - [ ] **Staging:** Opret `/opt/some/secrets/staging.env` uden publiceringstokens, og kør `scripts/deploy_staging.sh` (port 8001 via SSH-tunnel).
