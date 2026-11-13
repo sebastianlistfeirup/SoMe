@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from app.pipeline.downloader import detect_media_type
 from app.pipeline.editorial import GameReception
+from app.pipeline.game_research import GamePreparation
 from app.pipeline.media import MediaError, probe, run, srt_timestamp, synthesize, technical_checks
 from app.pipeline.mobile import mobile_filter
 
@@ -55,6 +56,7 @@ class RankingScene(BaseModel):
     music_allowed: bool = False
     attribution: str = Field(min_length=1, max_length=500)
     reception: GameReception | None = None
+    preparation: GamePreparation
 
 
 class RankingClaim(BaseModel):
@@ -71,6 +73,7 @@ class RankingPlan(BaseModel):
     title: str = Field(min_length=10, max_length=120)
     hook: str = Field(min_length=10, max_length=300)
     post_text: str = Field(min_length=10, max_length=2200)
+    target_game_platform: str = Field(default="cross-platform", min_length=1, max_length=80)
     voice_dir: str | None = None
     voice_model: str | None = None
     quality_dimensions: dict[str, float] | None = None

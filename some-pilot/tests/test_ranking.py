@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -20,6 +21,15 @@ def scene(rank: int = 1) -> dict:
         "rights_evidence": "Official video policy permits edited, monetized gameplay videos.",
         "music_allowed": False,
         "attribution": "Publisher and official game URL",
+        "preparation": {
+            "mobygames_url": "https://www.mobygames.com/game/104222/into-the-breach/",
+            "review_score": None,
+            "review_note": "Synthetic schema fixture; no MobyGames score is claimed.",
+            "fun_facts": [],
+            "fun_facts_note": "Synthetic schema fixture; no trivia is claimed.",
+            "observed_at": datetime.now(timezone.utc).isoformat(),
+            "release_platforms": [{"platform": "PC", "source_url": "https://publisher.example/game", "evidence_note": "Synthetic fixture for a documented PC release.", "verified_at": datetime.now(timezone.utc).isoformat()}],
+        },
     }
 
 

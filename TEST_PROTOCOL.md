@@ -190,3 +190,12 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Ident-cachen afhænger af både logo- og rendererhash. Testdata-dir respekteres, så testen ikke utilsigtet genbruger serverens gamle identer. `content.mp4` bevares som det rene redaktionelle indhold, mens det endelige `video.mp4` indeholder ident + indhold + ident.
 - Standardbuild og hele pakken: **181 passed**, kun den kendte Starlette TestClient-deprecationwarning. Ingen nye redaktionelle ejervideoer er produceret, eksisterende opslag er ikke ændret, og `C:/Users/compu/Videos/SoMe-captures` er urørt.
 - Commit `12d4b0b4` er pushet og deployet med `./scripts/deploy.sh`. Hele pakken bestod også på VPS: **181 passed**. Migration 0001 og doctor er OK. Web og worker er healthy, og loopback samt offentlig HTTPS-health returnerer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`. Ingen publicering eller betalt produktion blev udført.
+
+## MobyGames-forberedelse og cross-platform-footage — 2026-11-13
+
+- `app/pipeline/game_research.py` er en fælles kontrakt for konkret MobyGames-spilside, review score/not-found-note, fun facts/not-found-note, observationstidspunkt og dokumenterede udgivelsesplatforme.
+- Både almindelig editorial-pakke og ranking kræver research for hvert featured game. Forkert kildevært, manglende preparation, udløbet research og udokumenteret målplattform blokerer. Almindelige pakker skal desuden have MobyGames- og release-URL'er registreret som inspicerede kilder.
+- Tests beviser at PS5-footage må bruges til et PC-opslag med dokumenteret PC-udgivelse, mens et Switch 2-opslag uden Switch 2-dokumentation blokeres. `cross-platform` kræver ingen bestemt konsol. Aliaser som PlayStation 5, Nintendo Switch 2, PC games og X box Series X normaliseres.
+- Capture Bridge behandler platformmapper som proveniens. Tests beviser genkendelse af spilnavn i et PS5-filnavn og sikker `unknown`-stop ved et ukendt spil i Switch 2-mappen. Manifestet markerer at release_platforms kræver separat verificering.
+- MobyGames åbnede med Cloudflare-botskontrol. Der er ikke udført bypass eller automatisk scraping. Den konkrete MobyGames-URL til Into the Breach blev fundet via almindelig websøgning; testpakkens score/trivia er syntetiske og hævder ingen rigtige værdier.
+- Standardbuild og hele testpakken: **191 passed**, kun den kendte Starlette TestClient-deprecationwarning. Ingen redaktionelle videoer, eksisterende opslag eller ejerfootage er produceret eller ændret.

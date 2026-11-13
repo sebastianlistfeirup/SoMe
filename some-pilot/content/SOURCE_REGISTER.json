@@ -459,6 +459,15 @@
     "note": "Same limited scope as R01; no fabricated topic index or rank is used."
   },
   {
+    "id": "G58",
+    "title": "MobyGames game-specific research",
+    "url": "https://www.mobygames.com/",
+    "checked_date": "2026-11-13",
+    "role": "game_identity, review_scores, trivia, release_platforms, retro_research",
+    "status": "manual_game_page_inspection_required",
+    "note": "Every featured game requires its specific inspected MobyGames entry. Browser access encountered Cloudflare bot protection; no bypass or unverified score/trivia is permitted. Missing values require an explicit not-found-after-search note."
+  },
+  {
     "id": "I01",
     "title": "ElevenLabs — Create speech with timing",
     "url": "https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps",

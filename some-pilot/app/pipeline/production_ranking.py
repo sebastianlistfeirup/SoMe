@@ -8,6 +8,7 @@ from app.db.models import Asset, License, Script, Topic, VideoVersion
 from app.pipeline.approvals import paused, sha256_file, transition
 from app.pipeline.brand_ident import concat_with_idents, ident_metadata
 from app.pipeline.editorial import GameReception, editorial_score, freshness_blockers, reception_blockers, EvidenceClaim
+from app.pipeline.game_research import PREPARATION_FRESHNESS, RELEASE_FRESHNESS, as_utc, game_preparation_blockers
 from app.pipeline.media import probe, require_tools, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
@@ -55,6 +56,9 @@ def evaluate_ranking_editorial(plan: RankingPlan, narration: str, now: datetime 
             blockers.append(f"{scene.game}:reception_game_mismatch")
         games.append(reception)
         valid_until.append(reception.observed_at + timedelta(hours=24))
+        blockers.extend(game_preparation_blockers(scene.game, scene.preparation, plan.target_game_platform, now))
+        valid_until.append(as_utc(scene.preparation.observed_at) + PREPARATION_FRESHNESS)
+        valid_until.extend(as_utc(release.verified_at) + RELEASE_FRESHNESS for release in scene.preparation.release_platforms)
     blockers.extend(reception_blockers(games, narration))
     expiry = min(valid_until) if valid_until else None
     return {"decision": "ALLOW" if not blockers else "BLOCK", "score": score, "threshold": 85, "blockers": blockers, "source_refresh_checked_at": now.isoformat(), "source_valid_until": expiry.isoformat() if expiry else None, "claims_checked": len(claims), "games_checked": len(games)}

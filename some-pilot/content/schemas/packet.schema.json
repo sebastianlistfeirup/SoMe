@@ -209,6 +209,88 @@
             "type": "string",
             "minLength": 1
           },
+          "preparation": {
+            "type": "object",
+            "properties": {
+              "mobygames_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "review_score": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 100
+              },
+              "review_note": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "fun_facts": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 5,
+                  "maxLength": 500
+                },
+                "maxItems": 20
+              },
+              "fun_facts_note": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "observed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "release_platforms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "platform": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "source_url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "evidence_note": {
+                      "type": "string",
+                      "minLength": 5,
+                      "maxLength": 1000
+                    },
+                    "verified_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "platform",
+                    "source_url",
+                    "evidence_note",
+                    "verified_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 40
+              }
+            },
+            "required": [
+              "mobygames_url",
+              "review_score",
+              "review_note",
+              "fun_facts",
+              "fun_facts_note",
+              "observed_at",
+              "release_platforms"
+            ],
+            "additionalProperties": false
+          },
           "official_description_source_id": {
             "type": [
               "string",
@@ -316,6 +398,7 @@
           "edition",
           "footage_platform",
           "reviewed_platform",
+          "preparation",
           "official_description_source_id",
           "critic",
           "steam"

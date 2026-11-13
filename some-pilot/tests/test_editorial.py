@@ -9,7 +9,7 @@ def test_registry_has_all_recipes_ideas_sources_and_default_destinations():
     registry = EditorialRegistry()
     assert len(registry.recipes) == 20
     assert len(registry.ideas) == 120
-    assert len(registry.sources) == 57
+    assert len(registry.sources) == 58
     assert registry.recipe("GF01")["title"] == "The Amiga Corner"
     assert registry.idea("GI001")["lane"] == "gaming"
     assert registry.source("G01")["url"].startswith("https://")
@@ -59,6 +59,9 @@ def complete_packet(now):
         claim["evidence_type"] = "documented"
         claim["expires_at"] = (now + timedelta(days=1)).isoformat()
     for game in packet["games"]:
+        game["preparation"]["observed_at"] = now.isoformat()
+        for release in game["preparation"]["release_platforms"]:
+            release["verified_at"] = now.isoformat()
         for kind in ("critic", "steam"):
             game[kind]["status"] = "verified"
             game[kind]["reason"] = None

@@ -5,6 +5,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, ValidationError
 
+from app.pipeline.game_research import PREPARATION_FRESHNESS, RELEASE_FRESHNESS, GamePreparation, as_utc, game_preparation_blockers
+
 
 PLANNING_WEIGHTS = {
     "viewer_value": 20,
@@ -120,9 +122,9 @@ class EditorialRegistry:
         self.ideas = self._json.loads((self.root / "IDEA_BANK.json").read_text(encoding="utf-8"))
         self.sources = self._json.loads((self.root / "SOURCE_REGISTER.json").read_text(encoding="utf-8"))
         self.config = self._json.loads((self.root / "config.json").read_text(encoding="utf-8"))
-        if len(self.recipes) != 20 or len(self.ideas) != 120 or len(self.sources) != 57:
+        if len(self.recipes) != 20 or len(self.ideas) != 120 or len(self.sources) != 58:
             raise ValueError("editorial_registry_counts_invalid")
-        if len({item["id"] for item in self.recipes}) != 20 or len({item["id"] for item in self.ideas}) != 120 or len({item["id"] for item in self.sources}) != 57:
+        if len({item["id"] for item in self.recipes}) != 20 or len({item["id"] for item in self.ideas}) != 120 or len({item["id"] for item in self.sources}) != 58:
             raise ValueError("editorial_registry_duplicate_ids")
 
     def recipe(self, recipe_id: str) -> dict:
@@ -202,6 +204,21 @@ def evaluate_editorial_packet(packet: dict, narration: str, quality_dimensions: 
         linked = [sources[source_id] for source_id in source_ids if source_id in sources]
         observed = max((datetime.fromisoformat(source["retrieved_at"].replace("Z", "+00:00")) for source in linked), default=now)
         valid_until.append(observed + timedelta(hours=24))
+        try:
+            preparation = GamePreparation.model_validate(item["preparation"])
+        except ValidationError:
+            blockers.append(f"{item['title']}:game_preparation_invalid")
+            continue
+        blockers.extend(game_preparation_blockers(item["title"], preparation, item["reviewed_platform"], now))
+        valid_until.append(as_utc(preparation.observed_at) + PREPARATION_FRESHNESS)
+        valid_until.extend(as_utc(release.verified_at) + RELEASE_FRESHNESS for release in preparation.release_platforms)
+        research_urls = [str(preparation.mobygames_url), *[str(release.source_url) for release in preparation.release_platforms]]
+        for url in research_urls:
+            matching = [source for source in packet["sources"] if source["url"].rstrip("/") == url.rstrip("/")]
+            if not matching:
+                blockers.append(f"{item['title']}:research_source_not_registered:{url}")
+            elif any(source["access_status"] != "inspected" for source in matching):
+                blockers.append(f"{item['title']}:research_source_not_inspected:{url}")
         for kind in ("critic", "steam"):
             status = item[kind]["status"]
             if status not in {"verified", "not_found_after_search", "not_applicable"}:

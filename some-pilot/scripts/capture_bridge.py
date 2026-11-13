@@ -11,6 +11,7 @@ from pathlib import Path
 
 GAME_KEY = re.compile(r"^[a-z0-9][a-z0-9_-]{1,60}$")
 VIDEO_EXTENSIONS = {".mkv", ".mp4", ".mov"}
+PLATFORM_FOLDERS = {"amiga", "commodore-64", "game-boy", "gameboy-advance", "gamecube", "mega-drive", "sega-mega-drive", "nes", "nintendo-64", "pc-games", "playstation-1", "playstation-2", "ps3", "ps4", "ps5", "snes", "switch", "switch-2", "wii", "wii-u", "x-box-series-x", "xbox-360"}
 
 
 def load_config(path: Path) -> dict:
@@ -92,6 +93,17 @@ def upload_directory(directory: Path, config: dict, game: str) -> str:
     return remote
 
 
+def footage_platform_for_path(path: Path, config: dict) -> str | None:
+    capture_root = Path(config["capture_dir"]).resolve()
+    parent = path.parent.resolve()
+    while parent != capture_root and capture_root in parent.parents:
+        folder_key = re.sub(r"[^a-z0-9]+", "-", parent.name.lower()).strip("-")
+        if folder_key in PLATFORM_FOLDERS:
+            return parent.name
+        parent = parent.parent
+    return None
+
+
 def process_capture(input_path: Path, config: dict, game_key: str, upload: bool = False) -> dict:
     game = config["games"].get(game_key)
     if not game:
@@ -115,6 +127,8 @@ def process_capture(input_path: Path, config: dict, game_key: str, upload: bool 
     manifest = {
         "schema": "some-capture-v1",
         "game": game_key,
+        "footage_platform": footage_platform_for_path(input_path, config),
+        "release_platforms_require_separate_verification": True,
         "kind": "real_video",
         "source_type": game.get("source_type", "owned_gameplay"),
         "context": game.get("context", f"Own gameplay from {game_key}"),
@@ -171,14 +185,19 @@ def save_state(config: dict, state: dict) -> None:
 def game_for_path(path: Path, config: dict) -> str:
     capture_root = Path(config["capture_dir"]).resolve()
     parent = path.parent.resolve()
+    platform_folder = footage_platform_for_path(path, config)
     if parent != capture_root and capture_root in parent.parents:
         for candidate in reversed(path.parent.parts):
             folder_key = re.sub(r"[^a-z0-9]+", "-", candidate.lower()).strip("-")
             if folder_key in config["games"]:
                 return folder_key
-        return re.sub(r"[^a-z0-9]+", "-", path.parent.name.lower()).strip("-")
-    name = path.stem.lower()
-    return next((key for key in config["games"] if name.startswith(f"{key}-") or name.startswith(f"{key}_")), config.get("default_game", "hades"))
+        if not platform_folder:
+            return re.sub(r"[^a-z0-9]+", "-", path.parent.name.lower()).strip("-")
+    name = re.sub(r"[^a-z0-9]+", "-", path.stem.lower()).strip("-")
+    match = next((key for key in config["games"] if f"-{key.replace('_', '-')}-" in f"-{name}-"), None)
+    if match:
+        return match
+    return "unknown" if platform_folder else config.get("default_game", "hades")
 
 
 def process_pending(config: dict, upload: bool = False) -> list[dict]:

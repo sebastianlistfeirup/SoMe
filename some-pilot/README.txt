@@ -48,6 +48,12 @@ Ikke-demo-produktion kræver også `editorial-packet.json` og alle syv `quality_
 
 `media_composition.json` dokumenterer procent, varighed, scenetyper og kontekst. Manifestet hasher dynamisk alle faktiske leveranceartifacts, herunder script, subtitles, voice report og eventuelle ElevenLabs narration/alignment/transcription-filer. Thumbnail vælges som et rent frame fra originalkilden uden undertekster/titeloverlay. Review-kort og detailvisning viser reel medieprocent; ældre formater markeres som ældre.
 
+MobyGames og platformsgenbrug
+-----------------------------
+Hvert featured game skal have et `preparation`-objekt med en konkret HTTPS MobyGames-spilside, review score eller en eksplicit ikke-fundet-note, fun facts eller en ikke-fundet-note og dokumenterede `release_platforms`. Research skal være højst 168 timer gammel og platformsdokumentation højst 720 timer. Den konkrete MobyGames-side og udgivelseskilder skal være inspiceret; en botskontrol må ikke omgås, og manglende data må ikke opfindes.
+
+Footage-mappen begrænser ikke genbrug. PS5-footage kan derfor bruges til PC, Switch 2 eller et generelt remake-opslag, men en specifik målplattform kræver dokumenteret udgivelse på netop den platform. Ranking angiver dette med `target_game_platform`; standard er `cross-platform`. Capture Bridge gemmer mappen som `footage_platform` og aldrig som bevis for spillets samlede udgivelsesplatforme.
+
 Godkendt intro/outro
 --------------------
 Alle nye videoer i både den almindelige produktionspipeline og ranking-pipelinen får automatisk den ejergodkendte Pixel & Parameters-intro og -outro på 3,5 sekunder hver. YouTube bruger 1920×1080 (16:9), mens TikTok, Instagram Reels og Facebook bruger 1080×1920 (9:16). Animationen, de separate orange blokke, `GAMING CULTURE × AI`, `FOLLOW FOR MORE` og den dæmpede lyd kommer fra den fælles `app/pipeline/brand_ident.py`. Cachen invalideres ved ændret logo eller renderer. Ændringer kræver ny visuel ejergodkendelse; eksisterende videoer ændres ikke bagud.
@@ -87,7 +93,7 @@ Tests
   docker compose build
   docker compose run --rm --no-deps worker pytest -q
 
-Den aktuelle pakke har 181 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+Den aktuelle pakke har 191 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
 Gameplay-ranking (internetklip og ElevenLabs-voiceover)
 ------------------------------------------------------
@@ -113,6 +119,6 @@ OBS og FFmpeg behandler nye optagelser på Windows via `scripts/capture_bridge.p
   python scripts/capture_bridge.py --config /path/capture_bridge.json --input /path/hades-run.mkv --game hades
   python scripts/capture_bridge.py --config /path/capture_bridge.json --watch --upload
 
-Nye filer i `C:/Users/compu/Videos/SoMe-captures` overvåges rekursivt, ventes skriveferdige og konverteres til MP4 med kontaktark og `some-capture-v1` manifest. Brug gerne én undermappe pr. spil, fx `Monster Train 2/`; mappenavnet vælger spilprofil. Alternativt kan filnavne som `hades-*`, `celeste-*` eller `slay-the-spire-*` bruges. Output ligger i `SoMe-processed/<spil>/` og kan uploades via eksisterende SSH-forbindelse til `/opt/some/data/media-library/<spil>/`. Upload kan udelades ved at undlade `--upload`. Ingen optagelse publiceres automatisk, og rettigheds-/ejergodkendelse er stadig obligatorisk. Monster Train 2 kræver desuden kanalspecifikt bevis fra Devolvers officielle tilladelsesgenerator før produktion.
+Nye filer i `C:/Users/compu/Videos/SoMe-captures` overvåges rekursivt, ventes skriveferdige og konverteres til MP4 med kontaktark og `some-capture-v1` manifest. En spilmappe som `Monster Train 2/` vælger spilprofil. Platformmapper som `PS5` og `Switch 2` gemmes derimod som `footage_platform`, mens spillet genkendes i filnavnet. Et ukendt spil stopper med `unknown_game_profile` og bliver aldrig automatisk registreret som standardspillet. Output ligger i `SoMe-processed/<spil>/` og kan uploades via eksisterende SSH-forbindelse til `/opt/some/data/media-library/<spil>/`. Upload kan udelades ved at undlade `--upload`. Ingen optagelse publiceres automatisk, og rettigheds-/ejergodkendelse er stadig obligatorisk. Monster Train 2 kræver desuden kanalspecifikt bevis fra Devolvers officielle tilladelsesgenerator før produktion.
 
 Grok, Gemini og Qwen CLI er lokale processer og kan ikke køre med computeren slukket. Et CLI-abonnement er ikke en cloud-API eller en videogenereringskontrakt. Separate Veo/Imagine API'er kræver egen nøgle, pris og rettighedsafklaring. ElevenLabs bruger den eksisterende paid-/pris-/rettighedsblokerede adapter og aktiveres først efter hemmelig nøgleopsætning og kontrol af abonnementet.

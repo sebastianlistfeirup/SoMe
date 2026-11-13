@@ -115,3 +115,15 @@ def test_unknown_subfolder_does_not_fall_back_to_hades(tmp_path, monkeypatch):
     results = process_pending(payload)
     assert results[0]["status"] == "error"
     assert "unknown_game_profile" in results[0]["error"]
+
+
+def test_platform_folder_is_provenance_not_game_identity_or_release_permission(tmp_path):
+    from scripts.capture_bridge import footage_platform_for_path, game_for_path
+
+    payload = config(tmp_path)
+    known = tmp_path / "captures" / "PS5" / "PS5_Longplay_Hades_01.mp4"
+    unknown = tmp_path / "captures" / "Switch 2" / "Switch_2_Longplay_Unlisted_Game.mp4"
+    assert footage_platform_for_path(known, payload) == "PS5"
+    assert footage_platform_for_path(unknown, payload) == "Switch 2"
+    assert game_for_path(known, payload) == "hades"
+    assert game_for_path(unknown, payload) == "unknown"

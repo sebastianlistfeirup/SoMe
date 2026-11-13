@@ -95,6 +95,16 @@ Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af
 - Eksempel: `research/top10-legion-go2/real-media-demo.json`. På serveren ligger plan og klip under `/data/media-plans/real-demo`.
 - **Demo 8** er produceret med 100 % officiel video fra Transistor, Celeste, Slay the Spire, Hollow Knight og Hades. Den har 11 manifestfiler, teknisk ALLOW og rent source-frame som thumbnail. Demo 6 og 7 er erstattede. Demo 8 er ikke publiceret.
 
+## 6B. MobyGames og footage på tværs af platforme
+
+- **Hvert featured game skal have en konkret MobyGames-side som en del af researchforberedelsen**, også ældre spil. Eksempel: https://www.mobygames.com/game/2069/disneys-aladdin/.
+- `preparation` skal dokumentere review score og fun facts. Hvis MobyGames ikke har oplysningerne, kræves en ærlig note om, at de ikke blev fundet efter søgning. Systemet må ikke opfinde manglende værdier.
+- MobyGames viste Cloudflare-botskontrol under den tekniske undersøgelse. Der er ikke bygget en bypass-scraper. Den konkrete side skal være inspiceret og registreret som kilde før produktion.
+- **Mappenavnet beskriver kun footage-proveniens.** Et klip i `PS5`, `PS4`, `Switch` eller en anden mappe må bruges til alle dokumenterede udgivelsesplatforme og til generelle emner som remakes.
+- Eksempel: Final Fantasy VII Rebirth-footage fra `PS5` må bruges til PC- eller Switch 2-opslag, når den konkrete udgivelse på målplattformen er dokumenteret med en frisk kilde. Uden den dokumentation blokeres opslaget med `platform_release_unverified`.
+- Ranking bruger `target_game_platform`, fx `PC`, `Switch 2` eller standardværdien `cross-platform`. Den sociale destination (`youtube`, `reels`, `tiktok`) er en helt separat værdi.
+- Capture Bridge gemmer platformmappen som `footage_platform`. Den forsøger at identificere spillet i filnavnet; et ukendt spil stopper med `unknown_game_profile` i stedet for at blive fejlregistreret som standardspillet.
+
 ## 7. GeForce Now og egne gameplayoptagelser — ikke konfigureret
 
 NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
@@ -116,7 +126,7 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 
 - OBS Studio 33.0.1 og FFmpeg 9.0.2 er installeret lokalt. `scripts/capture_bridge.py` overvåger `C:/Users/compu/Videos/SoMe-captures` og behandler nye MKV/MP4/MOV-filer.
 - Resultatet ligger under `C:/Users/compu/Videos/SoMe-processed/<spil>/` med `gameplay.mp4`, `contact-sheet.jpg`, `capture-manifest.json` og procesresultat.
-- Undermapper understøttes rekursivt, fx `SoMe-captures/Monster Train 2/clip.mp4`. Mappenavnet vælger spilprofil. Alternativt kan filnavne som `hades-*`, `celeste-*` eller `slay-the-spire-*` bruges; andre filnavne bruger standardprofilen Hades.
+- Undermapper understøttes rekursivt. En spilmappe som `Monster Train 2` vælger spilprofil. Platformmapper som `PS5` og `Switch 2` gemmes som footage-proveniens, mens spillet genkendes i filnavnet. Ukendte spil i platformmapper stopper med `unknown_game_profile`; uden platformmappe bruges den konfigurerede standardprofil som hidtil.
 - Monster Train 2 bruger [Devolvers tilladelsesgenerator](https://canipostandmonetizevideosofdevolvergames.com/). Indsæt kanalnavn og gem den skriftlige tilladelse som bevis. Klippene markeres som rettighedsreview indtil beviset er tilføjet; upload er ikke publicering.
 - Den permanente watcher kører med upload aktiveret via eksisterende SSH-nøgle til `/opt/some/data/media-library/<spil>/`. Der er ikke behov for GitHub MCP eller råvideoer i Git.
 - Alle fire Monster Train 2-filer er verificeret byte-for-byte med lokale MP4 SHA-256-hashes. Alle fire AI-filer er uploadet som `owned_screen_recording`. Fejlregistreringer er flyttet til karantæne, og originalerne er uændrede.

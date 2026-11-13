@@ -3,7 +3,8 @@ Opdateret: 2026-11-13
 Repository: https://github.com/sebastianlistfeirup/SoMe
 
 AKTIV ARKITEKTUR
-- Pixel and Parameters Content Bible v1.1 er integreret med 20 recipes, 120 idéer, 57 evidenskilder og redaktionelle scoringer. Ikke-demo-produktion kræver en schema-valideret `editorial-packet.json`, lane-match og mindst 85 point. Research-eksempler, uaktuelle kilder og manglende hørbar reception blokerer før stemme/rendering; kildernes udløb kontrolleres igen ved dispatch. Steam- og Metacritic-opslag accepterer ikke manglende data som succes.
+- Pixel and Parameters Content Bible v1.1 er integreret med 20 recipes, 120 idéer, 58 evidenskilder og redaktionelle scoringer. Ikke-demo-produktion kræver en schema-valideret `editorial-packet.json`, lane-match og mindst 85 point. Research-eksempler, uaktuelle kilder og manglende hørbar reception blokerer før stemme/rendering; kildernes udløb kontrolleres igen ved dispatch. Steam- og Metacritic-opslag accepterer ikke manglende data som succes.
+- Hvert featured game kræver nu en konkret, inspiceret MobyGames-side med review score eller eksplicit ikke-fundet-note, fun facts eller ikke-fundet-note samt dokumenterede udgivelsesplatforme. Footage-mappen er kun proveniens og begrænser ikke genbrug. Et platformsopslag kræver frisk dokumentation for netop den platform; generelle cross-platform-opslag har ingen målplatformslås.
 - Backendens review-center viser den færdige video, thumbnail, titel, opslagstekst, hashtags, kilder og medieprocent. ElevenLabs-narration kan afspilles separat, når den findes i manifestet.
 - Facebook, Instagram, YouTube og TikTok er valgt som standard. Ejeren kan fjerne destinationer, vælge YouTube-synlighed og angive et fremtidigt tidspunkt. Kun forbundne, konkrete konto-ID'er kan godkendes.
 - Godkendelsen er immutable: Den binder video, thumbnail, narration, subtitles, alignment, script, editorial-pakke, tekst, links, destinationer, konto-ID'er, synlighed og tidspunkt med SHA-256, når artifacts findes. Ændringer kræver en ny revision og ny godkendelse.
@@ -25,8 +26,8 @@ TIKTOK
 - Den gatede adapter bruger creator_info og `/post/publish/video/init/`, aldrig inbox-endpointet. Kun `PUBLISH_COMPLETE` accepteres som publiceret. Production-review og reelt Direct Post-kald er ikke verificeret.
 
 VERIFICERET LOKALT
-- Standardbuild og hele testpakken: 181/181 tests består i frisk Docker-container.
-- Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost, AI-lane-valg og reelle intro/outro-sammenføjninger i 9:16 og 16:9.
+- Standardbuild og hele testpakken: 191/191 tests består i frisk Docker-container.
+- Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost, AI-lane-valg, intro/outro i begge formater, MobyGames-krav og verificeret cross-platform-genbrug.
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
 VERIFICERET PÅ VPS
