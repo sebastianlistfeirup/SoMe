@@ -1,19 +1,19 @@
 SoMe-maskinen — STATUS (genereret)
-Genereret: 2026-11-13T20:51:41+00:00 · miljø: local · commit: d5129c98be3f
+Genereret: 2026-11-13T21:02:43+00:00 · miljø: vps · commit: 32f8ada43552
 Genereres med: python -m app.cli status-report --tests-passed <N> --environment <local|vps>
 Arkitektur og regler: CLAUDE_HANDOFF.md · historik: TEST_PROTOCOL.md (changelog)
 
 FAKTA
 - Testpakke: 272 bestået
 - Migration: 0002 (forventet 0002, ok=ja)
-- Sikkerhed: DRY_RUN=True, PUBLISH_ENABLED=False, PAID_JOBS_ENABLED=False, WORKER_CONCURRENCY=1
-- Stemme: produktion=elevenlabs, kun demo=kokoro, ElevenLabs konfigureret=nej
+- Sikkerhed: DRY_RUN=True, PUBLISH_ENABLED=False, PAID_JOBS_ENABLED=True, WORKER_CONCURRENCY=1
+- Stemme: produktion=elevenlabs, kun demo=kokoro, ElevenLabs konfigureret=ja
 
 PUBLICERING
-- youtube: publishing_configured=False, oauth_verified=False
-- instagram: publishing_configured=False, oauth_verified=False
-- facebook: publishing_configured=False, oauth_verified=False
-- tiktok: publishing_configured=False, oauth_verified=False, direct_post_eligible=False, direct_post_blocker=tiktok_direct_post_not_eligible
+- youtube: publishing_configured=True, oauth_verified=True
+- instagram: publishing_configured=True, oauth_verified=True
+- facebook: publishing_configured=True, oauth_verified=True
+- tiktok: publishing_configured=True, oauth_verified=True, direct_post_eligible=False, direct_post_blocker=tiktok_direct_post_not_eligible
 
 LÆRING
 - Aktiv læringsmodel: ingen endnu
@@ -21,14 +21,14 @@ LÆRING
 
 DRIFT
 - Kontotjek: ikke kørt endnu
-- Åbne advarsler: disk_usage
+- Åbne advarsler: ingen
 
 Ingen garanti for vækst, likes, subscribers eller fejlfri drift.
 
 DEPLOY-STATUS (manuelt, opdateres ved deploy)
-- VPS kører 8589e38e med 199/199 tests (verificeret 2026-11-13).
-- Commits efter 8589e38e (forbedringsrunden: 04ceceff → d5129c98) er testet lokalt (272/272) men IKKE pushet eller deployet.
-- Ved næste deploy: kør scripts/deploy.sh (tagget image, backup før migration 0002, automatisk rollback) og generér derefter STATUS på VPS med --environment vps.
+- VPS kører forbedringsrunden (image some-pilot:32f8ada43552, også tagget :local), deployet 2026-11-13 21:01 UTC med scripts/deploy.sh: 272/272 tests, verificeret krypteret backup før migration (some-backup-20261113T210026Z.zip.enc), migration 0002, doctor OK, web/worker healthy, loopback og offentlig HTTPS-health ok med publish_enabled=false.
+- Der findes intet rollback-image for 8589e38e (det blev overskrevet ved første tagged deploy, se TEST_PROTOCOL). Fra næste deploy er 32f8ada43552 rollback-målet.
+- Serverens app.env har stadig VOICE_PROVIDER=kokoro (kun visning; produktion bruger altid ElevenLabs). Ejerhandling: sæt VOICE_PROVIDER=elevenlabs.
 
 FORMÅL OG REGLER
 SoMe-maskinen producerer rettighedssikre, dokumenterede videoer til Pixel and Parameters (gaming, retro, handheld, lokal/PC-AI). Ingen nye redaktionelle videoer før ejeren skriver "Nu må du begynde". Intet publiceres uden ejergodkendelse af den præcise version. Se CLAUDE_HANDOFF.md, OWNER_ACTIONS.md, docs/KPI.md og docs/PILOT_PLAN.md.

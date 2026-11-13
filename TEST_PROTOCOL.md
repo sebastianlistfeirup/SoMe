@@ -269,3 +269,15 @@ Nyt (kort; detaljer i commit-beskeder og ADR'er under `some-pilot/docs/decisions
   - kildekommentar til manuel fastgørelse
 
 Ikke verificeret: rigtige API-kald til retention, kommentarer, kontotjek, alarmer og offsite (alt er mock-testet). Den nye deploy-proces er ikke kørt på VPS. CI-workflowet er ikke kørt på GitHub.
+
+### Deploy af forbedringsrunden — 2026-11-13
+
+- **Første forsøg (`fe94817d`):** Stoppede i testtrinnet før backup, migration og genstart. Produktionen var uændret. To tests læste serverens `VOICE_PROVIDER=kokoro` i stedet for kodens standard. Rettet i `32f8ada4`, så testene nu tjekker kodens standard og doctorens produktionsstemme.
+- **Andet forsøg (`32f8ada4`):**
+  - 272 passed og verificeret krypteret backup `some-backup-20261113T210026Z.zip.enc` før migration.
+  - Migration 0002 og doctor OK.
+  - Health-gate bestået: web og worker healthy, `/healthz` ok lokalt og via HTTPS med `publish_enabled=false`.
+  - Nye moduler bekræftet i den kørende container.
+- **Fejl i den nye deploy-proces:** `sudo` nulstiller miljøet, så `IMAGE_TAG` nåede ikke Docker Compose. Imaget blev bygget og startet som `some-pilot:local` og overskrev det forrige image, så der var intet rollback-image til `8589e38e`. Den kørende kode er korrekt. Rettet i `f3937141` med `sudo --preserve-env=IMAGE_TAG`. Det kørende image er tagget `some-pilot:32f8ada43552` og er rollback-mål for næste deploy.
+- **CI på GitHub:** De første kørsler fejlede med `PermissionError` under `/data`, fordi runneren opretter bind-mappen som root, mens containeren kører som uid 10001. Rettet i `4e42e9cc`.
+- **STATUS:** Genereret på VPS med `status-report --environment vps`.

@@ -159,10 +159,10 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 
 ## 13. Ejerbeslutninger efter forbedringsrunden (2026-11-13)
 
-Alt nedenfor er bygget og testet lokalt (272 tests), men ikke deployet. Intet er slået til uden dig.
+Alt nedenfor er deployet (272 tests på VPS). Intet er slået til uden dig.
 
-- [ ] **Push og deploy:** Giv OK til push af `04ceceff` → `d5129c98` plus docs, og til deploy med den nye `scripts/deploy.sh` (backup før migration 0002 og automatisk rollback).
-- [ ] **GitHub CI:** `.github/workflows/ci.yml` kræver, at det token, der pusher, har `workflow`-adgang.
+- [x] **Push og deploy:** Udført 2026-11-13 (272 tests på VPS, backup før migration 0002, healthy).
+- [x] **GitHub CI:** Workflowet er pushet og kører ved hver push.
 - [ ] **Serverens app.env:** Sæt `VOICE_PROVIDER=elevenlabs`. Linjen `VOICE_PRESET` kan slettes. Kokoro er nu kun demo og kan ikke godkendes.
 - [ ] **Alarmkanal:** Vælg webhook (fx Discord) og/eller e-mail, og sæt `ALERT_*` i `/opt/some/secrets/app.env`.
 - [ ] **Offsite backup:** Vælg en udbyder med WebDAV over HTTPS (fx en storage box). Godkend prisen, og sæt `OFFSITE_*`. Kun krypterede backups sendes.

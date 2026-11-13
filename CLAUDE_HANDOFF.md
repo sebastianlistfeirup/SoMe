@@ -28,7 +28,7 @@ Der må **ikke** produceres nye redaktionelle ejervideoer, før ejeren eksplicit
 
 Fakta genereres nu i `STATUS.txt` (`python -m app.cli status-report`). Historik står i `TEST_PROTOCOL.md` (changelog). Beslutninger ligger i `some-pilot/docs/decisions/` og er bundet til tests.
 
-**Lokalt:** Commit `d5129c98` plus docs: **272/272 tests**, migration 0002. Forbedringsrunden `04ceceff` → `d5129c98` er **ikke pushet eller deployet**.
+**Deployet 2026-11-13:** Forbedringsrunden kører på VPS som image `some-pilot:32f8ada43552`: 272/272 tests lokalt og på VPS, migration 0002, healthy. Deploy sker via `scripts/deploy.sh`, og rollback-mål for næste deploy er `32f8ada43552`.
 
 **Deployet og verificeret på Contabo-VPS (`8589e38e`):**
 
@@ -384,7 +384,7 @@ Færdige punkter fra den tidligere liste (2026-11-13):
 
 ### Næste opgaver
 
-1. **Push og deploy forbedringsrunden** via den nye `deploy.sh` (kræver ejerens OK). Kør derefter staging-scriptet én gang og generér STATUS på VPS.
+1. Kør `scripts/deploy_staging.sh`, når ejeren har oprettet `staging.env`. Bekræft, at CI er grøn efter `4e42e9cc`.
 2. **Piloten** efter ejerens “Nu må du begynde” (`docs/PILOT_PLAN.md`).
 3. Meta/TikTok-metrics: undersøg Insights-/Display-API-kapacitet og byg import. Indtil da bruges CSV-import med aliaser.
 4. Visuelt mediebibliotek med rettigheder, kontaktark og tidligere brug.
@@ -422,4 +422,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **272 tests** lokalt. VPS: **199** (`8589e38e`) indtil forbedringsrunden deployes.
+Forventet baseline på genoptagelsestidspunktet: **272 tests** lokalt og på VPS (image `32f8ada43552`).
