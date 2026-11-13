@@ -175,10 +175,10 @@ Alt nedenfor er deployet (272 tests på VPS). Intet er slået til uden dig.
 
 ## 14. Ekstern adgang, YouTube-udvidelser og vækstværktøjer (2026-11-13)
 
-Bygget og testet lokalt (295 tests), pushet som `24447828`, men **ikke deployet**. Deploy kræver dit OK.
+Deployet 2026-11-13 som `71d87757` (295 tests på VPS).
 
 Ekstern adgang, i denne rækkefølge:
-- [ ] Giv OK til deploy af `24447828` (migration 0003 tilføjer 2-faktor-felter; backup tages automatisk før migrationen).
+- [x] Deploy udført 2026-11-13 (`71d87757`, 295 tests på VPS, backup før migration 0003, healthy).
 - [ ] Log ind hjemmefra, åbn **Sikkerhed**, tilføj nøglen i din authenticator-app, bekræft med en kode, og gem de 8 gendannelseskoder et sikkert sted.
 - [ ] Sig til, når det er gjort. Så sætter jeg `REQUIRE_TOTP=true` og `PUBLIC_DASHBOARD_URL`, fjerner IP-begrænsningen i Caddy og tester login udefra.
 - [ ] Beslut, om SSH (port 22) fortsat skal være åben fra hele internettet. Den er i dag beskyttet af nøgle-login og Fail2ban.

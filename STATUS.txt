@@ -26,6 +26,7 @@ DRIFT
 Ingen garanti for vækst, likes, subscribers eller fejlfri drift.
 
 DEPLOY-STATUS (manuelt, opdateres ved deploy)
+- 2026-11-13 22:03 UTC: Produktion kører some-pilot:71d87757b448 (YouTube-udvidelser, lange videoer, vækstværktøjer, 2-faktor). 295/295 tests på VPS, verificeret krypteret backup før migration (some-backup-20261113T220257Z.zip.enc), migration 0003, health ok. Rollback-mål: 32f8ada43552. 2-faktor er deployet, men ikke påkrævet (REQUIRE_TOTP=false); dashboardet er stadig kun åbent for ejerens IP-adresser.
 - VPS kører forbedringsrunden (image some-pilot:32f8ada43552, også tagget :local), deployet 2026-11-13 21:01 UTC med scripts/deploy.sh: 272/272 tests, verificeret krypteret backup før migration (some-backup-20261113T210026Z.zip.enc), migration 0002, doctor OK, web/worker healthy, loopback og offentlig HTTPS-health ok med publish_enabled=false.
 - Der findes intet rollback-image for 8589e38e (det blev overskrevet ved første tagged deploy, se TEST_PROTOCOL). Fra næste deploy er 32f8ada43552 rollback-målet.
 - 2026-11-13 21:22 UTC: VOICE_PROVIDER=elevenlabs sat i /opt/some/secrets/app.env (backup app.env.bak-20261113T212216Z). Web og worker er genskabt på some-pilot:32f8ada43552; doctor viser provider=elevenlabs, og health er ok.

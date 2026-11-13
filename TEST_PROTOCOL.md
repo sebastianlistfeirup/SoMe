@@ -301,3 +301,9 @@ Commit `24447828`: **295 passed** lokalt (23 nye tests). Pushet, **ikke deployet
 - **2-faktor:** TOTP verificeret mod RFC 6238-testvektoren, med beskyttelse mod genbrug, gendannelseskoder og `REQUIRE_TOTP`. Sikker "videre til"-adresse og `SameSite=Lax`.
 - **Fund:** UFW tillader SSH fra hele internettet, ikke kun ejerens IP som dokumenteret. Det er ikke ændret.
 - **Ikke verificeret mod rigtige API'er:** undertekster, playlister, IGDB, ElevenLabs-ordbog og YPP-kald er kun mock-testet.
+- **Deploy (`71d87757`, ejerens OK):**
+  - 295 passed på VPS og verificeret krypteret backup `some-backup-20261113T220257Z.zip.enc` før migration.
+  - Migration 0003 og doctor OK, health-gate bestået.
+  - Image `some-pilot:71d87757b448`; rollback-mål `32f8ada43552` findes.
+  - `/login` svarer 200. `/login/2fa` og `/account/security` sender uden login korrekt videre til login.
+  - Én bruger, 2-faktor endnu ikke tilmeldt. Dashboardet er fortsat IP-begrænset.
