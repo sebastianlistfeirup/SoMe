@@ -180,7 +180,8 @@ def claude_draft(db: Session, topic: Topic, source_excerpts: list[dict], job_id:
         "Set verified=true only when the supplied research directly supports the claim text. "
         f"hook_type must be exactly one of: {', '.join(HOOK_TYPES)}. "
         + guidance + "\n"
-        f"Topic: {topic.title}\n<research>{untrusted}</research>"
+        + feedback_prompt_block(db)
+        + f"Topic: {topic.title}\n<research>{untrusted}</research>"
     )
     return _call_json(db, ScriptDraft, prompt, job_id, "claude_script", 1200)
 
@@ -219,6 +220,12 @@ def packet_claims(packet: dict) -> list[Claim]:
     return claims
 
 
+def feedback_prompt_block(db: Session) -> str:
+    from app.pipeline.quality import feedback_prompt_block as block
+
+    return block(db)
+
+
 def packet_draft(db: Session, topic: Topic, packet: dict, job_id: str, variant_id: str | None = None) -> ScriptDraft:
     """Build the script from the editorial packet. The model only writes packaging.
 
@@ -245,7 +252,8 @@ def packet_draft(db: Session, topic: Topic, packet: dict, job_id: str, variant_i
         "Return JSON only in this exact shape: {\"title\":\"...\",\"post_text\":\"...\",\"hook_type\":\"...\"}. "
         "title: under 100 characters, specific, no clickbait the narration cannot pay off. post_text: natural caption without hashtags or links. "
         f"hook_type classifies how the first narration sentence opens and must be exactly one of: {', '.join(HOOK_TYPES)}.\n"
-        f"Topic: {topic.title}\n<packet>{untrusted}</packet>"
+        + feedback_prompt_block(db)
+        + f"Topic: {topic.title}\n<packet>{untrusted}</packet>"
     )
     packaging = _call_json(db, PostPackaging, prompt, job_id, "claude_packaging", 600)
     return ScriptDraft(title=packaging.title, narration=narration, claims=claims, hook_type=packaging.hook_type, post_text=packaging.post_text, narration_source="editorial_packet_segments")

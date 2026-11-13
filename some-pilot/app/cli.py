@@ -157,6 +157,10 @@ def build_parser() -> argparse.ArgumentParser:
     experiment.add_argument("--story", help="Story key (packet story_id) for assign")
     experiment.add_argument("--reason", default="")
     sub.add_parser("scorecard", help="Weekly scorecard and learning-model governance state")
+    ideas = sub.add_parser("ideas", help="Rank the Content Bible idea bank (80 %% exploit / 20 %% explore)")
+    ideas.add_argument("--next", type=int, default=10)
+    ideas.add_argument("--lane", choices=["gaming", "ai", "crossover"])
+    sub.add_parser("calibration", help="Compare predicted and independent quality scores with outcomes")
     return parser
 
 
@@ -184,6 +188,14 @@ def run_extended(db, args) -> dict | None:
             return evaluate_experiment(db, args.id)
         experiment = stop_experiment(db, args.id, args.reason)
         return {"experiment_id": experiment.id, "status": experiment.status, "decision": experiment.decision}
+    if args.command == "ideas":
+        from app.pipeline.ideas import rank_ideas
+
+        return {"ideas": rank_ideas(db, args.next, args.lane)}
+    if args.command == "calibration":
+        from app.pipeline.quality import calibration_report, rejection_category_counts
+
+        return {"calibration": calibration_report(db), "rejection_categories_28d": rejection_category_counts(db)}
     if args.command == "scorecard":
         from app.db.models import Setting
         from app.pipeline.governance import GOVERNANCE_KEY, scorecard
@@ -223,7 +235,9 @@ def main() -> int:
                 if not adapters:
                     payload = {"status": "no_real_adapters_configured", "observations": 0, "next": "Configure YouTube API or use --demo; demo is never real research."}
                 else:
-                    payload = run_adapters(db, adapters, ["handheld gaming PC", "RTX Spark"], ["en"], args.days, Path(args.output))
+                    from app.pipeline.research import bible_research
+
+                    payload = bible_research(db, Path(args.output), adapters, days=args.days)
         elif args.command == "produce":
             video = produce(db, args.topic_id, args.dry_run, args.media_plan)
             payload = {"video_id": video.id, "status": video.status, "output_dir": video.output_dir, "demo": args.dry_run}

@@ -84,5 +84,18 @@ def run_adapters(db: Session, adapters: list[ResearchAdapter], queries: list[str
     return result
 
 
+def bible_research(db: Session, output: Path, adapters: list[ResearchAdapter] | None = None, limit: int = 6, days: int = 30) -> dict:
+    """Research driven by the ranked Content Bible ideas instead of fixed search terms."""
+    from app.adapters.youtube import YouTubeAdapter
+    from app.pipeline.ideas import research_plan, suggestions_from_research
+
+    plan = research_plan(db, limit)
+    result = run_adapters(db, adapters or [YouTubeAdapter()], [item["query"] for item in plan], ["en"], days, output)
+    suggestions = suggestions_from_research(db, plan, days, is_demo=any(adapter.is_demo for adapter in (adapters or [])))
+    result["plan"] = plan
+    result["suggestions"] = [{"id": item.id, "idea_id": item.idea_id, "rationale": item.rationale} for item in suggestions]
+    return result
+
+
 def _iso(value):
     return value.isoformat() if isinstance(value, datetime) else value

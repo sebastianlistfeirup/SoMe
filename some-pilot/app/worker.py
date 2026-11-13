@@ -16,7 +16,7 @@ from app.pipeline.jobs import claim, complete, enqueue, fail, recover_expired_le
 from app.pipeline.learning import weekly_learning
 from app.pipeline.maintenance import cleanup_temporary_files, prune_backups
 from app.pipeline.metrics import collect_due
-from app.pipeline.research import run_adapters
+from app.pipeline.research import bible_research
 from app.pipeline.revisions import create_post_revision
 
 
@@ -50,7 +50,7 @@ def execute(db, job) -> Path:
         if not settings.youtube_api_key:
             result = {"status": "not_configured", "collected": 0}
         else:
-            result = run_adapters(db, [YouTubeAdapter()], ["handheld gaming PC", "RTX Spark"], ["en"], 30, output)
+            result = bible_research(db, output)
     elif job.kind == "metrics":
         result = collect_due(db, collect=True)
     elif job.kind == "learn_weekly":

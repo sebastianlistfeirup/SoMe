@@ -15,8 +15,10 @@ from tests.test_real_media import make_media, scene_payload, write_srt
 PARAPHRASE = "Into the Breach squeezes a huge tactical choice into a tiny grid, and that is why strategy fans keep returning to it."
 
 
-def _fake_call_json(calls):
+def _fake_call_json(calls, calls_quality=None):
     from app.pipeline import ai
+
+    calls_quality = calls_quality or {}
 
     def fake(_db, model_class, prompt, job_id, kind, max_tokens, route="text"):
         calls.append({"model": model_class.__name__, "kind": kind, "route": route, "prompt": prompt})
@@ -24,6 +26,9 @@ def _fake_call_json(calls):
             return ai.ScriptDraft(title="Tiny board", narration=PARAPHRASE, claims=[], hook_type="question", post_text="A small board with a big decision.")
         if model_class is ai.ControlResult:
             return ai.ControlResult(decision="ALLOW")
+        if model_class.__name__ == "QualityScore":
+            score = calls_quality.get("score", 5)
+            return model_class(dimensions={name: score for name in ("viewer_promise", "opening", "evidence", "visual_match", "payoff", "platform_fit", "voice")}, reasons={"opening": "clear"})
         if model_class.__name__ == "PostPackaging":
             return model_class(title="One Small Board, One Big Decision", post_text="Why one tiny tactics board can hold a real decision.", hook_type="Bold claim")
         raise AssertionError(model_class)
@@ -31,7 +36,7 @@ def _fake_call_json(calls):
     return fake
 
 
-def _live_production(db, tmp_path, monkeypatch, packet):
+def _live_production(db, tmp_path, monkeypatch, packet, quality_score=5):
     _image, _video, narration_wav = make_media(tmp_path)
     plan = {"platform": "youtube", "quality_dimensions": full_quality(), "idea_id": "GI001", "scenes": [scene_payload("real_image", "photo.jpg", "zoom_in"), scene_payload()]}
     plan_path = tmp_path / "plan.json"
@@ -42,7 +47,7 @@ def _live_production(db, tmp_path, monkeypatch, packet):
     db.add(topic)
     db.commit()
     calls = []
-    monkeypatch.setattr("app.pipeline.ai._call_json", _fake_call_json(calls))
+    monkeypatch.setattr("app.pipeline.ai._call_json", _fake_call_json(calls, {"score": quality_score}))
     spoken = {}
 
     def fake_voice(segments, provider, output_dir, **kwargs):
@@ -127,3 +132,20 @@ def test_unknown_packet_state_still_blocks(db, tmp_path, monkeypatch):
     packet["state"] = "needs_footage"
     with pytest.raises(ValueError, match="editorial_blocked"):
         _live_production(db, tmp_path, monkeypatch, packet)
+
+
+def test_independent_blind_review_gates_production_and_is_recorded(db, tmp_path, monkeypatch):
+    packet = complete_packet(datetime.now(timezone.utc))
+    video, calls, _spoken = _live_production(db, tmp_path, monkeypatch, packet)
+    review = next(call for call in calls if call["model"] == "QualityScore")
+    assert review["route"] == "research" and "quality_dimensions" not in review["prompt"]
+    assert video.features_json["predicted_quality_score"] == 100
+    assert video.features_json["independent_quality_score"] == 100
+    editorial = json.loads((Path(video.output_dir) / "checks.json").read_text())["editorial"]
+    assert editorial["independent_quality"]["blind"] is True
+
+
+def test_low_independent_score_blocks_before_voice(db, tmp_path, monkeypatch):
+    packet = complete_packet(datetime.now(timezone.utc))
+    with pytest.raises(ValueError, match="independent_quality_below_85"):
+        _live_production(db, tmp_path, monkeypatch, packet, quality_score=3)

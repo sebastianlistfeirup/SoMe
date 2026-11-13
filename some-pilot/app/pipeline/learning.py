@@ -270,6 +270,9 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     governance = None
     experiments = []
     allocation = None
+    next_ideas = []
+    quality_calibration = None
+    rejection_counts = None
     if not is_demo:
         from app.pipeline.experiments import allocation_report, evaluate_active
         from app.pipeline.governance import weekly_step
@@ -277,6 +280,12 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         experiments = evaluate_active(db, now)
         allocation = allocation_report(db, now=now)
         governance = weekly_step(db, model.value_json, now)
+        from app.pipeline.ideas import rank_ideas
+        from app.pipeline.quality import calibration_report, rejection_category_counts
+
+        next_ideas = rank_ideas(db, 10)
+        quality_calibration = calibration_report(db)
+        rejection_counts = rejection_category_counts(db)
     prompt_dir = settings.data_dir / "prompts"
     prompt_dir.mkdir(parents=True, exist_ok=True)
     mode = "demo" if is_demo else "real"
@@ -297,6 +306,9 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         "experiments": experiments,
         "exploration_allocation": allocation,
         "governance": governance,
+        "next_ideas": next_ideas,
+        "quality_calibration": quality_calibration,
+        "owner_rejection_categories_28d": rejection_counts,
         "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS},
         "overall_medians": overall,
         "cohort_medians": cohort_medians,
@@ -330,6 +342,9 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     if experiments:
         lines += ["", "## Experiments"]
         lines.extend(f"- {item['name']} ({item['variable']}): {item['decision']}; samples {item['samples']}" for item in experiments)
+    if next_ideas:
+        lines += ["", "## Suggested next ideas (80 % exploit / 20 % explore)"]
+        lines.extend(f"- [{item['allocation']}] {item['idea_id']} {item['title']} — score {item['score']}" for item in next_ideas)
     if report["scene_drops"]:
         lines += ["", "## Steepest scene drops"]
         lines.extend(f"- publication {row['publication_id']} {row['scene_id']} ({row.get('source_type')}): {row['drop_per_second']:.4f}/s — {row.get('context')}" for row in report["scene_drops"])

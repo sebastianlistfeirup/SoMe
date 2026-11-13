@@ -21,6 +21,7 @@ from app.pipeline.approvals import ApprovalError, approve, approve_destinations,
 from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
+from app.pipeline.quality import CATEGORY_LABELS, REJECTION_CATEGORIES, normalize_categories, requires_new_production
 from app.pipeline.posts import format_duration, platform_label, post_view, preferred_platform, status_label
 from app.pipeline.signed_media import SignedMediaError, create_link, resolve_link
 
@@ -292,6 +293,8 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         revision_job=revision_job,
         publication_jobs=publication_jobs,
         revisions=revisions,
+        rejection_categories=[(key, CATEGORY_LABELS[key]) for key in REJECTION_CATEGORIES],
+        rejection_needs_new_production=requires_new_production(((latest_rejection.digest_json or {}) if latest_rejection else {}).get("rejection_categories", [])),
     )
 
 
@@ -323,7 +326,7 @@ def approve_video(video_id: int, request: Request, platform: str = Form(""), pla
 
 
 @app.post("/review/{video_id}/reject")
-def reject_video(video_id: int, note: str = Form(""), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+def reject_video(video_id: int, note: str = Form(""), categories: list[str] | None = Form(None), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
     note = note.strip()
     if not video or video.status != "AWAITING_OWNER":
@@ -331,7 +334,8 @@ def reject_video(video_id: int, note: str = Form(""), db: Session = Depends(get_
     if len(note) < 3:
         raise HTTPException(422, "Skriv kort hvad der skal rettes")
     transition(video, "REJECTED", auth[0].username)
-    db.add(Review(video_version_id=video.id, decision="REJECTED", reviewer=auth[0].username, note=note[:2000]))
+    selected = normalize_categories(categories)
+    db.add(Review(video_version_id=video.id, decision="REJECTED", reviewer=auth[0].username, note=note[:2000], digest_json={"rejection_categories": selected, "requires_new_production": requires_new_production(selected)}))
     db.commit()
     return RedirectResponse(f"/review/{video_id}?rejected=1", status_code=303)
 
@@ -344,6 +348,8 @@ def revise_video(video_id: int, db: Session = Depends(get_db), auth=Depends(csrf
     rejection = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "REJECTED").order_by(Review.created_at.desc(), Review.id.desc()).first()
     if not rejection:
         raise HTTPException(409, "Afvisning med kommentar mangler")
+    if requires_new_production((rejection.digest_json or {}).get("rejection_categories", [])):
+        raise HTTPException(409, "Afvisningen gælder video, stemme, klip, fakta, thumbnail eller tempo. Det kræver en ny produktion, ikke en tekstrettelse.")
     job, _created = enqueue(db, "revise_post", {"video_id": video.id, "review_id": rejection.id}, f"post-revision:{video.id}:{rejection.id}", max_attempts=2)
     if job.status == "FAILED":
         job.status = "QUEUED"

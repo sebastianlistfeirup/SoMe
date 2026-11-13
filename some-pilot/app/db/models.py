@@ -180,6 +180,23 @@ class Experiment(Base):
     decision: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
 
+class IdeaSuggestion(Base):
+    """A research-backed proposal for what to make next. Never production input by itself."""
+
+    __tablename__ = "idea_suggestions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    idea_id: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    lane: Mapped[str] = mapped_column(String(30))
+    title: Mapped[str] = mapped_column(Text)
+    query: Mapped[str] = mapped_column(String(300), default="")
+    rationale: Mapped[str] = mapped_column(Text)
+    evidence_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="NEW", index=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Cost(Base):
     __tablename__ = "costs"
     id: Mapped[int] = mapped_column(primary_key=True)

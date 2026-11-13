@@ -15,6 +15,7 @@ from app.pipeline.editorial import evaluate_editorial_packet
 from app.pipeline.experiments import allocation_report, verify_assignment, verify_rendered_variant
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
+from app.pipeline.quality import independent_quality_review
 from app.pipeline.posts import build_post
 from app.pipeline.real_media import RealMediaPlan, load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
 from app.pipeline.taxonomy import detect_cta
@@ -135,6 +136,14 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         editorial = {"decision": "ALLOW", "blockers": [], "score": None, "mode": "demo_no_external_claims", "source_valid_until": None}
         if packet is not None:
             editorial = evaluate_editorial_packet(packet, draft.narration, media_plan.quality_dimensions)
+            video.features_json = {**video.features_json, "predicted_quality_score": editorial.get("score")}
+            if editorial["decision"] == "ALLOW":
+                independent = independent_quality_review(db, packet, draft.narration, draft.title, draft.post_text, f"quality-{topic_id}-v{next_script_version}")
+                editorial["independent_quality"] = independent
+                video.features_json = {**video.features_json, "independent_quality_score": independent["score"]}
+                if independent["decision"] != "ALLOW":
+                    editorial["decision"] = "BLOCK"
+                    editorial["blockers"] = [*editorial["blockers"], f"independent_quality_below_{independent['threshold']}:{independent['score']}"]
             (output / "editorial.json").write_text(json.dumps(packet, indent=2, ensure_ascii=False), encoding="utf-8")
             if editorial["decision"] != "ALLOW":
                 transition(video, "BLOCKED")
