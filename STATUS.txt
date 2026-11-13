@@ -31,7 +31,7 @@ VERIFICERET LOKALT
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
 VERIFICERET PÅ VPS
-- Commit `12d4b0b4` med obligatorisk godkendt intro/outro er deployet med standardscriptet. Hele pakken består også på VPS: 181/181 tests.
+- Commit `918bd2c9` med MobyGames-forberedelse og verificeret cross-platform-footage er deployet med standardscriptet. Hele pakken består også på VPS: 191/191 tests.
 - Migration 0001 og doctor er OK. Web og worker er healthy, og både loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
 - Doctor viser `direct_post_eligible=false` og `direct_post_blocker=tiktok_direct_post_not_eligible`. ElevenLabs er konfigureret; der er ikke foretaget nye betalte produktionskald.
 
