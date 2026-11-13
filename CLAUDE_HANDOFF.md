@@ -129,7 +129,7 @@ Den godkendte visuelle version må ikke ændres uden ny ejergodkendelse. Ingen a
 - `some-pilot/app/pipeline/metrics.py`
   - YouTube Analytics kan hente views, watch time, retention, likes, comments, shares og subscribers gained/lost.
 - `some-pilot/app/pipeline/learning.py`
-  - Ugens læring bruger views, retention, watch time pr. view, engagement og netto-subscribers pr. 1.000 views omkring dag 7 (én værdi pr. publicering), kombineret via vægtet geometrisk gennemsnit (`learning-signals-v1`).
+  - Ugens læring bruger views, retention, watch time pr. view, engagement og netto-subscribers pr. 1.000 views omkring dag 7 (én værdi pr. publicering), kombineret via vægtet geometrisk gennemsnit (`learning-signals-v1`). Hooks sammenlignes kun inden for samme platform/format/længde og samles pr. hook på tværs af kohorter.
   - Grupper: platform, format, hook og længdebucket.
   - Multiplikatorer begrænses til 0,75–1,25.
   - Minimum to samples; lille datamængde dæmpes med `n/(n+5)`.
@@ -407,4 +407,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **197 tests** lokalt og på VPS.
+Forventet baseline på genoptagelsestidspunktet: **199 tests** lokalt (VPS: 197 indtil næste deploy).

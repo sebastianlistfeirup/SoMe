@@ -208,3 +208,10 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Nye tests i `tests/test_learning_signals.py` beviser: views-only giver præcis den tidligere formel; høj retention/subscribers kan vende en views-rangering; nærmeste dag-7-snapshot vælges og opslag uden for vinduet ignoreres; signaler med under to samples udelades og vægte renormaliseres; ekstreme værdier holdes inden for 0,75–1,25 og nul-median-signaler springes over; Meta/TikTok-aliaser normaliseres.
 - Standardbuild og hele testpakken: **197 passed** lokalt, kun den kendte Starlette-deprecationwarning. Ingen videoer, opslag, betalte kald eller footage er berørt.
 - Commit `72a3269c` er pushet og deployet med `./scripts/deploy.sh`. Også på VPS bestod **197 passed**. Migration 0001 og doctor er OK (`dry_run=true`, `publish_enabled=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`). Web og worker er healthy, og loopback samt offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
+
+## Pr.-hook-aggregering og kohortesammenligning — 2026-11-13
+
+- Fejl: Når samme hook fandtes i flere grupper (fx YouTube og Instagram), overskrev den sidst beregnede gruppe hook-multiplikatoren. Desuden blev hver gruppe sammenlignet med medianen på tværs af alle platforme, så platformens rækkevidde kunne tilskrives hooken.
+- Rettelse: En hook sammenlignes kun med andre hooks i samme kohorte (platform, format og længdebucket); kohorter med kun én hook springes over og vises som `groups_without_comparable_hook`. Hook-multiplikatoren er et sample-vægtet geometrisk gennemsnit over alle kohorter, hvor hooken findes, i stedet for den sidst beregnede gruppe.
+- Nye tests beviser, at en hook med stærk YouTube- og svag Instagram-performance får det sample-vægtede gennemsnit og ikke den sidste gruppe, og at en hook, der kun findes på en platform med høj rækkevidde, ikke belønnes for platformens views. Eksisterende tests er tilpasset den nye `updates`-struktur.
+- Standardbuild og hele testpakken: **199 passed** lokalt, kun den kendte Starlette-deprecationwarning. Ikke deployet endnu.

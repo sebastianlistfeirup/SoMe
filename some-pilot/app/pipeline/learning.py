@@ -137,6 +137,11 @@ def _combine(signals: dict[str, dict]) -> tuple[float, dict[str, float]]:
     return round(combined, 4), {name: round(weight, 4) for name, weight in weights.items()}
 
 
+def _cohort(group_key: str) -> str:
+    platform, video_format, _hook, bucket = group_key.split("|")
+    return f"{platform}|{video_format}|{bucket}"
+
+
 def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool = False) -> dict:
     settings = get_settings()
     output_dir = output_dir or settings.data_dir / "reports"
@@ -161,15 +166,38 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     previous = db.get(Setting, setting_key)
     version = int(previous.value_json.get("version", 0)) + 1 if previous else 1
     multipliers = previous.value_json.get("hook_multipliers", {}) if previous else {}
-    updates = []
+    # Hooks are only compared with other hooks in the same cohort (platform, format, length bucket),
+    # so platform-level differences in reach never masquerade as hook effects.
+    cohorts: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+    for key in groups:
+        cohorts[_cohort(key)]["groups"].append(key)
+    cohort_medians: dict[str, dict[str, float]] = {}
+    no_comparison = []
+    for cohort, members in sorted(cohorts.items()):
+        if len({key.split("|")[2] for key in members["groups"]}) < 2:
+            no_comparison.extend(sorted(members["groups"]))
+            continue
+        cohort_medians[cohort] = {}
+        for name in SIGNAL_WEIGHTS:
+            pooled = [value for key in members["groups"] for value in groups[key].get(name, [])]
+            if pooled:
+                cohort_medians[cohort][name] = statistics.median(pooled)
+    per_hook: dict[str, list[dict]] = defaultdict(list)
     for key, signals in sorted(groups.items()):
-        damped = {name: result for name in SIGNAL_WEIGHTS if (result := _damped_signal(signals.get(name, []), overall.get(name)))}
+        baseline = cohort_medians.get(_cohort(key))
+        if baseline is None:
+            continue
+        damped = {name: result for name in SIGNAL_WEIGHTS if (result := _damped_signal(signals.get(name, []), baseline.get(name)))}
         if not damped:
             continue
-        hook = key.split("|")[2]
         combined, weights_used = _combine(damped)
-        multipliers[hook] = combined
-        updates.append({"hook": hook, "group": key, "multiplier": combined, "sample_size": max(item["sample_size"] for item in damped.values()), "signals": damped, "weights_used": weights_used, "reason": "Weighted geometric mean of shrunk seven-day within-group median ratios per signal; correlation only."})
+        per_hook[key.split("|")[2]].append({"group": key, "multiplier": combined, "sample_size": max(item["sample_size"] for item in damped.values()), "signals": damped, "weights_used": weights_used})
+    updates = []
+    for hook, group_results in sorted(per_hook.items()):
+        total = sum(item["sample_size"] for item in group_results)
+        pooled = math.exp(sum(item["sample_size"] * math.log(item["multiplier"]) for item in group_results) / total)
+        multipliers[hook] = round(max(MULTIPLIER_FLOOR, min(MULTIPLIER_CEILING, pooled)), 4)
+        updates.append({"hook": hook, "multiplier": multipliers[hook], "sample_size": total, "groups": group_results, "reason": "Sample-weighted geometric mean over cohorts of shrunk seven-day median ratios versus other hooks in the same platform, format and length bucket; correlation only."})
     model = Setting(key=setting_key, value_json={"version": version, "hook_multipliers": multipliers, "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS}, "experiment_allocation": {"known_formats": 0.8, "new_experiments": 0.2}, "last_updated_utc": datetime.now(timezone.utc).isoformat(), "data_mode": "demo" if is_demo else "real", "updates": updates})
     db.merge(model)
     db.commit()
@@ -189,6 +217,8 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         "comparison": "One snapshot per publication at approximately seven days, grouped by platform, format, hook and length bucket. Signals: views, retention, watch time per view, engagement and net subscribers per 1,000 views.",
         "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS},
         "overall_medians": overall,
+        "cohort_medians": cohort_medians,
+        "groups_without_comparable_hook": no_comparison,
         "observed": summaries,
         "external_content_signals": external_summary,
         "possible_explanations": ["Hook, topic, packaging and channel fit may contribute; this sample cannot establish causality."],
@@ -206,7 +236,11 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         parts = [f"{name} n={item['sample_size']} median={item['median']:.2f} range={item['min']:.2f}–{item['max']:.2f}" for name, item in row["signals"].items()]
         lines.append(f"- {row['group']}: " + "; ".join(parts))
     lines += ["", "## Model updates"]
-    lines.extend(f"- {item['hook']} ({item['group']}): {item['multiplier']:.4f} from " + ", ".join(f"{name}={sig['damped']:.4f} (n={sig['sample_size']})" for name, sig in item["signals"].items()) for item in updates)
+    for item in updates:
+        lines.append(f"- {item['hook']}: {item['multiplier']:.4f} (n={item['sample_size']})")
+        lines.extend(f"  - {group['group']}: {group['multiplier']:.4f} from " + ", ".join(f"{name}={sig['damped']:.4f} (n={sig['sample_size']})" for name, sig in group["signals"].items()) for group in item["groups"])
+    if no_comparison:
+        lines.append("- No comparable hook in cohort (skipped): " + ", ".join(no_comparison))
     lines += ["", "## Interpretation", "- Correlation only; no causal claim.", "- Repeat promising formats only after comparable results.", "", "## Next experiment", report["next_experiment"]]
     md_path = output_dir / f"learning-{mode}-{date}-v{version}.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
