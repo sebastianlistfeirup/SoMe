@@ -90,9 +90,11 @@ def test_videos_with_rejected_kokoro_voice_can_never_be_approved(db, awaiting_vi
 
 
 def test_rejected_tools_are_not_defaults():
-    settings = get_settings()
-    assert settings.voice_provider == "elevenlabs"
-    assert not any(name.startswith("heygen") for name in type(settings).model_fields)
+    # Check the code default, not the server's environment (which may still say kokoro until the owner updates it).
+    fields = type(get_settings()).model_fields
+    assert fields["voice_provider"].default == "elevenlabs"
+    assert fields["demo_voice_provider"].default == "kokoro"
+    assert not any(name.startswith("heygen") for name in fields)
     import importlib.util
 
     assert importlib.util.find_spec("app.pipeline.avatar") is None

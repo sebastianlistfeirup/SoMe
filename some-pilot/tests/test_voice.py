@@ -151,10 +151,14 @@ def test_cli_uses_voice_provider_without_avatar_arguments():
     assert "avatar-request" not in build_parser().format_help()
 
 
-def test_doctor_reports_voice_provider_without_secrets(db):
+def test_doctor_reports_voice_provider_without_secrets(db, monkeypatch):
     from app.cli import doctor
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "voice_provider", "kokoro")
+    monkeypatch.setattr(get_settings(), "demo_voice_provider", "kokoro")
     result = doctor(db)
-    assert result["integrations"]["voice"]["provider"] == "elevenlabs"
+    assert result["integrations"]["voice"]["production_provider"] == "elevenlabs"
     assert result["integrations"]["voice"]["demo_provider"] == "kokoro"
     assert result["integrations"]["voice"]["demo_only_rejected_for_publication"] is True
     assert result["integrations"]["voice"]["local_available"] is True
