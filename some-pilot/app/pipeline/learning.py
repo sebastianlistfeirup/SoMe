@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.models import MetricSnapshot, Observation, Publication, Setting, VideoVersion
+from app.pipeline.taxonomy import normalize_hook
 
 
 def _utc(value: datetime) -> datetime:
@@ -107,7 +108,7 @@ def _group_rows(db: Session, is_demo: bool, age_days: int = 7) -> dict[str, dict
         video = db.get(VideoVersion, publication.video_version_id) if publication else None
         if not video:
             continue
-        key = f"{publication.platform}|{video.format}|{video.hook_type}|{_length_bucket(video.duration_seconds or 0)}"
+        key = f"{publication.platform}|{video.format}|{normalize_hook(video.hook_type, strict=False)}|{_length_bucket(video.duration_seconds or 0)}"
         for name, value in _signals(metrics).items():
             groups[key][name].append(value)
     return groups

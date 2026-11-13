@@ -7,16 +7,47 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
-from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
+from app.db.models import Asset, Cost, License, Script, Topic, VideoVersion
+from app.pipeline.ai import PACKET_PROMPT_VERSION, ScriptDraft, build_clip_plan, current_prompt_version, demo_draft, packet_draft, packet_excerpts, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
 from app.pipeline.brand_ident import concat_with_idents, ident_metadata
 from app.pipeline.editorial import evaluate_editorial_packet
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
-from app.pipeline.real_media import load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
+from app.pipeline.real_media import RealMediaPlan, load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
+from app.pipeline.taxonomy import detect_cta
 from app.pipeline.voice import VoiceSegment, prepare_voice, write_alignment_srt
+
+FEATURE_SCHEMA_VERSION = "production-features-v1"
+
+
+def production_features(topic: Topic, plan: RealMediaPlan, draft: ScriptDraft, lane: str, packet: dict | None, dry_run: bool) -> dict:
+    """What was actually produced, so learning can tell posts apart. No placeholder values."""
+    return {
+        "feature_schema": FEATURE_SCHEMA_VERSION,
+        "niche": topic.niche,
+        "lane": lane,
+        "platform": plan.platform,
+        "format": "packet_real_media_short" if packet else "vertical_explainer",
+        "aspect_ratio": "9:16",
+        "recipe_id": packet.get("recipe_id") if packet else None,
+        "story_id": packet.get("story_id") if packet else None,
+        "packet_variant_id": plan.packet_variant_id,
+        "idea_id": plan.idea_id,
+        "series_id": plan.series_id,
+        "hook_type": draft.hook_type,
+        "cta_type": detect_cta(f"{draft.narration} {draft.post_text}"),
+        "narration_source": draft.narration_source,
+        "narration_characters": len(draft.narration),
+        "claim_count": len(draft.claims),
+        "is_demo": dry_run,
+    }
+
+
+def opening_text(caption_segments: list[dict], seconds: float = 3.0) -> str:
+    words = [segment["text"].strip() for segment in caption_segments if float(segment["start"]) < seconds]
+    return " ".join(words)[:300]
 
 
 def transcription_quality(script: str, transcription: dict) -> dict:
@@ -56,14 +87,25 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     next_script_version = db.query(Script).filter(Script.topic_id == topic.id).count() + 1
     script_job_id = f"script-{topic_id}-v{next_script_version}"
     review_job_id = f"review-{topic_id}-v{next_script_version}"
+    lane = "ai" if "ai" in topic.niche.lower() else "gaming"
+    packet = None
     if dry_run:
         draft = demo_draft(topic)
     else:
-        observations = db.query(Observation).filter(Observation.is_demo.is_(False), Observation.topic.startswith(topic.niche + ":")).order_by(Observation.collected_at_utc.desc()).limit(20).all()
-        excerpts = [{"source_url": row.source_url, "topic": row.topic, "metric_name": row.metric_name, "metric_value": row.metric_value, "unit": row.unit, "collected_at_utc": row.collected_at_utc, "limitations": row.limitations} for row in observations]
-        draft = claude_draft(db, topic, excerpts, script_job_id)
-        claim_control = review_draft(db, draft, excerpts, review_job_id).model_dump()
-    script = Script(topic_id=topic.id, version=next_script_version, content=draft.narration, claims_json=[claim.model_dump() for claim in draft.claims], prompt_version="demo-v2" if dry_run else current_prompt_version(db), model="demo" if dry_run else settings.claude_model_text, is_demo=dry_run)
+        # The owner-reviewed editorial packet is the script source: its segment
+        # voiceovers are the locked narration and its inspected sources feed the review.
+        if Path(media_plan.editorial_packet).name != media_plan.editorial_packet or media_plan.editorial_packet in {"", ".", ".."}:
+            raise ValueError("editorial_packet_path_invalid")
+        packet_path = media_plan_path.parent / media_plan.editorial_packet
+        if not packet_path.is_file():
+            raise ValueError("editorial_packet_required")
+        packet = json.loads(packet_path.read_text(encoding="utf-8"))
+        if packet.get("lane") not in {lane, "crossover"}:
+            raise ValueError("editorial_lane_mismatch")
+        draft = packet_draft(db, topic, packet, script_job_id, media_plan.packet_variant_id)
+        claim_control = review_draft(db, draft, packet_excerpts(packet), review_job_id).model_dump()
+    prompt_version = "demo-v2" if dry_run else f"{PACKET_PROMPT_VERSION}+{current_prompt_version(db)}"
+    script = Script(topic_id=topic.id, version=next_script_version, content=draft.narration, claims_json=[claim.model_dump() for claim in draft.claims], prompt_version=prompt_version, model="demo" if dry_run else settings.claude_model_text, is_demo=dry_run)
     db.add(script)
     db.flush()
     production_cost = 0 if dry_run else sum(row.actual_amount or row.estimated_amount for row in db.query(Cost).filter(Cost.job_id.in_([script_job_id, review_job_id])).all())
@@ -72,21 +114,14 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     output.mkdir(parents=True, exist_ok=False)
     default_hashtags = ["ai", "artificialintelligence", "tech"] if "ai" in topic.niche.lower() else ["gaming", "handheldgaming", "tech"]
     post = build_post(draft.title, draft.post_text, default_hashtags, [claim.source_url for claim in draft.claims], ai_disclosure=True)
-    video = VideoVersion(script_id=script.id, topic_id=topic.id, version=version_number, output_dir=str(output), post_json=post, hook_type=draft.hook_type, language=topic.language, features_json={"niche": topic.niche, "platform": media_plan.platform, "aspect_ratio": "9:16", "pacing": "measured", "voice": "espeak-ng", "CTA": "save", "production_cost": production_cost, "is_demo": dry_run, "real_media_required": True, "minimum_real_media_ratio": media_plan.minimum_real_ratio})
+    features = production_features(topic, media_plan, draft, lane, packet, dry_run)
+    features.update({"production_cost": production_cost, "real_media_required": True, "minimum_real_media_ratio": media_plan.minimum_real_ratio})
+    video = VideoVersion(script_id=script.id, topic_id=topic.id, version=version_number, output_dir=str(output), post_json=post, hook_type=draft.hook_type, format=features["format"], language=topic.language, features_json=features)
     db.add(video)
     db.flush()
     try:
         editorial = {"decision": "ALLOW", "blockers": [], "score": None, "mode": "demo_no_external_claims", "source_valid_until": None}
-        if not dry_run:
-            if Path(media_plan.editorial_packet).name != media_plan.editorial_packet or media_plan.editorial_packet in {"", ".", ".."}:
-                raise ValueError("editorial_packet_path_invalid")
-            packet_path = media_plan_path.parent / media_plan.editorial_packet
-            if not packet_path.is_file():
-                raise ValueError("editorial_packet_required")
-            packet = json.loads(packet_path.read_text(encoding="utf-8"))
-            expected_lane = "ai" if "ai" in topic.niche.lower() else "gaming"
-            if packet.get("lane") not in {expected_lane, "crossover"}:
-                raise ValueError("editorial_lane_mismatch")
+        if packet is not None:
             editorial = evaluate_editorial_packet(packet, draft.narration, media_plan.quality_dimensions)
             (output / "editorial.json").write_text(json.dumps(packet, indent=2, ensure_ascii=False), encoding="utf-8")
             if editorial["decision"] != "ALLOW":
@@ -186,6 +221,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
             transition(video, "BLOCKED")
             raise ValueError("technical_blocked:" + ",".join(technical["reasons"]))
         video.duration_seconds = technical["duration_seconds"]
+        video.features_json = {**video.features_json, "duration_seconds": video.duration_seconds, "opening_text": opening_text(caption_segments), "thumbnail_type": layout["thumbnail"].get("type", "source_frame") if isinstance(layout.get("thumbnail"), dict) else "source_frame", "scene_count": len(prepared), "real_media_ratio": coverage.get("real_media_ratio")}
         transition(video, "TECH_CHECKED")
         contains_people = any(item.scene.contains_people for item in prepared)
         ages_verified = all(item.scene.ages_verified for item in prepared if item.scene.contains_people)
@@ -218,7 +254,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
 
 def _write_deliverables(output: Path, video: VideoVersion, script: Script, assets: list[Asset], licenses: list[License], checks: dict) -> None:
     (output / "claims.json").write_text(json.dumps(script.claims_json, indent=2, ensure_ascii=False), encoding="utf-8")
-    (output / "script.json").write_text(json.dumps({"id": script.id, "version": script.version, "narration": script.content, "language": video.language, "prompt_version": script.prompt_version, "model": script.model}, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output / "script.json").write_text(json.dumps({"id": script.id, "version": script.version, "narration": script.content, "language": video.language, "prompt_version": script.prompt_version, "model": script.model, "narration_source": video.features_json.get("narration_source", "model")}, indent=2, ensure_ascii=False), encoding="utf-8")
     rights = {"assets": [{"asset_id": asset.id, "source_url": asset.source_url, "sha256": asset.sha256, "rights_holder": license_.rights_holder, "license": license_.license_text, "commercial": license_.commercial_allowed, "derivatives": license_.derivative_allowed, "platforms": license_.platforms_json, "territories": license_.territories_json, "age_clearance": license_.age_clearance, "status": license_.status} for asset, license_ in zip(assets, licenses)]}
     (output / "rights.json").write_text(json.dumps(rights, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "post.json").write_text(json.dumps(video.post_json, indent=2, ensure_ascii=False), encoding="utf-8")

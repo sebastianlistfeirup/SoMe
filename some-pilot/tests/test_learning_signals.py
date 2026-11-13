@@ -33,7 +33,7 @@ def _model(db):
 
 
 def test_views_only_matches_previous_damped_formula(db, awaiting_video):
-    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "list")
+    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "comparison")
     for index, views in enumerate((100, 120)):
         _publish(db, a, {"views": views}, f"a{index}")
     for index, views in enumerate((300, 340)):
@@ -42,19 +42,19 @@ def test_views_only_matches_previous_damped_formula(db, awaiting_video):
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     multipliers = _model(db)["hook_multipliers"]
     assert multipliers["question"] == _old_views_formula(110, 210, 2)
-    assert multipliers["list"] == _old_views_formula(320, 210, 2)
-    assert {update["hook"]: update["groups"][0]["weights_used"] for update in report["model_updates"]} == {"question": {"views": 1.0}, "list": {"views": 1.0}}
+    assert multipliers["comparison"] == _old_views_formula(320, 210, 2)
+    assert {update["hook"]: update["groups"][0]["weights_used"] for update in report["model_updates"]} == {"question": {"views": 1.0}, "comparison": {"views": 1.0}}
 
 
 def test_retention_and_subscribers_can_outweigh_views(db, awaiting_video):
-    loud, loyal = _video(db, awaiting_video, "shock"), _video(db, awaiting_video, "story")
+    loud, loyal = _video(db, awaiting_video, "bold_claim"), _video(db, awaiting_video, "story")
     for index in range(4):
         _publish(db, loud, {"views": 1000, "averageViewPercentage": 30, "averageViewDuration": 9, "likes": 10, "comments": 1, "shares": 1, "subscribersGained": 1, "subscribersLost": 1}, f"loud{index}")
         _publish(db, loyal, {"views": 700, "averageViewPercentage": 75, "averageViewDuration": 22, "likes": 40, "comments": 8, "shares": 6, "subscribersGained": 9, "subscribersLost": 1}, f"loyal{index}")
     db.commit()
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     multipliers = _model(db)["hook_multipliers"]
-    assert multipliers["story"] > 1 > multipliers["shock"]
+    assert multipliers["story"] > 1 > multipliers["bold_claim"]
     story = next(update for update in report["model_updates"] if update["hook"] == "story")["groups"][0]
     assert story["signals"]["views"]["damped"] < 1
     assert set(story["signals"]) == {"views", "retention_pct", "watch_seconds_per_view", "engagement_per_1k_views", "net_subscribers_per_1k_views"}
@@ -63,7 +63,7 @@ def test_retention_and_subscribers_can_outweigh_views(db, awaiting_video):
 
 
 def test_one_sample_per_publication_closest_to_day_seven(db, awaiting_video):
-    video = _video(db, awaiting_video, "hook")
+    video = _video(db, awaiting_video, "surprising_fact")
     publication = _publish(db, video, {"views": 100}, "dedup")
     db.add(MetricSnapshot(publication_id=publication.id, collected_at=NOW - timedelta(hours=10), metric_definition_version="test-v1", metric_name="views", metric_value=90, is_demo=True))
     db.add(MetricSnapshot(publication_id=publication.id, collected_at=NOW - timedelta(days=4), metric_definition_version="test-v1", metric_name="views", metric_value=40, is_demo=True))
@@ -76,7 +76,7 @@ def test_one_sample_per_publication_closest_to_day_seven(db, awaiting_video):
 
 
 def test_sparse_signals_are_skipped_and_weights_renormalised(db, awaiting_video):
-    a, b = _video(db, awaiting_video, "a"), _video(db, awaiting_video, "b")
+    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "challenge")
     _publish(db, a, {"views": 100, "averageViewPercentage": 40}, "a0")
     _publish(db, a, {"views": 120}, "a1")
     _publish(db, b, {"views": 300, "averageViewPercentage": 60}, "b0")
@@ -84,13 +84,13 @@ def test_sparse_signals_are_skipped_and_weights_renormalised(db, awaiting_video)
     db.commit()
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     updates = {update["hook"]: update["groups"][0] for update in report["model_updates"]}
-    assert set(updates["a"]["signals"]) == {"views"}
-    assert set(updates["b"]["signals"]) == {"views", "retention_pct"}
-    assert updates["b"]["weights_used"] == {"views": round(0.30 / 0.55, 4), "retention_pct": round(0.25 / 0.55, 4)}
+    assert set(updates["question"]["signals"]) == {"views"}
+    assert set(updates["challenge"]["signals"]) == {"views", "retention_pct"}
+    assert updates["challenge"]["weights_used"] == {"views": round(0.30 / 0.55, 4), "retention_pct": round(0.25 / 0.55, 4)}
 
 
 def test_extreme_and_non_positive_values_stay_bounded(db, awaiting_video):
-    a, b = _video(db, awaiting_video, "a"), _video(db, awaiting_video, "b")
+    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "challenge")
     for index in range(30):
         _publish(db, a, {"views": 1, "averageViewPercentage": 1, "subscribersGained": 0, "subscribersLost": 0}, f"a{index}")
         _publish(db, b, {"views": 1_000_000, "averageViewPercentage": 99, "subscribersGained": 0, "subscribersLost": 0}, f"b{index}")
@@ -102,7 +102,7 @@ def test_extreme_and_non_positive_values_stay_bounded(db, awaiting_video):
 
 
 def test_platform_aliases_and_publications_outside_window(db, awaiting_video):
-    video = _video(db, awaiting_video, "reel")
+    video = _video(db, awaiting_video, "story")
     _publish(db, video, {"views": 500, "follows": 5}, "r0", platform="instagram")
     _publish(db, video, {"views": 400, "followers_gained": 2}, "r1", platform="instagram")
     _publish(db, video, {"views": 9999, "follows": 99}, "late", age_days=20, platform="instagram")
@@ -119,7 +119,7 @@ def test_platform_aliases_and_publications_outside_window(db, awaiting_video):
 
 
 def test_hook_multiplier_pools_all_cohorts_instead_of_last_group(db, awaiting_video):
-    q, other = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "list")
+    q, other = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "comparison")
     for index, views in enumerate((300, 320, 340, 360)):
         _publish(db, q, {"views": views}, f"yt-q{index}")
     for index, views in enumerate((100, 120, 140, 160)):
@@ -141,7 +141,7 @@ def test_hook_multiplier_pools_all_cohorts_instead_of_last_group(db, awaiting_vi
 
 
 def test_platform_reach_differences_are_not_credited_to_hooks(db, awaiting_video):
-    a, b = _video(db, awaiting_video, "a"), _video(db, awaiting_video, "b")
+    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "challenge")
     for index in range(3):
         _publish(db, a, {"views": 10_000}, f"yt-a{index}")
         _publish(db, b, {"views": 10_000}, f"yt-b{index}")
@@ -149,6 +149,6 @@ def test_platform_reach_differences_are_not_credited_to_hooks(db, awaiting_video
     db.commit()
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     multipliers = _model(db)["hook_multipliers"]
-    assert multipliers["a"] == 1.0 and multipliers["b"] == 1.0
+    assert multipliers["question"] == 1.0 and multipliers["challenge"] == 1.0
     assert report["cohort_medians"]["youtube|vertical_explainer|short"]["views"] == 10_000
     assert any(group.startswith("tiktok|") for group in report["groups_without_comparable_hook"])
