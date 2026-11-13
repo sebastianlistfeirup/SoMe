@@ -166,7 +166,7 @@ Alt nedenfor er deployet (272 tests på VPS). Intet er slået til uden dig.
 - [x] **Serverens app.env:** `VOICE_PROVIDER=elevenlabs` sat 2026-11-13 (backup af filen ligger ved siden af). Den ubrugte linje `VOICE_PRESET` er slettet samme dag (backup `app.env.bak-20261113T212412Z`).
 - [ ] **Alarmkanal:** Vælg webhook (fx Discord) og/eller e-mail, og sæt `ALERT_*` i `/opt/some/secrets/app.env`.
 - [ ] **Offsite backup:** Vælg en udbyder med WebDAV over HTTPS (fx en storage box). Godkend prisen, og sæt `OFFSITE_*`. Kun krypterede backups sendes.
-- [ ] **Staging:** Opret `/opt/some/secrets/staging.env` uden publiceringstokens, og kør `scripts/deploy_staging.sh` (port 8001 via SSH-tunnel).
+- [x] **Staging:** Kører siden 2026-11-13 på `127.0.0.1:8001` (projekt `some-staging`, data i `/opt/some/staging-data`, `staging.env` uden tokens; publicering og betalte kald er fra). Login kræver en separat staging-bruger: `sudo docker compose -p some-staging -f compose.yaml -f compose.staging.yaml run --rm -e APP_ADMIN_PASSWORD web python -m app.cli init-user`. Åbn via `ssh -N -L 8001:127.0.0.1:8001 <server>`.
 - [ ] **Udgiverpolitikker:** Verificér Devolver og Nintendo i `some-pilot/content/PUBLISHER_POLICIES.json` (`verified_at`, `verified_by`, bevis). Indtil da blokeres footage med de rettighedshavere.
 - [ ] **AI-mærkning:** Bekræft standarderne eller ret dem: YouTube fra (gælder realistisk syntetisk indhold), TikTok til, Instagram/Facebook manuelt i appen. Du kan ændre det pr. godkendelse.
 - [ ] **Serier:** Vælg hvilke forslag i `some-pilot/content/SERIES.json` der skal køre.

@@ -384,7 +384,7 @@ Færdige punkter fra den tidligere liste (2026-11-13):
 
 ### Næste opgaver
 
-1. Kør `scripts/deploy_staging.sh`, når ejeren har oprettet `staging.env`. Bekræft, at CI er grøn efter `4e42e9cc`.
+1. Staging kører (`scripts/deploy_staging.sh`, port 8001). Brug det før produktions-deploy ved ændringer i migrationer, worker eller web. CI er grøn.
 2. **Piloten** efter ejerens “Nu må du begynde” (`docs/PILOT_PLAN.md`).
 3. Meta/TikTok-metrics: undersøg Insights-/Display-API-kapacitet og byg import. Indtil da bruges CSV-import med aliaser.
 4. Visuelt mediebibliotek med rettigheder, kontaktark og tidligere brug.
