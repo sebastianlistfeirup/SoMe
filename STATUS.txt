@@ -26,13 +26,13 @@ TIKTOK
 - Den gatede adapter bruger creator_info og `/post/publish/video/init/`, aldrig inbox-endpointet. Kun `PUBLISH_COMPLETE` accepteres som publiceret. Production-review og reelt Direct Post-kald er ikke verificeret.
 
 VERIFICERET LOKALT
-- Standardbuild og hele testpakken: 197/197 tests består i frisk Docker-container (lokalt efter læringsudvidelsen; VPS kører stadig 191-versionen).
-- Ugentlig læring bruger én værdi pr. publicering (nærmeste snapshot omkring dag 7) og fem signaler: views, retention (averageViewPercentage), watch time pr. view, engagement (likes+comments+shares) pr. 1.000 views og netto-subscribers pr. 1.000 views. Hvert signal dæmpes med n/(n+5), kræver mindst to samples og begrænses til 0,75–1,25; signalerne kombineres med et vægtet geometrisk gennemsnit (`learning-signals-v1`: 0,30/0,25/0,20/0,15/0,10) over de signaler, der faktisk findes. Med kun views er resultatet identisk med den tidligere formel. Manuelle CSV-importer fra Meta/TikTok kan bruge aliaser som `follows`/`followers_gained`. Vægtene er redaktionelle valg, ikke kausale effekter. Ændringen er ikke deployet.
+- Standardbuild og hele testpakken: 197/197 tests består i frisk Docker-container lokalt og på VPS.
+- Ugentlig læring bruger én værdi pr. publicering (nærmeste snapshot omkring dag 7) og fem signaler: views, retention (averageViewPercentage), watch time pr. view, engagement (likes+comments+shares) pr. 1.000 views og netto-subscribers pr. 1.000 views. Hvert signal dæmpes med n/(n+5), kræver mindst to samples og begrænses til 0,75–1,25; signalerne kombineres med et vægtet geometrisk gennemsnit (`learning-signals-v1`: 0,30/0,25/0,20/0,15/0,10) over de signaler, der faktisk findes. Med kun views er resultatet identisk med den tidligere formel. Manuelle CSV-importer fra Meta/TikTok kan bruge aliaser som `follows`/`followers_gained`. Vægtene er redaktionelle valg, ikke kausale effekter. Commit `72a3269c` er deployet.
 - Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost, AI-lane-valg, intro/outro i begge formater, MobyGames-krav og verificeret cross-platform-genbrug.
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
 VERIFICERET PÅ VPS
-- Commit `918bd2c9` med MobyGames-forberedelse og verificeret cross-platform-footage er deployet med standardscriptet. Hele pakken består også på VPS: 191/191 tests.
+- Commit `72a3269c` (læring med retention, engagement og subscribers) er deployet med standardscriptet oven på `918bd2c9`. Hele pakken består også på VPS: 197/197 tests.
 - Migration 0001 og doctor er OK. Web og worker er healthy, og både loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
 - Doctor viser `direct_post_eligible=false` og `direct_post_blocker=tiktok_direct_post_not_eligible`. ElevenLabs er konfigureret; der er ikke foretaget nye betalte produktionskald.
 

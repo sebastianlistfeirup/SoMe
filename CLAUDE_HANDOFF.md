@@ -33,7 +33,7 @@ Seneste relevante applikationscommit:
 
 Verificeret både lokalt og på Contabo-VPS:
 
-- **191/191 tests består**
+- **197/197 tests består** (efter `72a3269c`)
 - Standard Docker-build består
 - Migration 0001 er OK
 - `doctor` er OK
@@ -356,7 +356,7 @@ Disse eksisterede før denne handoff og skal ikke slettes eller committes uden e
 ### Højeste prioritet: læring og metrics
 
 1. Implementér native retention-, watchtime-, likes- og subscriptionsindsamling for YouTube og undersøg Meta/TikTok API-kapacitet.
-2. ~~Udvid `weekly_learning` fra kun views til engagement-, retention- og subscriber-signaler med samme dampede, non-kausale metode.~~ Implementeret lokalt (197 tests), ikke deployet.
+2. ~~Udvid `weekly_learning` fra kun views til engagement-, retention- og subscriber-signaler med samme dampede, non-kausale metode.~~ Implementeret og deployet i `72a3269c` (197 tests lokalt og på VPS).
 3. Opret kontrolleret A/B-eksperimentmodel med én ændring ad gangen.
 4. Gem eksperimenthypotese, variant, randomisering, resultat og rollback.
 
@@ -407,4 +407,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **197 tests** lokalt (VPS: 191 indtil næste deploy).
+Forventet baseline på genoptagelsestidspunktet: **197 tests** lokalt og på VPS.
