@@ -191,7 +191,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         narration = output / "narration.wav"
         segment = VoiceSegment("full", draft.narration, topic.language)
         lane = "ai" if "ai" in topic.niche.lower() else "gaming"
-        provider = settings.voice_provider if dry_run else "elevenlabs"
+        provider = settings.demo_voice_provider if dry_run else "elevenlabs"
         voice_id = settings.elevenlabs_ai_voice_id if lane == "ai" else settings.elevenlabs_gaming_voice_id
         step("generating_voice")
         voice = prepare_voice([segment], provider, output / "voice", voice_id=voice_id if provider == "elevenlabs" else None)

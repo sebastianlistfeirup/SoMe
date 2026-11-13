@@ -2,7 +2,8 @@ services:
   web:
     build: .
     image: some-pilot:local
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    # Only Caddy on the host can reach the loopback-bound port, so forwarded headers are trusted.
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips "*"
     user: "10001:10001"
     env_file: .env.example
     environment:

@@ -75,8 +75,11 @@ class Settings(BaseSettings):
     offsite_password: str = ""
     server_monthly_cost_dkk: float = Field(default=176.94, ge=0)
     expected_monthly_api_dkk: float = Field(default=6.51, ge=0)
-    voice_provider: str = "kokoro"
-    voice_preset: str = "af_bella"
+    # Production narration is always ElevenLabs. Kokoro af_bella is creatively rejected and only
+    # used by old technical demo flows; approval refuses any video voiced with it.
+    voice_provider: str = "elevenlabs"
+    demo_voice_provider: str = "kokoro"
+    demo_voice_preset: str = "af_bella"
     voice_speed: float = 1.08
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
@@ -86,12 +89,6 @@ class Settings(BaseSettings):
     elevenlabs_voice_rights_confirmed: bool = False
     elevenlabs_cost_per_1000_chars_dkk: float = Field(default=0, ge=0)
     elevenlabs_pricing_verified_at: str = ""
-    heygen_gaming_avatar_name: str = "Placeholder Gaming"
-    heygen_gaming_avatar_look_id: str = ""
-    heygen_gaming_voice_id: str = "dc5370c68baa4905be87f702758df4b0"
-    heygen_ai_avatar_name: str = "Placeholder"
-    heygen_ai_avatar_look_id: str = ""
-    heygen_ai_voice_id: str = "5d4b765209dc42ddb52e043040679569"
 
     def ensure_directories(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)

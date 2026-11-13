@@ -38,7 +38,7 @@ def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, 
         path = voice_dir / f"{segment_id}.wav"
         path.write_bytes(b"voice")
         voice_files.append({"segment_id": segment_id, "path": str(path), "text_sha256": text_sha256(segment_id), "sha256": "a" * 64, "duration_seconds": 4, "sample_rate": 24000})
-    voice = {"decision": "ALLOW", "reasons": [], "provider": "kokoro", "voice_only": True, "avatar_present": False, "files": voice_files}
+    voice = {"decision": "ALLOW", "reasons": [], "provider": "elevenlabs", "voice_only": True, "avatar_present": False, "files": voice_files}
     monkeypatch.setattr("app.pipeline.production_ranking.require_tools", lambda: None)
     monkeypatch.setattr("app.pipeline.production_ranking.prepare_voice", lambda *_args, **_kwargs: voice)
 
@@ -64,7 +64,7 @@ def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, 
     expected_narration = " ".join([payload["hook"], *[item["narration"] for item in sorted(payload["scenes"], key=lambda row: row["rank"], reverse=True)]])
     monkeypatch.setattr("app.pipeline.production_ranking.transcribe", lambda *_args: {"language_probability": 0.99, "segments_detail": [{"text": expected_narration}]})
 
-    result = produce_ranking(db, plan_path, tmp_path / "output", voice_provider="kokoro")
+    result = produce_ranking(db, plan_path, tmp_path / "output", voice_provider="elevenlabs")
     assert result["status"] == "AWAITING_OWNER"
     assert result["avatar_present"] is False
     video = db.get(VideoVersion, result["video_id"])

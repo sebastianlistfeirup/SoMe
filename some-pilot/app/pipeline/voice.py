@@ -139,8 +139,8 @@ def _new_kokoro(segments: list[VoiceSegment], output_dir: Path) -> dict:
         output_dir.mkdir(parents=True, exist_ok=False)
         for segment in segments:
             path = output_dir / f"{segment.segment_id}.wav"
-            _generate_kokoro_file(segment, path, settings.voice_preset, settings.voice_speed)
-            files.append(_audio_file(segment, path, reasons, voice=settings.voice_preset, speed=settings.voice_speed, reused=False))
+            _generate_kokoro_file(segment, path, settings.demo_voice_preset, settings.voice_speed)
+            files.append(_audio_file(segment, path, reasons, voice=settings.demo_voice_preset, speed=settings.voice_speed, reused=False))
     except Exception as exc:
         reasons.append(f"voice_generation_failed:{type(exc).__name__}")
     return _base_report("kokoro", reasons, files, paid_call=False, cost_dkk=0, model_evidence=KOKORO_EVIDENCE)

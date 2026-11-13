@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.models import Publication, Setting, VideoVersion, utcnow
-from app.pipeline.approvals import transition, verify_approval
+from app.pipeline.approvals import approved_content, transition, verify_approval
 from app.pipeline.signed_media import create_link
 
 
@@ -59,6 +59,12 @@ def manual_export(video: VideoVersion, platform: str, output_root: Path) -> Path
         instructions = {"platform": platform, "status": "MANUAL_EXPORT_NOT_PUBLISHED", "steps": ["Watch the entire video.", "Verify account, rights, text, links and disclosure.", f"Upload manually to {platform}.", "Record the resulting URL/remote ID in the dashboard or metrics import."], "demo": video.features_json.get("is_demo", False)}
         archive.writestr("PUBLISHING_INSTRUCTIONS.json", json.dumps(instructions, indent=2))
     return target
+
+
+def _enter_publishing(video: VideoVersion) -> None:
+    """Multi-destination approvals publish one destination at a time; later ones find the video already PUBLISHING."""
+    if video.status != "PUBLISHING":
+        transition(video, "PUBLISHING")
 
 
 def _mark_success(db: Session, publication: Publication, video: VideoVersion) -> None:
@@ -123,13 +129,16 @@ class YouTubePublisher:
             return publication
         if publication.status == "RECONCILE_REQUIRED":
             raise PublishError("reconcile_required_before_retry")
-        verify_approval(db, video, "youtube", account)
+        content = approved_content(verify_approval(db, video, "youtube", account), video, "youtube", account)
         publication.status = "PUBLISHING"
-        transition(video, "PUBLISHING")
+        _enter_publishing(video)
         db.commit()
         try:
             token = self._access_token()
-            metadata = {"snippet": {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "description": video.post_json.get("text", "")}, "status": {"privacyStatus": privacy}}
+            status = {"privacyStatus": privacy}
+            if content["ai_label"] is not None:
+                status["containsSyntheticMedia"] = bool(content["ai_label"])
+            metadata = {"snippet": {"title": content["title"][:100], "description": content["text"]}, "status": status}
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=UTF-8", "X-Upload-Content-Type": "video/mp4"}
             start = httpx.post("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", headers=headers, json=metadata, timeout=30)
             if start.status_code in {401, 403}:
@@ -218,14 +227,14 @@ class InstagramPublisher:
             return publication
         if publication.status == "RECONCILE_REQUIRED":
             raise PublishError("reconcile_required_before_retry")
-        verify_approval(db, video, "instagram", account)
+        content = approved_content(verify_approval(db, video, "instagram", account), video, "instagram", account)
         publication.status = "PUBLISHING"
-        transition(video, "PUBLISHING")
+        _enter_publishing(video)
         db.commit()
         base = f"https://graph.facebook.com/{settings.meta_graph_version}"
         headers = {"Authorization": f"Bearer {settings.meta_access_token}"}
         try:
-            created = httpx.post(f"{base}/{account}/media", headers=headers, data={"media_type": "REELS", "video_url": media_url, "cover_url": cover_url, "caption": video.post_json.get("text", "")}, timeout=30)
+            created = httpx.post(f"{base}/{account}/media", headers=headers, data={"media_type": "REELS", "video_url": media_url, "cover_url": cover_url, "caption": content["text"]}, timeout=30)
             if created.status_code in {401, 403}:
                 raise PublishError("instagram_authorization_required")
             created.raise_for_status()
@@ -284,21 +293,21 @@ class FacebookPublisher:
             raise PublishError("explicit_valid_meta_graph_version_required")
         if account != settings.meta_page_id:
             raise PublishError("facebook_page_mismatch")
-        verify_approval(db, video, "facebook", account)
+        content = approved_content(verify_approval(db, video, "facebook", account), video, "facebook", account)
         publication = new_publication(db, video, "facebook", account)
         if publication.status == "PUBLISHED":
             return publication
         if publication.status == "RECONCILE_REQUIRED":
             raise PublishError("reconcile_required_before_retry")
         publication.status = "PUBLISHING"
-        transition(video, "PUBLISHING")
+        _enter_publishing(video)
         db.commit()
         try:
             with Path(video.video_path).open("rb") as handle:
                 response = httpx.post(
                     f"https://graph.facebook.com/{settings.meta_graph_version}/{account}/videos",
                     headers={"Authorization": f"Bearer {settings.meta_page_access_token}"},
-                    data={"description": video.post_json.get("text", "")},
+                    data={"description": content["text"]},
                     files={"file": (Path(video.video_path).name, handle, "video/mp4")},
                     timeout=120,
                 )
@@ -347,14 +356,14 @@ class TikTokPublisher:
             raise PublishError("tiktok_open_id_mismatch")
         if not all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)):
             raise PublishError("tiktok_direct_post_not_eligible")
-        verify_approval(db, video, "tiktok", account)
+        content = approved_content(verify_approval(db, video, "tiktok", account), video, "tiktok", account)
         publication = new_publication(db, video, "tiktok", account)
         if publication.status == "PUBLISHED":
             return publication
         if publication.status == "RECONCILE_REQUIRED":
             raise PublishError("reconcile_required_before_retry")
         publication.status = "PUBLISHING"
-        transition(video, "PUBLISHING")
+        _enter_publishing(video)
         db.commit()
         video_path = Path(video.video_path)
         size = video_path.stat().st_size
@@ -370,8 +379,9 @@ class TikTokPublisher:
                 headers=headers,
                 json={
                     "post_info": {
-                        "title": video.post_json.get("text", ""),
+                        "title": content["text"],
                         "privacy_level": "PUBLIC_TO_EVERYONE",
+                        **({"is_aigc": bool(content["ai_label"])} if content["ai_label"] is not None else {}),
                         "disable_duet": False,
                         "disable_comment": False,
                         "disable_stitch": False,

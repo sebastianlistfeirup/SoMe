@@ -154,7 +154,9 @@ def test_cli_uses_voice_provider_without_avatar_arguments():
 def test_doctor_reports_voice_provider_without_secrets(db):
     from app.cli import doctor
     result = doctor(db)
-    assert result["integrations"]["voice"]["provider"] == "kokoro"
+    assert result["integrations"]["voice"]["provider"] == "elevenlabs"
+    assert result["integrations"]["voice"]["demo_provider"] == "kokoro"
+    assert result["integrations"]["voice"]["demo_only_rejected_for_publication"] is True
     assert result["integrations"]["voice"]["local_available"] is True
     assert result["integrations"]["voice"]["avatar_required"] is False
     assert "api_key" not in result["integrations"]["voice"]

@@ -100,6 +100,15 @@ def transition(video: VideoVersion, target: str, actor: str = "system") -> None:
     video.updated_at = utcnow()
 
 
+REJECTED_VOICE_PROVIDERS = {"kokoro", "espeak-ng"}
+
+
+def uses_rejected_voice(video: VideoVersion) -> bool:
+    """Kokoro af_bella (and the espeak fallback) are creatively rejected; such videos can never be approved."""
+    features = video.features_json or {}
+    return (features.get("voice_provider") or features.get("voice")) in REJECTED_VOICE_PROVIDERS
+
+
 def approve(
     db: Session,
     video: VideoVersion,
@@ -116,6 +125,8 @@ def approve(
         raise ApprovalError("emergency_stop_active")
     if video.status != "AWAITING_OWNER":
         raise ApprovalError("video_not_awaiting_owner")
+    if uses_rejected_voice(video):
+        raise ApprovalError("rejected_voice_not_publishable:kokoro_or_espeak")
     checks_path = Path(video.output_dir) / "checks.json"
     if not checks_path.exists():
         raise ApprovalError("missing_checks")
@@ -188,14 +199,21 @@ def invalidate_approval(db: Session, video: VideoVersion, actor: str) -> None:
 def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
     if not video.video_path or not video.thumbnail_path:
         raise ApprovalError("missing_rendered_files")
+    from app.pipeline.variants import ai_label_for, platform_variant
+
     normalized = []
     for destination in destinations:
-        normalized.append({
+        item = {
             "platform": destination["platform"],
             "account": destination["account"],
             "visibility": destination.get("visibility", "public"),
             "publish_at": destination.get("publish_at"),
-        })
+        }
+        # digest_version 2 binds the exact per-platform text and the AI label; older approvals keep their original shape.
+        if destination.get("digest_version", 1) >= 2:
+            label = ai_label_for(destination["platform"], destination.get("ai_label"))
+            item.update({"digest_version": 2, "ai_label": label["ai_label"], "ai_label_applied_by": label["applied_by"], "variant": platform_variant(video.post_json, destination["platform"])})
+        normalized.append(item)
     normalized.sort(key=lambda item: (item["platform"], item["account"], item["publish_at"] or ""))
     components = {
         "video_sha256": sha256_file(video.video_path),
@@ -210,6 +228,15 @@ def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
     return {**components, "approval_sha256": canonical_hash(components)}
 
 
+def approved_content(review: Review, video: VideoVersion, platform: str, account: str) -> dict:
+    """The exact text and AI label the owner approved for this destination."""
+    destination = next((item for item in (review.digest_json or {}).get("destinations", []) if item["platform"] == platform and item["account"] == account), None)
+    if destination and destination.get("variant"):
+        variant = destination["variant"]
+        return {"title": variant.get("title") or video.post_json.get("title", ""), "text": variant["text"], "ai_label": destination.get("ai_label"), "digest_version": 2}
+    return {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "text": video.post_json.get("text", ""), "ai_label": None, "digest_version": 1}
+
+
 def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destinations: list[dict], owner_watched_full_video: bool) -> Review:
     if not reviewer.strip():
         raise ApprovalError("owner_reviewer_required")
@@ -219,6 +246,8 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
         raise ApprovalError("emergency_stop_active")
     if video.status != "AWAITING_OWNER":
         raise ApprovalError("video_not_awaiting_owner")
+    if uses_rejected_voice(video):
+        raise ApprovalError("rejected_voice_not_publishable:kokoro_or_espeak")
     if not destinations:
         raise ApprovalError("destination_required")
     seen = set()

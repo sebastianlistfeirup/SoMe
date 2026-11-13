@@ -279,3 +279,8 @@ code { user-select: all; }
 .publication-job small { color: #667085; overflow-wrap: anywhere; }
 .approval-result { flex: 1; }
 @media (max-width: 520px) { .destination-picker, .approval-settings { grid-template-columns: 1fr; } .publication-job { grid-template-columns: 1fr; } }
+
+.variant-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.variant-card{border:1px solid rgba(127,127,127,.25);border-radius:8px;padding:10px}
+.variant-text{white-space:pre-wrap;font-size:.9em}
+.reject-categories,.ai-labels,.variant-preview{border:0;padding:0;margin:12px 0}

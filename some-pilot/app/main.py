@@ -21,6 +21,7 @@ from app.pipeline.approvals import ApprovalError, approve, approve_destinations,
 from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
+from app.pipeline.variants import AI_LABEL_API, AI_LABEL_DEFAULTS, all_variants
 from app.pipeline.quality import CATEGORY_LABELS, REJECTION_CATEGORIES, normalize_categories, requires_new_production
 from app.pipeline.posts import format_duration, platform_label, post_view, preferred_platform, status_label
 from app.pipeline.signed_media import SignedMediaError, create_link, resolve_link
@@ -127,7 +128,9 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
     key = f"{client}:{username}"
     now = time.monotonic()
     login_attempts[key] = [stamp for stamp in login_attempts.get(key, []) if now - stamp < 300]
-    if len(login_attempts[key]) >= 5:
+    ip_key = f"ip:{client}"
+    login_attempts[ip_key] = [stamp for stamp in login_attempts.get(ip_key, []) if now - stamp < 300]
+    if len(login_attempts[key]) >= 5 or len(login_attempts[ip_key]) >= 20:
         return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "For mange forsøg. Prøv igen om fem minutter."}, status_code=429)
     user = db.query(AuthUser).filter(AuthUser.username == username).first()
     try:
@@ -137,6 +140,7 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
         hasher.verify(user.password_hash, password)
     except (VerificationError, VerifyMismatchError):
         login_attempts[key].append(now)
+        login_attempts[ip_key].append(now)
         return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "Forkert brugernavn eller password."}, status_code=401)
     session = AuthSession(id=secrets.token_urlsafe(32), user_id=user.id, csrf_token=secrets.token_urlsafe(32), expires_at=datetime.now(timezone.utc) + timedelta(minutes=settings.session_ttl_minutes))
     db.add(session)
@@ -294,12 +298,15 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         publication_jobs=publication_jobs,
         revisions=revisions,
         rejection_categories=[(key, CATEGORY_LABELS[key]) for key in REJECTION_CATEGORIES],
+        post_variants=all_variants(video.post_json, topic.title if topic else ""),
+        ai_label_defaults=AI_LABEL_DEFAULTS,
+        ai_label_api=AI_LABEL_API,
         rejection_needs_new_production=requires_new_production(((latest_rejection.digest_json or {}) if latest_rejection else {}).get("rejection_categories", [])),
     )
 
 
 @app.post("/review/{video_id}/approve")
-def approve_video(video_id: int, request: Request, platform: str = Form(""), platforms: list[str] | None = Form(None), account: str = Form(""), visibility: str = Form("public"), publish_at: str = Form(""), watched: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+def approve_video(video_id: int, request: Request, platform: str = Form(""), platforms: list[str] | None = Form(None), account: str = Form(""), visibility: str = Form("public"), publish_at: str = Form(""), watched: bool = Form(False), ai_labels: list[str] | None = Form(None), ai_labels_present: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
     if not video:
         raise HTTPException(404)
@@ -317,6 +324,8 @@ def approve_video(video_id: int, request: Request, platform: str = Form(""), pla
                 "account": destination_account,
                 "visibility": visibility if selected_platform == "youtube" else "public",
                 "publish_at": scheduled_at,
+                "digest_version": 2,
+                "ai_label": (selected_platform in (ai_labels or [])) if ai_labels_present else None,
             })
         review = approve_destinations(db, video, auth[0].username, destinations, watched)
         jobs = enqueue_publication_jobs(db, review)
@@ -443,7 +452,8 @@ def settings_page(request: Request, db: Session = Depends(get_db), auth=Depends(
     safe = {"DRY_RUN": settings.dry_run, "PUBLISH_ENABLED": settings.publish_enabled, "PAID_JOBS_ENABLED": settings.paid_jobs_enabled, "APP_TIMEZONE": settings.app_timezone, "MONTHLY_AI_BUDGET_DKK": settings.monthly_ai_budget_dkk, "MAX_JOB_AI_COST_DKK": settings.max_job_ai_cost_dkk}
     capabilities = {"youtube_publish": YouTubePublisher().capabilities(db), "instagram_publish": InstagramPublisher().capabilities(db), "facebook_publish": FacebookPublisher().capabilities(db), "tiktok_publish": TikTokPublisher().capabilities(db), "youtube_research": YouTubeAdapter().capabilities()}
     voice_profiles = {
-        "active": {"provider": settings.voice_provider, "preset": settings.voice_preset, "speed": settings.voice_speed, "avatar_required": False},
+        "production": {"provider": "elevenlabs", "gaming_voice_id_configured": bool(settings.elevenlabs_gaming_voice_id), "ai_voice_id_configured": bool(settings.elevenlabs_ai_voice_id), "avatar_required": False},
+        "demo_only": {"provider": settings.demo_voice_provider, "preset": settings.demo_voice_preset, "publishable": False},
         "elevenlabs": {"configured": bool(settings.elevenlabs_api_key and settings.elevenlabs_voice_id), "voice_id_configured": bool(settings.elevenlabs_voice_id), "verified_price_configured": settings.elevenlabs_cost_per_1000_chars_dkk > 0 and bool(settings.elevenlabs_pricing_verified_at), "voice_rights_confirmed": settings.elevenlabs_voice_rights_confirmed, "paid_jobs_enabled": settings.paid_jobs_enabled},
     }
     return render(request, "settings.html", db, auth, safe_settings=safe, capabilities=capabilities, voice_profiles=voice_profiles)
