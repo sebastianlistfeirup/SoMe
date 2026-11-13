@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Whitespace check (git diff --check)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --check "origin/${{ github.base_ref }}...HEAD"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] && git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
+            git diff --check "${{ github.event.before }}" "${{ github.sha }}"
+          else
+            git diff --check HEAD~1 HEAD || true
+          fi
+
+      - name: Build image
+        run: docker compose -f some-pilot/compose.yaml build --quiet
+
+      - name: Full test suite
+        run: docker compose -f some-pilot/compose.yaml run --rm --no-deps worker pytest -q

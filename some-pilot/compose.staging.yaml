@@ -1,0 +1,29 @@
+# Staging on the same VPS with separate data, port and secrets. Never publishes,
+# never makes paid calls. Use with an explicit project name:
+#   WEB_PORT=8001 IMAGE_TAG=<tag> sudo -E docker compose -p some-staging \
+#     -f compose.yaml -f compose.staging.yaml up -d
+# Reach it through an SSH tunnel: ssh -N -L 8001:127.0.0.1:8001 <server>
+services:
+  web:
+    env_file: /opt/some/secrets/staging.env
+    environment:
+      APP_ENV: staging
+      DRY_RUN: "true"
+      PUBLISH_ENABLED: "false"
+      PAID_JOBS_ENABLED: "false"
+    volumes:
+      - /opt/some/staging-data:/data
+      - /opt/some/models:/models:ro
+    mem_limit: 768m
+  worker:
+    env_file: /opt/some/secrets/staging.env
+    environment:
+      APP_ENV: staging
+      DRY_RUN: "true"
+      PUBLISH_ENABLED: "false"
+      PAID_JOBS_ENABLED: "false"
+    volumes:
+      - /opt/some/staging-data:/data
+      - /opt/some/models:/models:ro
+    mem_limit: 2g
+    cpus: "1.0"

@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    image: some-pilot:local
+    image: some-pilot:${IMAGE_TAG:-local}
     # Only Caddy on the host can reach the loopback-bound port, so forwarded headers are trusted.
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips "*"
     user: "10001:10001"
@@ -10,7 +10,7 @@ services:
       DATABASE_URL: sqlite:////data/some.db
       DATA_DIR: /data
       MODEL_CACHE_DIR: /models
-    ports: ["127.0.0.1:8000:8000"]
+    ports: ["127.0.0.1:${WEB_PORT:-8000}:8000"]
     volumes:
       - ./data:/data
       - ./models:/models
@@ -26,7 +26,7 @@ services:
     logging:
       options: {max-size: "10m", max-file: "3"}
   worker:
-    image: some-pilot:local
+    image: some-pilot:${IMAGE_TAG:-local}
     command: python -m app.worker
     user: "10001:10001"
     env_file: .env.example
