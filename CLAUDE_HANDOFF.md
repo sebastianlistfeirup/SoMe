@@ -129,7 +129,7 @@ Den godkendte visuelle version må ikke ændres uden ny ejergodkendelse. Ingen a
 - `some-pilot/app/pipeline/metrics.py`
   - YouTube Analytics kan hente views, watch time, retention, likes, comments, shares og subscribers gained/lost.
 - `some-pilot/app/pipeline/learning.py`
-  - Ugens læring bruger p.t. kun views omkring dag 7.
+  - Ugens læring bruger views, retention, watch time pr. view, engagement og netto-subscribers pr. 1.000 views omkring dag 7 (én værdi pr. publicering), kombineret via vægtet geometrisk gennemsnit (`learning-signals-v1`).
   - Grupper: platform, format, hook og længdebucket.
   - Multiplikatorer begrænses til 0,75–1,25.
   - Minimum to samples; lille datamængde dæmpes med `n/(n+5)`.
@@ -356,7 +356,7 @@ Disse eksisterede før denne handoff og skal ikke slettes eller committes uden e
 ### Højeste prioritet: læring og metrics
 
 1. Implementér native retention-, watchtime-, likes- og subscriptionsindsamling for YouTube og undersøg Meta/TikTok API-kapacitet.
-2. Udvid `weekly_learning` fra kun views til engagement-, retention- og subscriber-signaler med samme dampede, non-kausale metode.
+2. ~~Udvid `weekly_learning` fra kun views til engagement-, retention- og subscriber-signaler med samme dampede, non-kausale metode.~~ Implementeret lokalt (197 tests), ikke deployet.
 3. Opret kontrolleret A/B-eksperimentmodel med én ændring ad gangen.
 4. Gem eksperimenthypotese, variant, randomisering, resultat og rollback.
 
@@ -407,4 +407,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **191 tests**.
+Forventet baseline på genoptagelsestidspunktet: **197 tests** lokalt (VPS: 191 indtil næste deploy).

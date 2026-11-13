@@ -1,4 +1,5 @@
 import json
+import math
 import statistics
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -14,24 +15,126 @@ def _utc(value: datetime) -> datetime:
     return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
 
 
-def _group_rows(db: Session, is_demo: bool, age_days: int = 7) -> dict[str, list[float]]:
-    groups: dict[str, list[float]] = defaultdict(list)
-    snapshots = db.query(MetricSnapshot).filter(MetricSnapshot.is_demo == is_demo, MetricSnapshot.metric_name == "views", MetricSnapshot.metric_value.isnot(None)).all()
+# Canonical metric names follow YouTube Analytics. Manual CSV imports from other
+# platforms may use the aliases below; comparisons always stay within one platform group.
+METRIC_ALIASES = {
+    "views": "views",
+    "likes": "likes",
+    "comments": "comments",
+    "shares": "shares",
+    "subscribersGained": "subscribersGained",
+    "subscribers_gained": "subscribersGained",
+    "followers_gained": "subscribersGained",
+    "follows": "subscribersGained",
+    "subscribersLost": "subscribersLost",
+    "subscribers_lost": "subscribersLost",
+    "followers_lost": "subscribersLost",
+    "averageViewPercentage": "averageViewPercentage",
+    "average_view_percentage": "averageViewPercentage",
+    "averageViewDuration": "averageViewDuration",
+    "average_view_duration": "averageViewDuration",
+    "average_watch_time_seconds": "averageViewDuration",
+    "estimatedMinutesWatched": "estimatedMinutesWatched",
+    "estimated_minutes_watched": "estimatedMinutesWatched",
+}
+
+# Explicit, versioned judgement weights. They express channel goals, not causal effects.
+SIGNAL_WEIGHTS_VERSION = "learning-signals-v1"
+SIGNAL_WEIGHTS = {
+    "views": 0.30,
+    "retention_pct": 0.25,
+    "net_subscribers_per_1k_views": 0.20,
+    "engagement_per_1k_views": 0.15,
+    "watch_seconds_per_view": 0.10,
+}
+MIN_SAMPLES = 2
+MULTIPLIER_FLOOR = 0.75
+MULTIPLIER_CEILING = 1.25
+
+
+def _length_bucket(seconds: float) -> str:
+    return "short" if seconds <= 35 else "medium" if seconds <= 60 else "long"
+
+
+def _publication_metrics(db: Session, is_demo: bool, age_days: int) -> dict[int, dict[str, float]]:
+    """One value per publication and metric: the snapshot closest to the target age (latest wins ties)."""
+    chosen: dict[int, dict[str, tuple[float, datetime, float]]] = defaultdict(dict)
+    snapshots = db.query(MetricSnapshot).filter(MetricSnapshot.is_demo == is_demo, MetricSnapshot.metric_name.in_(list(METRIC_ALIASES)), MetricSnapshot.metric_value.isnot(None)).all()
+    published_cache: dict[int, datetime | None] = {}
     for snap in snapshots:
-        publication = db.get(Publication, snap.publication_id)
-        if not publication or not publication.published_at:
+        if snap.publication_id not in published_cache:
+            publication = db.get(Publication, snap.publication_id)
+            published_cache[snap.publication_id] = _utc(publication.published_at) if publication and publication.published_at else None
+        published_at = published_cache[snap.publication_id]
+        if published_at is None:
             continue
-        video = db.get(VideoVersion, publication.video_version_id)
+        collected = _utc(snap.collected_at)
+        distance = abs((collected - published_at).total_seconds() / 86400 - age_days)
+        if distance > 0.75:
+            continue
+        name = METRIC_ALIASES[snap.metric_name]
+        current = chosen[snap.publication_id].get(name)
+        if current is None or distance < current[0] or (distance == current[0] and collected > current[1]):
+            chosen[snap.publication_id][name] = (distance, collected, float(snap.metric_value))
+    return {pub_id: {name: item[2] for name, item in metrics.items()} for pub_id, metrics in chosen.items()}
+
+
+def _signals(metrics: dict[str, float]) -> dict[str, float]:
+    signals: dict[str, float] = {}
+    views = metrics.get("views")
+    if views is not None:
+        signals["views"] = views
+    if metrics.get("averageViewPercentage") is not None:
+        signals["retention_pct"] = metrics["averageViewPercentage"]
+    if metrics.get("averageViewDuration") is not None:
+        signals["watch_seconds_per_view"] = metrics["averageViewDuration"]
+    elif metrics.get("estimatedMinutesWatched") is not None and views:
+        signals["watch_seconds_per_view"] = metrics["estimatedMinutesWatched"] * 60 / views
+    if views and views > 0:
+        interactions = [metrics[name] for name in ("likes", "comments", "shares") if metrics.get(name) is not None]
+        if interactions:
+            signals["engagement_per_1k_views"] = sum(interactions) * 1000 / views
+        if metrics.get("subscribersGained") is not None:
+            net = metrics["subscribersGained"] - (metrics.get("subscribersLost") or 0)
+            signals["net_subscribers_per_1k_views"] = net * 1000 / views
+    return signals
+
+
+def _group_rows(db: Session, is_demo: bool, age_days: int = 7) -> dict[str, dict[str, list[float]]]:
+    groups: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for publication_id, metrics in sorted(_publication_metrics(db, is_demo, age_days).items()):
+        publication = db.get(Publication, publication_id)
+        video = db.get(VideoVersion, publication.video_version_id) if publication else None
         if not video:
             continue
-        actual_age = (_utc(snap.collected_at) - _utc(publication.published_at)).total_seconds() / 86400
-        if abs(actual_age - age_days) > 0.75:
-            continue
-        length = video.duration_seconds or 0
-        bucket = "short" if length <= 35 else "medium" if length <= 60 else "long"
-        key = f"{publication.platform}|{video.format}|{video.hook_type}|{bucket}"
-        groups[key].append(float(snap.metric_value))
+        key = f"{publication.platform}|{video.format}|{video.hook_type}|{_length_bucket(video.duration_seconds or 0)}"
+        for name, value in _signals(metrics).items():
+            groups[key][name].append(value)
     return groups
+
+
+def _describe(values: list[float]) -> dict:
+    ordered = sorted(values)
+    q1 = statistics.median(ordered[: len(ordered) // 2]) if len(ordered) > 1 else None
+    q3 = statistics.median(ordered[(len(ordered) + 1) // 2 :]) if len(ordered) > 1 else None
+    return {"sample_size": len(values), "median": statistics.median(values), "q1": q1, "q3": q3, "min": min(values), "max": max(values)}
+
+
+def _damped_signal(group_values: list[float], overall_median: float | None) -> dict | None:
+    if len(group_values) < MIN_SAMPLES or not overall_median or overall_median <= 0:
+        return None
+    raw = statistics.median(group_values) / overall_median
+    shrink = len(group_values) / (len(group_values) + 5)
+    bounded = max(MULTIPLIER_FLOOR, min(MULTIPLIER_CEILING, 1 + (raw - 1) * shrink))
+    return {"raw_ratio": round(raw, 4), "damped": round(bounded, 4), "sample_size": len(group_values)}
+
+
+def _combine(signals: dict[str, dict]) -> tuple[float, dict[str, float]]:
+    total = sum(SIGNAL_WEIGHTS[name] for name in signals)
+    weights = {name: SIGNAL_WEIGHTS[name] / total for name in signals}
+    log_mean = sum(weights[name] * math.log(signals[name]["damped"]) for name in signals)
+    combined = max(MULTIPLIER_FLOOR, min(MULTIPLIER_CEILING, math.exp(log_mean)))
+    return round(combined, 4), {name: round(weight, 4) for name, weight in weights.items()}
 
 
 def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool = False) -> dict:
@@ -39,31 +142,35 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     output_dir = output_dir or settings.data_dir / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     groups = _group_rows(db, is_demo)
-    all_values = [value for values in groups.values() for value in values]
-    overall = statistics.median(all_values) if all_values else None
+    overall: dict[str, float] = {}
+    for name in SIGNAL_WEIGHTS:
+        pooled = [value for signals in groups.values() for value in signals.get(name, [])]
+        if pooled:
+            overall[name] = statistics.median(pooled)
     summaries = []
-    for key, values in sorted(groups.items()):
-        ordered = sorted(values)
-        q1 = statistics.median(ordered[: len(ordered) // 2]) if len(ordered) > 1 else None
-        q3 = statistics.median(ordered[(len(ordered) + 1) // 2 :]) if len(ordered) > 1 else None
-        summaries.append({"group": key, "sample_size": len(values), "median_views": statistics.median(values), "q1": q1, "q3": q3, "min": min(values), "max": max(values)})
+    for key, signals in sorted(groups.items()):
+        described = {name: _describe(values) for name, values in signals.items() if values}
+        if not described:
+            continue
+        row = {"group": key, "sample_size": max(item["sample_size"] for item in described.values()), "signals": described}
+        views = described.get("views")
+        if views:
+            row.update({"median_views": views["median"], "q1": views["q1"], "q3": views["q3"], "min": views["min"], "max": views["max"]})
+        summaries.append(row)
     setting_key = "learning_model_demo" if is_demo else "learning_model"
     previous = db.get(Setting, setting_key)
     version = int(previous.value_json.get("version", 0)) + 1 if previous else 1
     multipliers = previous.value_json.get("hook_multipliers", {}) if previous else {}
     updates = []
-    if overall:
-        for row in summaries:
-            if row["sample_size"] < 2:
-                continue
-            hook = row["group"].split("|")[2]
-            raw = row["median_views"] / overall if overall > 0 else 1
-            shrink = row["sample_size"] / (row["sample_size"] + 5)
-            target = 1 + (raw - 1) * shrink
-            bounded = max(0.75, min(1.25, target))
-            multipliers[hook] = round(bounded, 4)
-            updates.append({"hook": hook, "multiplier": multipliers[hook], "sample_size": row["sample_size"], "reason": "Shrunk seven-day within-group median ratio; correlation only."})
-    model = Setting(key=setting_key, value_json={"version": version, "hook_multipliers": multipliers, "experiment_allocation": {"known_formats": 0.8, "new_experiments": 0.2}, "last_updated_utc": datetime.now(timezone.utc).isoformat(), "data_mode": "demo" if is_demo else "real", "updates": updates})
+    for key, signals in sorted(groups.items()):
+        damped = {name: result for name in SIGNAL_WEIGHTS if (result := _damped_signal(signals.get(name, []), overall.get(name)))}
+        if not damped:
+            continue
+        hook = key.split("|")[2]
+        combined, weights_used = _combine(damped)
+        multipliers[hook] = combined
+        updates.append({"hook": hook, "group": key, "multiplier": combined, "sample_size": max(item["sample_size"] for item in damped.values()), "signals": damped, "weights_used": weights_used, "reason": "Weighted geometric mean of shrunk seven-day within-group median ratios per signal; correlation only."})
+    model = Setting(key=setting_key, value_json={"version": version, "hook_multipliers": multipliers, "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS}, "experiment_allocation": {"known_formats": 0.8, "new_experiments": 0.2}, "last_updated_utc": datetime.now(timezone.utc).isoformat(), "data_mode": "demo" if is_demo else "real", "updates": updates})
     db.merge(model)
     db.commit()
     prompt_dir = settings.data_dir / "prompts"
@@ -79,7 +186,9 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     report = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "data_mode": "demo" if is_demo else "real",
-        "comparison": "Views at approximately seven days, grouped by platform, format, hook and length bucket",
+        "comparison": "One snapshot per publication at approximately seven days, grouped by platform, format, hook and length bucket. Signals: views, retention, watch time per view, engagement and net subscribers per 1,000 views.",
+        "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS},
+        "overall_medians": overall,
         "observed": summaries,
         "external_content_signals": external_summary,
         "possible_explanations": ["Hook, topic, packaging and channel fit may contribute; this sample cannot establish causality."],
@@ -93,7 +202,11 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     json_path = output_dir / f"learning-{mode}-{date}-v{version}.json"
     json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     lines = [f"# Weekly learning — {date} — model v{version}", "", f"Data mode: {'DEMO' if is_demo else 'REAL'}", "", "## Observed"]
-    lines.extend(f"- {row['group']}: n={row['sample_size']}, median={row['median_views']:.1f}, range={row['min']:.1f}–{row['max']:.1f}" for row in summaries)
+    for row in summaries:
+        parts = [f"{name} n={item['sample_size']} median={item['median']:.2f} range={item['min']:.2f}–{item['max']:.2f}" for name, item in row["signals"].items()]
+        lines.append(f"- {row['group']}: " + "; ".join(parts))
+    lines += ["", "## Model updates"]
+    lines.extend(f"- {item['hook']} ({item['group']}): {item['multiplier']:.4f} from " + ", ".join(f"{name}={sig['damped']:.4f} (n={sig['sample_size']})" for name, sig in item["signals"].items()) for item in updates)
     lines += ["", "## Interpretation", "- Correlation only; no causal claim.", "- Repeat promising formats only after comparable results.", "", "## Next experiment", report["next_experiment"]]
     md_path = output_dir / f"learning-{mode}-{date}-v{version}.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
