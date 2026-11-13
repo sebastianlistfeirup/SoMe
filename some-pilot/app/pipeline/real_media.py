@@ -60,6 +60,15 @@ class RealMediaPlan(BaseModel):
     experiment_variant_id: str | None = Field(default=None, max_length=40)
     # Several pre-registered experiments on different variables can apply to one story (factorial pilot).
     experiments: list[dict] = Field(default_factory=list, max_length=4)
+    # short_9x16 serves Shorts/Reels/TikTok; long_16x9 is a YouTube long-form video with optional chapters.
+    video_format: Literal["short_9x16", "long_16x9"] = "short_9x16"
+    chapters: list[dict] = Field(default_factory=list, max_length=60)
+
+    @model_validator(mode="after")
+    def long_form_is_youtube(self):
+        if self.video_format == "long_16x9" and self.platform != "youtube":
+            raise ValueError("long_form_is_youtube_only")
+        return self
     scenes: list[RealMediaScene] = Field(min_length=1, max_length=30)
 
 
@@ -139,7 +148,15 @@ def prepare_media(plan: RealMediaPlan, plan_path: Path, output: Path) -> list[Pr
     return prepared
 
 
-def _image_motion(scene: RealMediaScene, duration: float) -> str:
+PORTRAIT = {"width": 1080, "height": 1920, "wrap": 36, "text_width": 920, "caption_margin": 390, "title_y": 100}
+LANDSCAPE = {"width": 1920, "height": 1080, "wrap": 60, "text_width": 1700, "caption_margin": 150, "title_y": 60}
+
+
+def _geometry(landscape: bool) -> dict:
+    return LANDSCAPE if landscape else PORTRAIT
+
+
+def _image_motion(scene: RealMediaScene, duration: float, landscape: bool = False) -> str:
     frames = max(1, round(duration * 30))
     if scene.effect == "zoom_out":
         expression = "if(eq(on,0),1.08,max(zoom-0.0008,1.0))"
@@ -155,16 +172,19 @@ def _image_motion(scene: RealMediaScene, duration: float) -> str:
         x = f"(iw-iw/zoom)*on/{frames}"
     else:
         x = "iw/2-(iw/zoom/2)"
-    return f"zoompan=z='{expression}':x='{x}':y='ih/2-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30"
+    size = _geometry(landscape)
+    return f"zoompan=z='{expression}':x='{x}':y='ih/2-(ih/zoom/2)':d={frames}:s={size['width']}x{size['height']}:fps=30"
 
 
-def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: Path, title: str, output: Path, coverage: dict) -> dict:
+def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: Path, title: str, output: Path, coverage: dict, landscape: bool = False) -> dict:
+    size = _geometry(landscape)
+    width, height = size["width"], size["height"]
     if not prepared or coverage.get("decision") != "ALLOW":
         raise MediaError("real_media_coverage_not_allowed")
     caption_blocks = [block for block in captions.read_text(encoding="utf-8").strip().split("\n\n") if block.strip()]
     if len(prepared) != len(caption_blocks):
         raise MediaError("media_scene_caption_count_mismatch")
-    title_lines = textwrap.wrap(title, width=36)[:2]
+    title_lines = textwrap.wrap(title, width=size["wrap"])[:2]
     title_file = output.parent / "title.txt"
     title_file.write_text("\n".join(title_lines), encoding="utf-8")
     inputs = []
@@ -180,8 +200,8 @@ def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: 
             inputs.extend(["-ss", f"{item.scene.start_seconds:.3f}", "-t", f"{duration:.3f}", "-i", str(item.path)])
         else:
             inputs.extend(["-loop", "1", "-t", f"{duration:.3f}", "-i", str(item.path)])
-        crop = f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:x='(in_w-1080)*{item.scene.focus_x:.3f}':y='(in_h-1920)*{item.scene.focus_y:.3f}'"
-        motion = _image_motion(item.scene, duration) if item.scene.kind != "real_video" else "null"
+        crop = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}:x='(in_w-{width})*{item.scene.focus_x:.3f}':y='(in_h-{height})*{item.scene.focus_y:.3f}'"
+        motion = _image_motion(item.scene, duration, landscape) if item.scene.kind != "real_video" else "null"
         filters.append(f"[{index}:v]{crop},{motion},trim=duration={duration:.3f},setpts=PTS-STARTPTS,setsar=1[v{index}]")
     filters.append(f"{''.join(f'[v{index}]' for index in range(len(prepared)))}concat=n={len(prepared)}:v=1:a=0[scenes]")
     caption_count = 0
@@ -192,25 +212,25 @@ def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: 
         timing = lines[1].split(" --> ")
         start = _srt_seconds(timing[0])
         end = _srt_seconds(timing[1])
-        wrapped = textwrap.wrap(" ".join(lines[2:]), width=36)
+        wrapped = textwrap.wrap(" ".join(lines[2:]), width=size["wrap"])
         chunks = [wrapped[index:index + 2] for index in range(0, len(wrapped), 2)]
         for chunk_index, chunk in enumerate(chunks, 1):
             caption_count += 1
             caption_file = output.parent / f"caption-{block_index}-{chunk_index}.txt"
             caption_file.write_text("\n".join(chunk), encoding="utf-8")
-            size = _font_size(chunk, 48, 920)
-            max_estimated_width = max(max_estimated_width, round(max(len(line) for line in chunk) * size * 0.62))
+            font = _font_size(chunk, 48, size["text_width"])
+            max_estimated_width = max(max_estimated_width, round(max(len(line) for line in chunk) * font * 0.62))
             chunk_start = start + (end - start) * (chunk_index - 1) / len(chunks)
             chunk_end = start + (end - start) * chunk_index / len(chunks)
             caption_filters.append(
                 f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:textfile={caption_file}:"
-                f"fontcolor=white:fontsize={size}:line_spacing=10:x=(w-text_w)/2:y=h-390:borderw=2:bordercolor=black:"
+                f"fontcolor=white:fontsize={font}:line_spacing=10:x=(w-text_w)/2:y=h-{size['caption_margin']}:borderw=2:bordercolor=black:"
                 f"box=1:boxcolor=black@0.58:boxborderw=14:enable='between(t,{chunk_start:.3f},{chunk_end:.3f})'"
             )
-    title_size = _font_size(title_lines, 48, 920)
+    title_size = _font_size(title_lines, 48, size["text_width"])
     caption_filters.append(
         f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile={title_file}:"
-        f"fontcolor=white:fontsize={title_size}:line_spacing=8:x=(w-text_w)/2:y=100:borderw=2:bordercolor=black:"
+        f"fontcolor=white:fontsize={title_size}:line_spacing=8:x=(w-text_w)/2:y={size['title_y']}:borderw=2:bordercolor=black:"
         f"box=1:boxcolor=black@0.65:boxborderw=16:enable='lt(t,2.5)'"
     )
     filters.append(f"[scenes]{','.join(caption_filters)},scale=out_range=tv,format=yuv420p[final]")
@@ -235,12 +255,15 @@ def render_real_media(prepared: list[PreparedMedia], narration: Path, captions: 
         "graphic_scenes": sum(item.scene.kind == "graphic" for item in prepared),
         "image_effects": [item.scene.effect for item in prepared if item.scene.kind == "real_image"],
         "max_estimated_text_width": max_estimated_width,
-        "caption_bottom_margin_px": 390,
+        "caption_bottom_margin_px": size["caption_margin"],
+        "resolution": f"{width}x{height}",
         "synthetic_slide_fallback": False,
     }
 
 
-def thumbnail_from_source(prepared: list[PreparedMedia], durations: list[float], output: Path) -> dict:
+def thumbnail_from_source(prepared: list[PreparedMedia], durations: list[float], output: Path, landscape: bool = False) -> dict:
+    size = _geometry(landscape)
+    width, height = size["width"], size["height"]
     if len(prepared) != len(durations):
         raise ValueError("thumbnail_scene_duration_mismatch")
     target = sum(durations) * 0.65
@@ -258,7 +281,7 @@ def thumbnail_from_source(prepared: list[PreparedMedia], durations: list[float],
     item = prepared[selected_index]
     source_seconds = item.scene.start_seconds + durations[selected_index] * 0.65
     inputs = ["-ss", f"{source_seconds:.3f}"] if item.scene.kind == "real_video" else []
-    crop = f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:x='(in_w-1080)*{item.scene.focus_x:.3f}':y='(in_h-1920)*{item.scene.focus_y:.3f}',scale=out_range=tv,format=yuv420p"
+    crop = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}:x='(in_w-{width})*{item.scene.focus_x:.3f}':y='(in_h-{height})*{item.scene.focus_y:.3f}',scale=out_range=tv,format=yuv420p"
     run(["ffmpeg", "-y", *inputs, "-i", str(item.path), "-vf", crop, "-frames:v", "1", "-q:v", "2", str(output)])
     return {"scene_index": selected_index + 1, "source_seconds": round(source_seconds, 3), "source_type": item.scene.source_type, "clean_frame_without_captions": True}
 

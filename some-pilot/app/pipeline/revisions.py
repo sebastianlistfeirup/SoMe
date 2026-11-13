@@ -110,6 +110,9 @@ def create_post_revision(db: Session, video_id: int, review_id: int, job_id: str
         ))
         db.commit()
         db.refresh(video)
+        from app.pipeline.alerts import notify_awaiting_owner
+
+        notify_awaiting_owner(db, video)
         return video
     except Exception:
         db.rollback()

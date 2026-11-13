@@ -22,6 +22,7 @@ from app.pipeline.taxonomy import normalize_hook
 EXPLOIT_SHARE = 0.8
 FRESHNESS_FACTOR = {"event": 1.10, "deal": 1.05, "evergreen": 1.0}
 PRIMARY = "net_subscribers_per_1k_views"
+OUTLIER_RATIO = 3.0
 
 
 def classify_idea_hook(text: str) -> str:
@@ -142,16 +143,21 @@ def suggestions_from_research(db: Session, plan: list[dict], days: int = 30, is_
     since = datetime.now(timezone.utc) - timedelta(days=1)
     created = []
     for item in plan:
-        rows = db.query(Observation).filter(Observation.is_demo.is_(is_demo), Observation.topic.startswith(item["query"] + ":"), Observation.metric_value.isnot(None)).all()
-        rows = [row for row in rows if (row.collected_at_utc.replace(tzinfo=timezone.utc) if row.collected_at_utc.tzinfo is None else row.collected_at_utc) >= since]
+        all_rows = db.query(Observation).filter(Observation.is_demo.is_(is_demo), Observation.topic.startswith(item["query"] + ":"), Observation.metric_value.isnot(None)).all()
+        all_rows = [row for row in all_rows if (row.collected_at_utc.replace(tzinfo=timezone.utc) if row.collected_at_utc.tzinfo is None else row.collected_at_utc) >= since]
+        rows = [row for row in all_rows if row.metric_name == "views"]
+        ratios = [row for row in all_rows if row.metric_name == "views_per_subscriber"]
+        outliers = sorted((row for row in ratios if row.metric_value >= OUTLIER_RATIO), key=lambda row: row.metric_value, reverse=True)
         values = [float(row.metric_value) for row in rows]
         top = sorted(rows, key=lambda row: row.metric_value or 0, reverse=True)[:3]
-        evidence = {"observations": len(values), "median_views": statistics.median(values) if values else None, "examples": [{"url": row.source_url, "title": row.topic.split(":", 1)[-1][:200], "views": row.metric_value} for row in top], "window_days": days, "limitations": "Search sample of other channels; cumulative views, not views per hour. Interest signal only, never evidence or footage."}
+        evidence = {"outliers": [{"url": row.source_url, "title": row.topic.split(":", 1)[-1][:200], "views_per_subscriber": row.metric_value} for row in outliers[:5]], "outlier_ratio_threshold": OUTLIER_RATIO, "observations": len(values), "median_views": statistics.median(values) if values else None, "examples": [{"url": row.source_url, "title": row.topic.split(":", 1)[-1][:200], "views": row.metric_value} for row in top], "window_days": days, "limitations": "Search sample of other channels; cumulative views, not views per hour. Interest signal only, never evidence or footage."}
         if values:
             rationale = f"{len(values)} recent YouTube videos match '{item['query']}' (median {statistics.median(values):,.0f} views in the last {days} days). Ranked as {item['allocation']}."
         else:
             rationale = f"No recent YouTube matches for '{item['query']}'. Ranked as {item['allocation']}; low competition or low interest — verify before choosing."
-        suggestion = IdeaSuggestion(idea_id=item["idea_id"], lane=item["lane"], title=item["title"], query=item["query"], rationale=rationale, evidence_json=evidence, score=evidence["median_views"], is_demo=is_demo)
+        if outliers:
+            rationale += f" {len(outliers)} outlier(s): a video reached at least {OUTLIER_RATIO:g}× its own channel's subscribers — a stronger topic signal than raw views."
+        suggestion = IdeaSuggestion(idea_id=item["idea_id"], lane=item["lane"], title=item["title"], query=item["query"], rationale=rationale, evidence_json=evidence, score=float(len(outliers)) * 1000 + (evidence["median_views"] or 0) / 1000 if values or outliers else None, is_demo=is_demo)
         db.add(suggestion)
         created.append(suggestion)
     db.commit()

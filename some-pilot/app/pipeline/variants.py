@@ -42,6 +42,8 @@ def platform_variant(post: dict, platform: str, fallback_title: str = "") -> dic
     tag_room = sum(len(tag) + 2 for tag in tags) + len(cta) + 4
     caption = _trim(view["caption"], rules["caption_max"] - tag_room)
     body = f"{caption}\n\n{cta}" if cta and cta.casefold() not in caption.casefold() else caption
+    if platform == "youtube" and post.get("chapters_text"):
+        body = f"{body}\n\n{post['chapters_text']}"
     return {
         "platform": platform,
         "title": _trim(view["title"], rules["title_max"]) if rules["title_max"] else "",

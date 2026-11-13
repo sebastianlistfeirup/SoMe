@@ -299,6 +299,10 @@ class AuthUser(Base):
     password_hash: Mapped[str] = mapped_column(Text)
     is_owner: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    totp_secret_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
+    totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    totp_last_step: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    recovery_codes_json: Mapped[list] = mapped_column(JSON, default=list)
 
 
 class AuthSession(Base):
@@ -308,3 +312,4 @@ class AuthSession(Base):
     csrf_token: Mapped[str] = mapped_column(String(64))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    mfa_pending: Mapped[bool] = mapped_column(Boolean, default=False)

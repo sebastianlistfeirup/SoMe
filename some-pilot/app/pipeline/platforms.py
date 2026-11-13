@@ -190,7 +190,6 @@ class YouTubePublisher:
             publication.published_at = utcnow()
             _mark_success(db, publication, video)
             db.commit()
-            return publication
         except httpx.TimeoutException:
             _mark_timeout(db, publication, video)
             raise PublishError("upload_timeout_reconcile_required")
@@ -200,6 +199,11 @@ class YouTubePublisher:
             else:
                 _mark_failure(db, publication, video, exc)
             raise
+        if content.get("post_publish"):
+            from app.pipeline.youtube_extras import run_post_publish
+
+            run_post_publish(db, video, publication, token, content["post_publish"])
+        return publication
 
 
 class InstagramPublisher:

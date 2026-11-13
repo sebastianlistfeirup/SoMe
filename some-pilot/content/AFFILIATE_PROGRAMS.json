@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Affiliate programmes the channel actually uses. A post whose links point to a listed domain (or contains a known affiliate pattern) must include that programme's disclosure text, or approval is refused. Record the programme terms and the date they were checked; no income is assumed.",
+  "generic_affiliate_patterns": ["amzn.to/", "tag=", "/ref=", "aff_id=", "affiliate", "partnerize", "awin1.com", "click.linksynergy.com"],
+  "programs": []
+}

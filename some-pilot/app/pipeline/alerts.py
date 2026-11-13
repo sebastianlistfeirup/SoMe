@@ -129,5 +129,21 @@ def immediate(db: Session, severity: str, code: str, message: str) -> dict:
     return notify(db, [{"severity": severity, "code": code, "message": redact(message)}], f"SoMe-maskinen: {code}")
 
 
+def review_url(video_id: int) -> str:
+    settings = get_settings()
+    base = (settings.public_dashboard_url or settings.public_base_url or "").rstrip("/")
+    return f"{base}/review/{video_id}" if base else f"/review/{video_id}"
+
+
+def notify_awaiting_owner(db: Session, video) -> dict:
+    """Tell the owner a video waits for review. The link opens the review page; approving still needs login."""
+    try:
+        title = (video.post_json or {}).get("title") or f"Video {video.id}"
+        demo = " (DEMO)" if (video.features_json or {}).get("is_demo") else ""
+        return notify(db, [{"severity": "info", "code": f"awaiting_owner:{video.id}", "message": f"Ny video venter på din godkendelse{demo}: {title[:120]}\n{review_url(video.id)}"}], "SoMe-maskinen: video venter på dig")
+    except Exception as exc:
+        return {"sent": [], "status": "notify_error", "error": type(exc).__name__}
+
+
 def status_json(db: Session) -> str:
     return json.dumps({"channels": channels_configured(), "alerts": collect_alerts(db)}, ensure_ascii=False)

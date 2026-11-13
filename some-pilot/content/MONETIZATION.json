@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "source_url": "https://support.google.com/youtube/answer/72851",
+  "expanded_tier_source_url": "https://support.google.com/youtube/answer/13429240",
+  "observed_at": "2026-11-13",
+  "note": "Thresholds as read on YouTube Help on the observed date; YouTube reviews every channel and meeting a threshold does not guarantee acceptance. Re-check the source before acting. YouTube has announced higher entry thresholds for new creators from 2027-02-01 (8,000 watch hours in 365 days or 20 million Shorts views in 90 days, plus 1,000 subscribers).",
+  "tiers": [
+    {"id": "expanded_fan_funding", "name": "Expanded YPP (fan funding, Shopping)", "subscribers": 500, "public_uploads_90d": 3, "watch_hours_365d": 3000, "shorts_views_90d": 3000000},
+    {"id": "full_ypp", "name": "Full YPP (ad revenue)", "subscribers": 1000, "watch_hours_365d": 4000, "shorts_views_90d": 10000000}
+  ],
+  "other_requirements": ["Follow YouTube monetization policies", "Live in an eligible country/region", "No active Community Guidelines strikes", "2-Step Verification on the Google account"]
+}

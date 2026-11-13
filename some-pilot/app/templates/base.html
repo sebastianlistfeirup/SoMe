@@ -25,6 +25,7 @@
       <span class="nav-label">SYSTEM</span>
       <a class="{{ 'active' if request.url.path.startswith('/operations') else '' }}" href="/operations"><span class="nav-symbol">⚑</span>Drift</a>
       <a class="{{ 'active' if request.url.path.startswith('/economy') else '' }}" href="/economy"><span class="nav-symbol">¤</span>Økonomi</a>
+      <a class="{{ 'active' if request.url.path.startswith('/account') else '' }}" href="/account/security"><span class="nav-symbol">⚿</span>Sikkerhed</a>
       <a class="{{ 'active' if request.url.path.startswith('/settings') else '' }}" href="/settings"><span class="nav-symbol">⚙</span>Indstillinger</a>
     </nav>
     <div class="sidebar-status"><span class="live-dot"></span><div><strong>Sikker tilstand</strong><small>Publicering kræver godkendelse</small></div></div>

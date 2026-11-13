@@ -103,6 +103,12 @@ def transition(video: VideoVersion, target: str, actor: str = "system") -> None:
 REJECTED_VOICE_PROVIDERS = {"kokoro", "espeak-ng"}
 
 
+def _affiliate_blockers(video: VideoVersion) -> list[str]:
+    from app.pipeline.monetization import affiliate_blockers
+
+    return affiliate_blockers(video.post_json or {})
+
+
 def uses_rejected_voice(video: VideoVersion) -> bool:
     """Kokoro af_bella (and the espeak fallback) are creatively rejected; such videos can never be approved."""
     features = video.features_json or {}
@@ -134,7 +140,7 @@ def approve(
     for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition"):
         if checks.get(name, {}).get("decision") != "ALLOW":
             raise ApprovalError(f"check_not_allowed:{name}")
-    blockers = editorial_blockers(checks)
+    blockers = editorial_blockers(checks) + _affiliate_blockers(video)
     if blockers:
         raise ApprovalError(blockers[0])
     digest = approval_digest(video, platform, account)
@@ -213,6 +219,9 @@ def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
         if destination.get("digest_version", 1) >= 2:
             label = ai_label_for(destination["platform"], destination.get("ai_label"))
             item.update({"digest_version": 2, "ai_label": label["ai_label"], "ai_label_applied_by": label["applied_by"], "variant": platform_variant(video.post_json, destination["platform"])})
+            if destination["platform"] == "youtube":
+                # Follow-up actions after upload are part of what the owner approves.
+                item["post_publish"] = {"captions": (Path(video.output_dir) / "captions.srt").is_file(), "series_playlist": (video.features_json or {}).get("series_id")}
         normalized.append(item)
     normalized.sort(key=lambda item: (item["platform"], item["account"], item["publish_at"] or ""))
     components = {
@@ -233,8 +242,8 @@ def approved_content(review: Review, video: VideoVersion, platform: str, account
     destination = next((item for item in (review.digest_json or {}).get("destinations", []) if item["platform"] == platform and item["account"] == account), None)
     if destination and destination.get("variant"):
         variant = destination["variant"]
-        return {"title": variant.get("title") or video.post_json.get("title", ""), "text": variant["text"], "ai_label": destination.get("ai_label"), "digest_version": 2}
-    return {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "text": video.post_json.get("text", ""), "ai_label": None, "digest_version": 1}
+        return {"title": variant.get("title") or video.post_json.get("title", ""), "text": variant["text"], "ai_label": destination.get("ai_label"), "digest_version": 2, "post_publish": destination.get("post_publish") or {}}
+    return {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "text": video.post_json.get("text", ""), "ai_label": None, "digest_version": 1, "post_publish": {}}
 
 
 def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destinations: list[dict], owner_watched_full_video: bool) -> Review:
@@ -251,9 +260,12 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
     if not destinations:
         raise ApprovalError("destination_required")
     seen = set()
+    allowed = set((video.features_json or {}).get("allowed_platforms") or ["youtube", "instagram", "facebook", "tiktok"])
     for destination in destinations:
         if destination["platform"] not in {"youtube", "instagram", "facebook", "tiktok"}:
             raise ApprovalError("unsupported_platform")
+        if destination["platform"] not in allowed:
+            raise ApprovalError(f"format_not_for_platform:{destination['platform']}")
         if not destination["account"].strip():
             raise ApprovalError("connected_account_required")
         key = (destination["platform"], destination["account"])
@@ -269,7 +281,7 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
     for name in ("rights", "technical", "layout", "safety", "quality", "claim_control", "voice", "media_composition"):
         if checks.get(name, {}).get("decision") != "ALLOW":
             raise ApprovalError(f"check_not_allowed:{name}")
-    blockers = editorial_blockers(checks)
+    blockers = editorial_blockers(checks) + _affiliate_blockers(video)
     if blockers:
         raise ApprovalError(blockers[0])
     digest = destinations_digest(video, destinations)

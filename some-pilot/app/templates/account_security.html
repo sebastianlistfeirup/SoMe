@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<h1>Sikkerhed</h1>
+<section>
+  <h2>2-faktor-login</h2>
+  {% if recovery_codes %}
+    <p><strong>2-faktor er slået til.</strong> Gem disse gendannelseskoder et sikkert sted nu. De vises kun denne ene gang, og hver kan bruges én gang, hvis du mister telefonen.</p>
+    <pre>{% for code in recovery_codes %}{{ code }}
+{% endfor %}</pre>
+  {% elif user.totp_enabled %}
+    <p>2-faktor er slået til. Gendannelseskoder tilbage: {{ recovery_left }}.</p>
+    {% if not require_totp %}
+    <form method="post" action="/account/2fa/disable"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Kode fra appen for at slå 2-faktor fra <input name="code" inputmode="numeric" autocomplete="one-time-code" required></label><button class="danger">Slå 2-faktor fra</button></form>
+    {% else %}<p>2-faktor er påkrævet på denne server.</p>{% endif %}
+  {% elif setup and setup.error %}
+    <p class="error">2-faktor kan ikke sættes op: {{ setup.error }}</p>
+  {% elif setup %}
+    <ol>
+      <li>Åbn din authenticator-app (fx Google Authenticator, Microsoft Authenticator eller 1Password) og vælg at tilføje en konto med en nøgle.</li>
+      <li>Kontonavn: <strong>SoMe-maskinen</strong>. Nøgle: <code>{{ setup.key }}</code> (tidsbaseret, 6 cifre).</li>
+      <li>På telefonen kan du i stedet prøve linket: <a href="{{ setup.uri }}">tilføj til authenticator</a>.</li>
+      <li>Skriv den kode, appen viser, og bekræft.</li>
+    </ol>
+    <form method="post" action="/account/2fa/enable"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Kode fra appen <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required></label><button>Slå 2-faktor til</button></form>
+  {% endif %}
+</section>
+{% endblock %}

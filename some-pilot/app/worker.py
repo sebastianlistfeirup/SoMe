@@ -34,7 +34,7 @@ def next_local(hour: int, weekday: int | None = None) -> datetime:
 
 
 def schedule(db) -> None:
-    jobs = (("research", next_local(6)), ("metrics", datetime.now(timezone.utc)), ("learn_weekly", next_local(8, 0)), ("backup", next_local(3)), ("maintenance", next_local(4)), ("account_probe", next_local(5)), ("alerts_digest", next_local(7)), ("comments", next_local(6, 2)))
+    jobs = (("research", next_local(6)), ("metrics", datetime.now(timezone.utc)), ("learn_weekly", next_local(8, 0)), ("backup", next_local(3)), ("maintenance", next_local(4)), ("account_probe", next_local(5)), ("alerts_digest", next_local(7)), ("comments", next_local(6, 2)), ("release_calendar", next_local(6, 1)), ("ypp_progress", next_local(9, 0)))
     for kind, due in jobs:
         enqueue(db, kind, {}, f"{kind}:{due.date().isoformat()}:{due.hour}", due_at=due)
     zone = ZoneInfo(get_settings().app_timezone)
@@ -90,6 +90,14 @@ def execute(db, job) -> Path:
         else:
             result = collect_comments(db)
             result["suggestions"] = [item.id for item in suggestions_from_comments(db)]
+    elif job.kind == "release_calendar":
+        from app.pipeline.releases import refresh
+
+        result = refresh(db)
+    elif job.kind == "ypp_progress":
+        from app.pipeline.monetization import collect_progress
+
+        result = collect_progress(db)
     elif job.kind == "cost_report":
         from app.pipeline.ops import monthly_cost_report
 

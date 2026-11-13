@@ -73,6 +73,11 @@ class Settings(BaseSettings):
     offsite_webdav_url: str = ""
     offsite_username: str = ""
     offsite_password: str = ""
+    igdb_client_id: str = ""
+    igdb_client_secret: str = ""
+    igdb_terms_confirmed: bool = False
+    public_dashboard_url: str = ""
+    require_totp: bool = False
     server_monthly_cost_dkk: float = Field(default=176.94, ge=0)
     expected_monthly_api_dkk: float = Field(default=6.51, ge=0)
     # Production narration is always ElevenLabs. Kokoro af_bella is creatively rejected and only

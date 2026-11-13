@@ -219,7 +219,7 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path, voice_id: st
                 f"https://api.elevenlabs.io/v1/text-to-speech/{selected_voice}/with-timestamps",
                 params={"output_format": "pcm_24000"},
                 headers={"xi-api-key": settings.elevenlabs_api_key, "Content-Type": "application/json"},
-                json={"text": segment.text.strip(), "model_id": settings.elevenlabs_model_id},
+                json=_tts_body(segment.text.strip(), settings.elevenlabs_model_id),
                 timeout=45,
             )
             response.raise_for_status()
@@ -246,6 +246,17 @@ def _new_elevenlabs(segments: list[VoiceSegment], output_dir: Path, voice_id: st
     paid_call = successful_calls > 0
     actual_cost = round(successful_characters * settings.elevenlabs_cost_per_1000_chars_dkk / 1000, 6) if paid_call else None
     return _base_report("elevenlabs", reasons, files, paid_call=paid_call, estimated_cost_dkk=estimated_cost, actual_cost_dkk=actual_cost, successful_provider_calls=successful_calls, duration_seconds=round(total_duration, 3), cost_basis="configured_verified_character_unit_price")
+
+
+def _tts_body(text: str, model_id: str) -> dict:
+    """Narration request; adds the synced pronunciation dictionary for game names when present."""
+    from app.pipeline.pronunciation import current_locator
+
+    body = {"text": text, "model_id": model_id}
+    locator = current_locator()
+    if locator:
+        body["pronunciation_dictionary_locators"] = [locator]
+    return body
 
 
 def prepare_voice(segments: list[VoiceSegment], provider: str, output_dir: Path, existing_dir: Path | None = None, voice_id: str | None = None) -> dict:

@@ -284,3 +284,14 @@ code { user-select: all; }
 .variant-card{border:1px solid rgba(127,127,127,.25);border-radius:8px;padding:10px}
 .variant-text{white-space:pre-wrap;font-size:.9em}
 .reject-categories,.ai-labels,.variant-preview{border:0;padding:0;margin:12px 0}
+
+/* Mobile review: one column, large tap targets, the approve button always reachable. */
+@media (max-width: 680px) {
+  .variant-grid { grid-template-columns: 1fr; }
+  .decision-card input, .decision-card select, .decision-card textarea, .reject-form textarea { font-size: 16px; }
+  .destination-option, .ai-labels .check, .reject-categories .check { display: flex; gap: .5rem; align-items: center; min-height: 44px; }
+  .approve-button { position: sticky; bottom: .6rem; width: 100%; min-height: 52px; font-size: 1rem; z-index: 5; box-shadow: 0 6px 18px #10182833; }
+  .reject-button { width: 100%; min-height: 48px; }
+  .watch-check { min-height: 48px; }
+  .variant-text { font-size: .95rem; }
+}

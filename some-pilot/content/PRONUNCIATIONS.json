@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Alias rules sent to ElevenLabs as a pronunciation dictionary so game names are spoken the same way every time. Alias rules work with every model (phoneme rules only with some). Matching is case sensitive and the first matching rule wins. Add a rule when the owner hears a name spoken wrong.",
+  "rules": [
+    {"string_to_replace": "Hades", "alias": "Hay-deez"},
+    {"string_to_replace": "Amiga", "alias": "uh-mee-guh"}
+  ]
+}

@@ -7,6 +7,9 @@ from app.adapters.base import ResearchAdapter
 from app.config import get_settings
 
 
+MIN_SUBSCRIBERS_FOR_RATIO = 100
+
+
 class YouTubeAdapter(ResearchAdapter):
     name = "youtube"
     api_url = "https://www.googleapis.com/youtube/v3"
@@ -28,6 +31,14 @@ class YouTubeAdapter(ResearchAdapter):
         if not ids:
             return []
         metadata = self._get("videos", {"part": "snippet,statistics,contentDetails", "id": ",".join(ids)})
+        channel_ids = sorted({item["snippet"].get("channelId") for item in metadata.get("items", []) if item.get("snippet", {}).get("channelId")})
+        subscribers: dict[str, int] = {}
+        if channel_ids:
+            channels = self._get("channels", {"part": "statistics", "id": ",".join(channel_ids[:50])})
+            for channel in channels.get("items", []):
+                stats = channel.get("statistics", {})
+                if not stats.get("hiddenSubscriberCount") and stats.get("subscriberCount"):
+                    subscribers[channel["id"]] = int(stats["subscriberCount"])
         rows = []
         for item in metadata.get("items", []):
             snippet = item["snippet"]
@@ -47,6 +58,9 @@ class YouTubeAdapter(ResearchAdapter):
                 "confidence": "high",
                 "limitations": "Cumulative views; not views/hour. Search sample is not representative. Channel and format normalization required.",
             })
+            channel_subs = subscribers.get(snippet.get("channelId"))
+            if "viewCount" in stats and channel_subs and channel_subs >= MIN_SUBSCRIBERS_FOR_RATIO:
+                rows.append({**rows[-1], "metric_name": "views_per_subscriber", "metric_value": round(int(stats["viewCount"]) / channel_subs, 4), "unit": "ratio", "method": "videos.list viewCount / channels.list subscriberCount", "limitations": "Outlier signal: views relative to the channel's own size. Subscriber counts are rounded by YouTube; hidden counts are skipped."})
         return rows
 
     def fetch_metadata(self, external_id: str) -> dict[str, Any]:

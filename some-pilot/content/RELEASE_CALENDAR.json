@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Upcoming game releases used to time 'event' stories. Manual entries are the default source; each needs a source URL and the date it was checked. An optional IGDB import (Twitch credentials, owner must confirm the API terms for commercial use) can add more. Release dates move: re-check before production.",
+  "releases": []
+}

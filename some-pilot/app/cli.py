@@ -176,6 +176,10 @@ def build_parser() -> argparse.ArgumentParser:
     derivatives.add_argument("--plan", type=Path, required=True)
     sub.add_parser("comments", help="Fetch YouTube comments and show viewer questions")
     sub.add_parser("series", help="List recurring series and their performance")
+    sub.add_parser("releases", help="Upcoming releases (manual calendar + optional IGDB) and event suggestions")
+    sub.add_parser("ypp", help="Progress toward the YouTube Partner Program")
+    pronunciation = sub.add_parser("pronunciation", help="Sync the ElevenLabs pronunciation dictionary")
+    pronunciation.add_argument("--force", action="store_true")
     status = sub.add_parser("status-report", help="Generate STATUS facts from doctor and a test result")
     status.add_argument("--tests-passed", type=int, required=True)
     status.add_argument("--environment", default="local")
@@ -238,6 +242,18 @@ def run_extended(db, args) -> dict | None:
         from app.pipeline.audience import load_series, series_report
 
         return {"series": load_series(), "performance": series_report(db)}
+    if args.command == "releases":
+        from app.pipeline.releases import refresh, upcoming
+
+        return {**refresh(db), "releases": upcoming(db)}
+    if args.command == "ypp":
+        from app.pipeline.monetization import collect_progress
+
+        return collect_progress(db)
+    if args.command == "pronunciation":
+        from app.pipeline.pronunciation import sync
+
+        return sync(force=args.force)
     if args.command == "cost-report":
         from app.pipeline.ops import monthly_cost_report
 

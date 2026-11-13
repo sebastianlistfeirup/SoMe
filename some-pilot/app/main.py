@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 from pathlib import Path
 
 from argon2 import PasswordHasher
@@ -15,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
-from app.db.models import AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
+from app.db.models import AuditEvent, AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
 from app.pipeline.approvals import ApprovalError, approve, approve_destinations, paused, set_pause, transition
 from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
@@ -68,10 +69,25 @@ def require_user(request: Request, db: Session = Depends(get_db)) -> tuple[AuthU
     session = current_session(request, db)
     if not session:
         raise HTTPException(status_code=401, headers={"X-Login-Required": "true"})
+    if session.mfa_pending:
+        raise HTTPException(status_code=401, headers={"X-MFA-Required": "true"})
     user = db.get(AuthUser, session.user_id)
     if not user:
         raise HTTPException(status_code=401)
     return user, session
+
+
+def safe_next(value: str | None) -> str:
+    """Only same-site relative paths; never an open redirect."""
+    if not value or not value.startswith("/") or value.startswith("//") or "\\" in value or value.startswith("/login"):
+        return "/review"
+    return value[:500]
+
+
+def _set_session_cookie(response, session_id: str, minutes: int) -> None:
+    # Lax (not Strict) so a link from a notification opens the page while logged in;
+    # every state-changing form still requires the per-session CSRF token.
+    response.set_cookie("some_session", session_id, httponly=True, secure=settings.secure_cookies, samesite="lax", max_age=minutes * 60, path="/")
 
 
 def csrf_check(request: Request, csrf_token: str = Form(...), db: Session = Depends(get_db)) -> tuple[AuthUser, AuthSession]:
@@ -88,10 +104,13 @@ def render(request: Request, template: str, db: Session, auth: tuple[AuthUser, A
 
 
 @app.exception_handler(401)
-async def login_redirect(request: Request, _exc: HTTPException):
+async def login_redirect(request: Request, exc: HTTPException):
     if request.url.path.startswith("/healthz"):
         return HTMLResponse("Unauthorized", status_code=401)
-    return RedirectResponse("/login", status_code=303)
+    target = quote(safe_next(request.url.path + (f"?{request.url.query}" if request.url.query else "")), safe="")
+    if (getattr(exc, "headers", None) or {}).get("X-MFA-Required"):
+        return RedirectResponse(f"/login/2fa?next={target}", status_code=303)
+    return RedirectResponse(f"/login?next={target}", status_code=303)
 
 
 @app.get("/healthz")
@@ -119,12 +138,13 @@ def tiktok_domain_verification():
 
 
 @app.get("/login", response_class=HTMLResponse)
-def login_page(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": None})
+def login_page(request: Request, next: str = "/review") -> HTMLResponse:
+    return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": None, "next": safe_next(next)})
 
 
 @app.post("/login")
-def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+def login(request: Request, username: str = Form(...), password: str = Form(...), next: str = Form("/review"), db: Session = Depends(get_db)):
+    next = safe_next(next)
     client = request.client.host if request.client else "unknown"
     key = f"{client}:{username}"
     now = time.monotonic()
@@ -132,7 +152,7 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
     ip_key = f"ip:{client}"
     login_attempts[ip_key] = [stamp for stamp in login_attempts.get(ip_key, []) if now - stamp < 300]
     if len(login_attempts[key]) >= 5 or len(login_attempts[ip_key]) >= 20:
-        return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "For mange forsøg. Prøv igen om fem minutter."}, status_code=429)
+        return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "For mange forsøg. Prøv igen om fem minutter.", "next": next}, status_code=429)
     user = db.query(AuthUser).filter(AuthUser.username == username).first()
     try:
         if not user:
@@ -142,13 +162,126 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
     except (VerificationError, VerifyMismatchError):
         login_attempts[key].append(now)
         login_attempts[ip_key].append(now)
-        return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "Forkert brugernavn eller password."}, status_code=401)
+        return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "Forkert brugernavn eller password.", "next": next}, status_code=401)
+    if user.totp_enabled:
+        pending = AuthSession(id=secrets.token_urlsafe(32), user_id=user.id, csrf_token=secrets.token_urlsafe(32), expires_at=datetime.now(timezone.utc) + timedelta(minutes=5), mfa_pending=True)
+        db.add(pending)
+        db.commit()
+        response = RedirectResponse(f"/login/2fa?next={quote(next, safe='')}", status_code=303)
+        _set_session_cookie(response, pending.id, 5)
+        return response
+    if settings.require_totp:
+        return templates.TemplateResponse(request, "login.html", {"request": request, "app_name": settings.app_name, "error": "Denne konto kræver 2-faktor-login, som ikke er sat op. Sæt det op fra et godkendt netværk.", "next": next}, status_code=403)
     session = AuthSession(id=secrets.token_urlsafe(32), user_id=user.id, csrf_token=secrets.token_urlsafe(32), expires_at=datetime.now(timezone.utc) + timedelta(minutes=settings.session_ttl_minutes))
     db.add(session)
     db.commit()
-    response = RedirectResponse("/review", status_code=303)
-    response.set_cookie("some_session", session.id, httponly=True, secure=settings.secure_cookies, samesite="strict", max_age=settings.session_ttl_minutes * 60, path="/")
+    response = RedirectResponse(next, status_code=303)
+    _set_session_cookie(response, session.id, settings.session_ttl_minutes)
     return response
+
+
+def _pending_session(request: Request, db: Session) -> AuthSession:
+    session = current_session(request, db)
+    if not session or not session.mfa_pending:
+        raise HTTPException(status_code=401)
+    return session
+
+
+@app.get("/login/2fa", response_class=HTMLResponse)
+def login_second_factor_page(request: Request, next: str = "/review", db: Session = Depends(get_db)) -> HTMLResponse:
+    session = _pending_session(request, db)
+    return templates.TemplateResponse(request, "login_2fa.html", {"request": request, "app_name": settings.app_name, "error": None, "next": safe_next(next), "csrf_token": session.csrf_token})
+
+
+@app.post("/login/2fa")
+def login_second_factor(request: Request, code: str = Form(...), csrf_token: str = Form(...), next: str = Form("/review"), db: Session = Depends(get_db)):
+    from app.pipeline import totp
+
+    next = safe_next(next)
+    pending = _pending_session(request, db)
+    if not secrets.compare_digest(csrf_token, pending.csrf_token):
+        raise HTTPException(status_code=403, detail="CSRF validation failed")
+    key = f"2fa:{pending.user_id}"
+    now = time.monotonic()
+    login_attempts[key] = [stamp for stamp in login_attempts.get(key, []) if now - stamp < 300]
+    if len(login_attempts[key]) >= 5:
+        return templates.TemplateResponse(request, "login_2fa.html", {"request": request, "app_name": settings.app_name, "error": "For mange forsøg. Prøv igen om fem minutter.", "next": next, "csrf_token": pending.csrf_token}, status_code=429)
+    user = db.get(AuthUser, pending.user_id)
+    step = totp.verify(totp.decrypt_secret(user.totp_secret_encrypted), code, user.totp_last_step) if user and user.totp_secret_encrypted else None
+    used_recovery = False
+    if step is None and user:
+        remaining = totp.use_recovery_code(list(user.recovery_codes_json or []), code)
+        if remaining is not None:
+            user.recovery_codes_json = remaining
+            used_recovery = True
+    if step is None and not used_recovery:
+        login_attempts[key].append(now)
+        return templates.TemplateResponse(request, "login_2fa.html", {"request": request, "app_name": settings.app_name, "error": "Forkert kode.", "next": next, "csrf_token": pending.csrf_token}, status_code=401)
+    if step is not None:
+        user.totp_last_step = step
+    db.delete(pending)
+    session = AuthSession(id=secrets.token_urlsafe(32), user_id=user.id, csrf_token=secrets.token_urlsafe(32), expires_at=datetime.now(timezone.utc) + timedelta(minutes=settings.session_ttl_minutes))
+    db.add(session)
+    db.add(AuditEvent(actor=user.username, action="LOGIN_2FA_RECOVERY_CODE" if used_recovery else "LOGIN_2FA", entity_type="auth_user", entity_id=str(user.id), details_json={"recovery_codes_left": len(user.recovery_codes_json or [])}))
+    db.commit()
+    response = RedirectResponse(next, status_code=303)
+    _set_session_cookie(response, session.id, settings.session_ttl_minutes)
+    return response
+
+
+@app.get("/account/security", response_class=HTMLResponse)
+def account_security(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
+    from app.pipeline import totp
+
+    user = auth[0]
+    setup = None
+    if not user.totp_enabled:
+        try:
+            if not user.totp_secret_encrypted:
+                user.totp_secret_encrypted = totp.encrypt_secret(totp.new_secret())
+                db.commit()
+            secret = totp.decrypt_secret(user.totp_secret_encrypted)
+            setup = {"key": totp.grouped(secret), "uri": totp.provisioning_uri(user.username, secret)}
+        except ValueError as exc:
+            setup = {"error": str(exc)}
+    return render(request, "account_security.html", db, auth, setup=setup, recovery_codes=None, require_totp=settings.require_totp, recovery_left=len(user.recovery_codes_json or []))
+
+
+@app.post("/account/2fa/enable")
+def enable_two_factor(request: Request, code: str = Form(...), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    from app.pipeline import totp
+
+    user = auth[0]
+    if user.totp_enabled or not user.totp_secret_encrypted:
+        raise HTTPException(409, "2-faktor er allerede slået til eller ikke klargjort")
+    step = totp.verify(totp.decrypt_secret(user.totp_secret_encrypted), code)
+    if step is None:
+        raise HTTPException(422, "Koden passede ikke. Tjek at telefonens ur er korrekt, og prøv den næste kode.")
+    codes, hashes = totp.new_recovery_codes()
+    user.totp_enabled = True
+    user.totp_last_step = step
+    user.recovery_codes_json = hashes
+    db.add(AuditEvent(actor=user.username, action="TOTP_ENABLED", entity_type="auth_user", entity_id=str(user.id), details_json={}))
+    db.commit()
+    return render(request, "account_security.html", db, auth, setup=None, recovery_codes=codes, require_totp=settings.require_totp, recovery_left=len(hashes))
+
+
+@app.post("/account/2fa/disable")
+def disable_two_factor(code: str = Form(...), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    from app.pipeline import totp
+
+    user = auth[0]
+    if settings.require_totp:
+        raise HTTPException(409, "2-faktor er påkrævet på denne server og kan ikke slås fra her")
+    if not user.totp_enabled or totp.verify(totp.decrypt_secret(user.totp_secret_encrypted), code, user.totp_last_step) is None:
+        raise HTTPException(422, "Koden passede ikke")
+    user.totp_enabled = False
+    user.totp_secret_encrypted = None
+    user.totp_last_step = None
+    user.recovery_codes_json = []
+    db.add(AuditEvent(actor=user.username, action="TOTP_DISABLED", entity_type="auth_user", entity_id=str(user.id), details_json={}))
+    db.commit()
+    return RedirectResponse("/account/security", status_code=303)
 
 
 @app.post("/logout")

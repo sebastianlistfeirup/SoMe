@@ -12,3 +12,4 @@ Korte beslutningsnotater. Hver beslutning peger på de tests, der håndhæver de
 - [Læring er dæmpet, skygge-testet og kan rulles tilbage](0008-learning-is-damped-shadowed-and-reversible.md)
 - [Eksperimenter ændrer én ting, og ejeren beslutter](0009-one-variable-experiments-owner-adopts.md)
 - [Ingen nye redaktionelle videoer uden ejerens go](0010-no-new-videos-without-owner-go.md)
+- [Ekstern adgang til dashboardet kun med 2-faktor](0011-external-access-only-with-two-factor.md)

@@ -18,9 +18,11 @@ from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.quality import independent_quality_review
 from app.pipeline.owner_workflow import publisher_policy_blockers
 from app.pipeline.audience import validate_series
+from app.pipeline.alerts import notify_awaiting_owner
 from app.pipeline.posts import build_post
 from app.pipeline.real_media import RealMediaPlan, load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
 from app.pipeline.taxonomy import detect_cta
+from app.pipeline.youtube_extras import build_chapters
 from app.pipeline.voice import VoiceSegment, prepare_voice, write_alignment_srt
 
 FEATURE_SCHEMA_VERSION = "production-features-v1"
@@ -33,8 +35,10 @@ def production_features(topic: Topic, plan: RealMediaPlan, draft: ScriptDraft, l
         "niche": topic.niche,
         "lane": lane,
         "platform": plan.platform,
-        "format": "packet_real_media_short" if packet else "vertical_explainer",
-        "aspect_ratio": "9:16",
+        "format": ("packet_real_media_long" if plan.video_format == "long_16x9" else "packet_real_media_short") if packet else "vertical_explainer",
+        "aspect_ratio": "16:9" if plan.video_format == "long_16x9" else "9:16",
+        "video_format": plan.video_format,
+        "allowed_platforms": ["youtube"] if plan.video_format == "long_16x9" else ["youtube", "instagram", "tiktok", "facebook"],
         "recipe_id": packet.get("recipe_id") if packet else None,
         "story_id": packet.get("story_id") if packet else None,
         "packet_variant_id": plan.packet_variant_id,
@@ -206,6 +210,13 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         provider = settings.demo_voice_provider if dry_run else "elevenlabs"
         voice_id = settings.elevenlabs_ai_voice_id if lane == "ai" else settings.elevenlabs_gaming_voice_id
         step("generating_voice")
+        if provider == "elevenlabs" and not dry_run:
+            from app.pipeline.pronunciation import sync as sync_pronunciation
+
+            try:
+                video.features_json = {**video.features_json, "pronunciation_dictionary": sync_pronunciation().get("status")}
+            except Exception as exc:
+                video.features_json = {**video.features_json, "pronunciation_dictionary": f"sync_failed:{type(exc).__name__}"}
         voice = prepare_voice([segment], provider, output / "voice", voice_id=voice_id if provider == "elevenlabs" else None)
         (output / "voice_assets.json").write_text(json.dumps(voice, indent=2, ensure_ascii=False), encoding="utf-8")
         if voice["decision"] != "ALLOW":
@@ -243,12 +254,13 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         content = output / "content.mp4"
         rendered = output / "video.mp4"
         step("rendering")
-        layout = render_real_media(prepared, narration, captions, draft.title, content, coverage)
-        concat_with_idents(content, rendered, landscape=False)
-        layout["brand_ident"] = ident_metadata(False)
+        landscape = media_plan.video_format == "long_16x9"
+        layout = render_real_media(prepared, narration, captions, draft.title, content, coverage, landscape=landscape)
+        concat_with_idents(content, rendered, landscape=landscape)
+        layout["brand_ident"] = ident_metadata(landscape)
         video.features_json = {**video.features_json, "intro_seconds": IDENT_SECONDS, "outro_seconds": IDENT_SECONDS}
         thumb = output / "thumbnail.jpg"
-        layout["thumbnail"] = thumbnail_from_source(prepared, durations, thumb)
+        layout["thumbnail"] = thumbnail_from_source(prepared, durations, thumb, landscape=landscape)
         board = output / "storyboard.jpg"
         storyboard(rendered, board)
         video.video_path = str(rendered)
@@ -265,6 +277,11 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         except ValueError:
             transition(video, "BLOCKED")
             raise
+        if packet is not None and media_plan.chapters:
+            chapters = build_chapters(packet, draft.narration, caption_segments, media_plan.chapters, IDENT_SECONDS, video.duration_seconds)
+            layout["chapters"] = chapters
+            if chapters["status"] == "ok":
+                video.post_json = {**video.post_json, "chapters_text": chapters["text"]}
         video.features_json = {**video.features_json, "duration_seconds": video.duration_seconds, "opening_text": opening_text(caption_segments), "thumbnail_type": layout["thumbnail"].get("type", "source_frame") if isinstance(layout.get("thumbnail"), dict) else "source_frame", "scene_count": len(prepared), "real_media_ratio": coverage.get("real_media_ratio")}
         transition(video, "TECH_CHECKED")
         contains_people = any(item.scene.contains_people for item in prepared)
@@ -290,6 +307,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         _write_deliverables(output, video, script, assets, licenses, checks)
         db.commit()
         db.refresh(video)
+        notify_awaiting_owner(db, video)
         return video
     except Exception:
         db.commit()

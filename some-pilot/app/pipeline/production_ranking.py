@@ -154,4 +154,7 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
     transition(video, "AWAITING_OWNER")
     _write_deliverables(output, video, script, assets, licenses, checks)
     db.commit()
+    from app.pipeline.alerts import notify_awaiting_owner
+
+    notify_awaiting_owner(db, video)
     return {"video_id": video.id, "topic_id": topic.id, "platform": platform, "status": video.status, "output_dir": str(output), "duration_seconds": duration, "checks": checks["quality"], "real_gameplay_clips": 10, "voice_provider": voice_provider, "avatar_present": False}
