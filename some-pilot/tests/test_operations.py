@@ -242,4 +242,7 @@ def test_operations_page_retry_and_produce_routes(db, tmp_path, monkeypatch):
     assert client.post("/jobs/produce", data={"csrf_token": csrf, "topic_id": 1, "media_plan": "pilot/plan.json"}, follow_redirects=False).status_code == 303
     produce_job = db.query(Job).filter(Job.kind == "produce").one()
     assert produce_job.payload["dry_run"] is True
+    assert client.post("/timelog", data={"csrf_token": csrf, "story_key": "GI001-x", "step": "mobygames", "minutes": 25}, follow_redirects=False).status_code == 303
+    assert client.post("/timelog", data={"csrf_token": csrf, "story_key": "GI001-x", "step": "napping", "minutes": 25}, follow_redirects=False).status_code == 422
+    assert "mobygames" in client.get("/operations").text
     app.dependency_overrides.clear()

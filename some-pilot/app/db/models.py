@@ -197,6 +197,18 @@ class IdeaSuggestion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class OwnerTimeLog(Base):
+    """Minutes the owner spends per production step; finds the bottleneck worth automating."""
+
+    __tablename__ = "owner_time_logs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    story_key: Mapped[str] = mapped_column(String(120), index=True)
+    step: Mapped[str] = mapped_column(String(40), index=True)
+    minutes: Mapped[float] = mapped_column(Float)
+    note: Mapped[str] = mapped_column(Text, default="")
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Cost(Base):
     __tablename__ = "costs"
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -17,3 +17,16 @@ research/**/clips/
 research/**/voice*/
 research/**/previews/
 SoMe-mini-bibel-original.txt
+
+# Owner/agent working folders that must never be committed (kept locally, untouched)
+/.codex_tmp/
+/.codex_doc_review/
+/.tools/
+/tools/
+/brand/
+/voice-previews/
+/Grok Mini-PC/
+/Pixel and Parameters - AI/
+/KIMI_HANDOFF_SOME_MASKINEN.docx
+/research/heygen-*.png
+/some-pilot/some-pilot/

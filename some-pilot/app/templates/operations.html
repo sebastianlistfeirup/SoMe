@@ -24,6 +24,18 @@
   <p><small>Der vises aldrig nøgler eller tokens; kun status, konto og udløb.</small></p>
 </section>
 <section>
+  <h2>Din tid pr. opslag</h2>
+  <p>Log minutter pr. trin. Det dyreste trin er det, der skal automatiseres først.</p>
+  <form method="post" action="/timelog"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Historie <input name="story_key" required maxlength="120" placeholder="fx GI001-20261120"></label>
+    <label>Trin <select name="step">{% for step in owner_steps %}<option>{{ step }}</option>{% endfor %}</select></label>
+    <label>Minutter <input name="minutes" type="number" min="1" max="1440" step="1" required></label>
+    <label>Note <input name="note" maxlength="500"></label>
+    <button>Gem</button>
+  </form>
+  <pre>{{ owner_time | tojson(indent=2) }}</pre>
+</section>
+<section>
   <h2>Start produktion som job</h2>
   <p>Medieplanen og dens klip skal ligge under <code>data/media-plans</code>. Rigtig produktion bruger betalte kald (Claude og ElevenLabs) og må kun startes efter ejerens go.</p>
   <form method="post" action="/jobs/produce"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">

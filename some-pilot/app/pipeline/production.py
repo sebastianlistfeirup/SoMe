@@ -16,6 +16,7 @@ from app.pipeline.experiments import allocation_report, verify_assignment, verif
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.quality import independent_quality_review
+from app.pipeline.owner_workflow import publisher_policy_blockers
 from app.pipeline.posts import build_post
 from app.pipeline.real_media import RealMediaPlan, load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
 from app.pipeline.taxonomy import detect_cta
@@ -119,14 +120,22 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     post = build_post(draft.title, draft.post_text, default_hashtags, [claim.source_url for claim in draft.claims], ai_disclosure=True)
     features = production_features(topic, media_plan, draft, lane, packet, dry_run)
     features.update({"production_cost": production_cost, "real_media_required": True, "minimum_real_media_ratio": media_plan.minimum_real_ratio})
+    references = list(media_plan.experiments)
     if media_plan.experiment_id is not None:
-        if not media_plan.experiment_variant_id:
-            raise ValueError("experiment_variant_required")
+        references.insert(0, {"experiment_id": media_plan.experiment_id, "variant_id": media_plan.experiment_variant_id})
+    if references:
         story_key = (packet or {}).get("story_id") or media_plan.idea_id or f"topic-{topic.id}"
-        marker = verify_assignment(db, media_plan.experiment_id, media_plan.experiment_variant_id, story_key, features)
-        if not marker["is_pilot"] and not dry_run and allocation_report(db)["over_budget"]:
+        markers = []
+        for reference in references:
+            if reference.get("experiment_id") is None or not reference.get("variant_id"):
+                raise ValueError("experiment_variant_required")
+            markers.append({**verify_assignment(db, int(reference["experiment_id"]), str(reference["variant_id"]), story_key, features), "story_key": story_key})
+        if len({marker["variable"] for marker in markers}) != len(markers):
+            raise ValueError("experiments_must_test_different_variables")
+        if not all(marker["is_pilot"] for marker in markers) and not dry_run and allocation_report(db)["over_budget"]:
             raise ValueError("exploration_budget_exceeded_80_20")
-        features["experiment"] = {**marker, "story_key": story_key}
+        features["experiment"] = markers[0]
+        features["experiments"] = markers
         features["allocation"] = "experiment"
     else:
         features["allocation"] = "known_format"
@@ -183,9 +192,10 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
             assets.append(asset)
             licenses.append(license_)
         rights = rights_policy(db, [asset.id for asset in assets], media_plan.platform)
-        if rights.decision != "ALLOW":
+        publisher_blockers = publisher_policy_blockers([item.scene.rights_holder for item in prepared if item.is_real])
+        if rights.decision != "ALLOW" or publisher_blockers:
             transition(video, "BLOCKED")
-            raise ValueError("rights_blocked:" + ",".join(rights.reasons))
+            raise ValueError("rights_blocked:" + ",".join([*rights.reasons, *publisher_blockers]))
         transition(video, "RIGHTS_CHECKED")
         transition(video, "SCRIPTED")
         narration = output / "narration.wav"

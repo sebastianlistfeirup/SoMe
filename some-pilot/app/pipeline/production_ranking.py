@@ -110,10 +110,13 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
         licenses.append(license_)
     target_platform = "instagram" if platform == "reels" else platform
     rights = rights_policy(db, [asset.id for asset in assets], target_platform)
-    if rights.decision != "ALLOW":
+    from app.pipeline.owner_workflow import publisher_policy_blockers
+
+    publisher_blockers = publisher_policy_blockers([scene.rights_holder for scene in plan.scenes])
+    if rights.decision != "ALLOW" or publisher_blockers:
         transition(video, "BLOCKED")
         db.commit()
-        raise ValueError("rights_blocked:" + ",".join(rights.reasons))
+        raise ValueError("rights_blocked:" + ",".join([*rights.reasons, *publisher_blockers]))
     transition(video, "RIGHTS_CHECKED")
     transition(video, "SCRIPTED")
     layout = render_ranking(plan_path, output, platform, mobile_style, voice_files)

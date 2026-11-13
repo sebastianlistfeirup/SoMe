@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Reusable record of each game publisher's video/monetisation policy for gameplay footage. Production blocks footage whose rights holder matches an entry that disallows use, is unverified or is past its re-verification window. Entries are evidence pointers, not legal advice; the owner verifies each one and records the date.",
+  "publishers": [
+    {
+      "publisher": "Devolver Digital",
+      "aliases": ["Devolver"],
+      "policy_url": "https://canipostandmonetizevideosofdevolvergames.com/",
+      "video_use_allowed": null,
+      "monetization_allowed": null,
+      "conditions": "Channel-specific permission is generated on the policy page; keep the written permission for this channel as evidence.",
+      "evidence": "",
+      "verified_at": null,
+      "verified_by": null,
+      "reverify_after_days": 180
+    },
+    {
+      "publisher": "Nintendo",
+      "aliases": ["Nintendo Co., Ltd.", "Nintendo of America", "Nintendo of Europe"],
+      "policy_url": "https://www.nintendo.co.jp/networkservice_guideline/en/index.html",
+      "video_use_allowed": null,
+      "monetization_allowed": null,
+      "conditions": "Read the current Game Content Guidelines for online video and image sharing platforms, including what counts as adding creative input and commentary.",
+      "evidence": "",
+      "verified_at": null,
+      "verified_by": null,
+      "reverify_after_days": 180
+    }
+  ]
+}

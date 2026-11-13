@@ -471,7 +471,9 @@ def operations(request: Request, db: Session = Depends(get_db), auth=Depends(req
     plans_root = settings.data_dir / "media-plans"
     media_plans = sorted(str(path.relative_to(plans_root)) for path in plans_root.glob("**/*.json") if path.name != "editorial-packet.json") if plans_root.is_dir() else []
     topics = db.query(Topic).order_by(Topic.created_at.desc()).limit(50).all()
-    return render(request, "operations.html", db, auth, running=running, failed=[(job, can_retry(job)) for job in failed], alerts=collect_alerts(db), channels=channels_configured(), accounts=(account_status.value_json if account_status else {}), metrics=ops_metrics(db), media_plans=media_plans, topics=topics)
+    from app.pipeline.owner_workflow import OWNER_STEPS, owner_time_report
+
+    return render(request, "operations.html", db, auth, owner_steps=OWNER_STEPS, owner_time=owner_time_report(db), running=running, failed=[(job, can_retry(job)) for job in failed], alerts=collect_alerts(db), channels=channels_configured(), accounts=(account_status.value_json if account_status else {}), metrics=ops_metrics(db), media_plans=media_plans, topics=topics)
 
 
 @app.post("/jobs/{job_id}/retry")
@@ -495,6 +497,17 @@ def queue_production(topic_id: int = Form(...), media_plan: str = Form(...), liv
         raise HTTPException(404)
     job, _created = enqueue(db, "produce", {"topic_id": topic_id, "media_plan": str(plan.relative_to(root)), "dry_run": not live, "requested_by": auth[0].username}, f"produce:{topic_id}:{plan.relative_to(root)}:{'live' if live else 'demo'}:{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}", max_attempts=1)
     return RedirectResponse(f"/operations?queued={job.id}", status_code=303)
+
+
+@app.post("/timelog")
+def add_timelog(story_key: str = Form(...), step: str = Form(...), minutes: float = Form(...), note: str = Form(""), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    from app.pipeline.owner_workflow import log_owner_time
+
+    try:
+        log_owner_time(db, story_key, step, minutes, note)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return RedirectResponse("/operations?timelog=1", status_code=303)
 
 
 @app.post("/accounts/check")

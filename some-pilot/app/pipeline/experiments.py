@@ -139,11 +139,19 @@ def verify_assignment(db: Session, experiment_id: int, variant_id: str, story_ke
     return {"experiment_id": experiment.id, "variant_id": variant_id, "variable": spec.variable, "value": value, "verified": spec.variable in VERIFIABLE_VARIABLES, "spec_sha256": experiment.spec_sha256, "is_pilot": spec.is_pilot}
 
 
+def experiment_markers(features: dict) -> list[dict]:
+    markers = list(features.get("experiments") or [])
+    single = features.get("experiment")
+    if single and not any(marker.get("experiment_id") == single.get("experiment_id") for marker in markers):
+        markers.insert(0, single)
+    return markers
+
+
 def verify_rendered_variant(features: dict) -> None:
     """Checks that can only run after rendering (duration bucket)."""
-    experiment = features.get("experiment") or {}
-    if experiment.get("variable") == "duration_bucket" and duration_bucket(features.get("duration_seconds")) != experiment.get("value"):
-        raise ValueError("experiment_variable_not_applied:duration_bucket")
+    for experiment in experiment_markers(features):
+        if experiment.get("variable") == "duration_bucket" and duration_bucket(features.get("duration_seconds")) != experiment.get("value"):
+            raise ValueError("experiment_variable_not_applied:duration_bucket")
 
 
 def _variant_values(db: Session, experiment: Experiment, metric: str, now: datetime) -> dict[str, list[float]]:
@@ -154,8 +162,8 @@ def _variant_values(db: Session, experiment: Experiment, metric: str, now: datet
     for publication_id, metrics in per_publication.items():
         publication = db.get(Publication, publication_id)
         video = db.get(VideoVersion, publication.video_version_id) if publication else None
-        marker = (video.features_json or {}).get("experiment") if video else None
-        if not marker or marker.get("experiment_id") != experiment.id:
+        marker = next((item for item in experiment_markers(video.features_json or {}) if item.get("experiment_id") == experiment.id), None) if video else None
+        if not marker:
             continue
         signal = _signals(metrics).get(metric)
         if signal is not None and marker.get("variant_id") in values:
@@ -241,6 +249,6 @@ def allocation_report(db: Session, days: int = 30, now: datetime | None = None) 
     now = now or datetime.now(timezone.utc)
     since = now - timedelta(days=days)
     videos = [video for video in db.query(VideoVersion).all() if not (video.features_json or {}).get("is_demo") and video.created_at and (video.created_at.replace(tzinfo=timezone.utc) if video.created_at.tzinfo is None else video.created_at) >= since]
-    experimental = [video for video in videos if (video.features_json or {}).get("experiment") and not video.features_json["experiment"].get("is_pilot")]
+    experimental = [video for video in videos if any(not marker.get("is_pilot") for marker in experiment_markers(video.features_json or {}))]
     share = len(experimental) / len(videos) if videos else 0.0
     return {"window_days": days, "productions": len(videos), "experimental": len(experimental), "share": round(share, 4), "target_share": EXPLORATION_SHARE, "over_budget": len(videos) >= 10 and share > EXPLORATION_SHARE + 0.05}

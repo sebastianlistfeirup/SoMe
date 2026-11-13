@@ -58,6 +58,8 @@ class RealMediaPlan(BaseModel):
     series_id: str | None = Field(default=None, max_length=100)
     experiment_id: int | None = None
     experiment_variant_id: str | None = Field(default=None, max_length=40)
+    # Several pre-registered experiments on different variables can apply to one story (factorial pilot).
+    experiments: list[dict] = Field(default_factory=list, max_length=4)
     scenes: list[RealMediaScene] = Field(min_length=1, max_length=30)
 
 

@@ -1,0 +1,17 @@
+{
+  "name": "Pilot A: question vs bold-claim opening",
+  "hypothesis": "Opening the editorial part with a concrete question keeps more viewers through the first three seconds after the brand intro than opening with a bold claim, without lowering average retention.",
+  "variable": "hook_type",
+  "variants": [
+    {"id": "control", "value": "bold_claim"},
+    {"id": "question", "value": "question"}
+  ],
+  "primary_metric": "hook_retention_3s",
+  "guardrails": ["retention_pct", "net_subscribers_per_1k_views"],
+  "platform": "any",
+  "min_samples_per_variant": 6,
+  "max_days": 42,
+  "minimum_detectable_effect": 0.1,
+  "rollback": "Keep bold_claim as the default opening; record the pilot as inconclusive or negative in TEST_PROTOCOL.md.",
+  "is_pilot": true
+}

@@ -161,6 +161,19 @@ def build_parser() -> argparse.ArgumentParser:
     ideas.add_argument("--next", type=int, default=10)
     ideas.add_argument("--lane", choices=["gaming", "ai", "crossover"])
     sub.add_parser("calibration", help="Compare predicted and independent quality scores with outcomes")
+    prefill = sub.add_parser("prefill-packet", help="Write a schema-valid draft packet (no facts) for an idea under data/media-plans")
+    prefill.add_argument("--idea", required=True)
+    timelog = sub.add_parser("timelog", help="Log or report the owner's minutes per production step")
+    timelog.add_argument("action", choices=["add", "report"])
+    timelog.add_argument("--story", default="")
+    timelog.add_argument("--step", default="other")
+    timelog.add_argument("--minutes", type=float, default=0)
+    timelog.add_argument("--note", default="")
+    sub.add_parser("cost-report", help="Write the previous month's cost report")
+    status = sub.add_parser("status-report", help="Generate STATUS facts from doctor and a test result")
+    status.add_argument("--tests-passed", type=int, required=True)
+    status.add_argument("--environment", default="local")
+    status.add_argument("--output", type=Path)
     return parser
 
 
@@ -188,6 +201,26 @@ def run_extended(db, args) -> dict | None:
             return evaluate_experiment(db, args.id)
         experiment = stop_experiment(db, args.id, args.reason)
         return {"experiment_id": experiment.id, "status": experiment.status, "decision": experiment.decision}
+    if args.command == "prefill-packet":
+        from app.pipeline.owner_workflow import write_prefilled_packet
+
+        path = write_prefilled_packet(args.idea, get_settings().data_dir / "media-plans")
+        return {"packet": str(path), "state": "needs_evidence", "facts_included": False}
+    if args.command == "timelog":
+        from app.pipeline.owner_workflow import log_owner_time, owner_time_report
+
+        if args.action == "add":
+            row = log_owner_time(db, args.story, args.step, args.minutes, args.note)
+            return {"logged": row.id, "story": row.story_key, "step": row.step, "minutes": row.minutes}
+        return owner_time_report(db)
+    if args.command == "cost-report":
+        from app.pipeline.ops import monthly_cost_report
+
+        return monthly_cost_report(db)
+    if args.command == "status-report":
+        from app.pipeline.status_report import write_status
+
+        return write_status(db, args.tests_passed, args.environment, args.output)
     if args.command == "ideas":
         from app.pipeline.ideas import rank_ideas
 
