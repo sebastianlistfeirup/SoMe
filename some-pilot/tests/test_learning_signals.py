@@ -43,7 +43,7 @@ def test_views_only_matches_previous_damped_formula(db, awaiting_video):
     multipliers = _model(db)["hook_multipliers"]
     assert multipliers["question"] == _old_views_formula(110, 210, 2)
     assert multipliers["comparison"] == _old_views_formula(320, 210, 2)
-    assert {update["hook"]: update["groups"][0]["weights_used"] for update in report["model_updates"]} == {"question": {"views": 1.0}, "comparison": {"views": 1.0}}
+    assert {update["hook"]: update["groups"][0]["weights_used"] for update in report["model_updates"]} == {"question": {"views_relative": 1.0}, "comparison": {"views_relative": 1.0}}
 
 
 def test_retention_and_subscribers_can_outweigh_views(db, awaiting_video):
@@ -56,10 +56,10 @@ def test_retention_and_subscribers_can_outweigh_views(db, awaiting_video):
     multipliers = _model(db)["hook_multipliers"]
     assert multipliers["story"] > 1 > multipliers["bold_claim"]
     story = next(update for update in report["model_updates"] if update["hook"] == "story")["groups"][0]
-    assert story["signals"]["views"]["damped"] < 1
-    assert set(story["signals"]) == {"views", "retention_pct", "watch_seconds_per_view", "engagement_per_1k_views", "net_subscribers_per_1k_views"}
+    assert story["signals"]["views_relative"]["damped"] < 1
+    assert set(story["signals"]) == {"views_relative", "retention_pct", "watch_seconds_per_view", "engagement_per_1k_views", "net_subscribers_per_1k_views"}
     assert abs(sum(story["weights_used"].values()) - 1) < 1e-3
-    assert report["signal_weights"]["version"] == "learning-signals-v1"
+    assert report["signal_weights"]["version"] == "learning-signals-v2"
 
 
 def test_one_sample_per_publication_closest_to_day_seven(db, awaiting_video):
@@ -84,9 +84,9 @@ def test_sparse_signals_are_skipped_and_weights_renormalised(db, awaiting_video)
     db.commit()
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     updates = {update["hook"]: update["groups"][0] for update in report["model_updates"]}
-    assert set(updates["question"]["signals"]) == {"views"}
-    assert set(updates["challenge"]["signals"]) == {"views", "retention_pct"}
-    assert updates["challenge"]["weights_used"] == {"views": round(0.30 / 0.55, 4), "retention_pct": round(0.25 / 0.55, 4)}
+    assert set(updates["question"]["signals"]) == {"views_relative"}
+    assert set(updates["challenge"]["signals"]) == {"views_relative", "retention_pct"}
+    assert updates["challenge"]["weights_used"] == {"views_relative": round(0.25 / 0.45, 4), "retention_pct": round(0.20 / 0.45, 4)}
 
 
 def test_extreme_and_non_positive_values_stay_bounded(db, awaiting_video):
@@ -150,5 +150,52 @@ def test_platform_reach_differences_are_not_credited_to_hooks(db, awaiting_video
     report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
     multipliers = _model(db)["hook_multipliers"]
     assert multipliers["question"] == 1.0 and multipliers["challenge"] == 1.0
-    assert report["cohort_medians"]["youtube|vertical_explainer|short"]["views"] == 10_000
+    assert report["cohort_medians"]["youtube|vertical_explainer|short"]["views_relative"] == 1.0
     assert any(group.startswith("tiktok|") for group in report["groups_without_comparable_hook"])
+
+
+def test_growth_correction_removes_channel_growth_from_hook_comparison(db, awaiting_video):
+    early, late = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "story")
+    # The channel grows 10x between the two periods; each period has both hooks with equal performance.
+    for index in range(3):
+        _publish(db, early, {"views": 100}, f"e-q{index}", age_days=37)
+        _publish(db, late, {"views": 100}, f"e-s{index}", age_days=37)
+        _publish(db, early, {"views": 1000}, f"l-q{index}")
+        _publish(db, late, {"views": 1000}, f"l-s{index}")
+    for index in range(3):
+        # extra late-period story posts make the raw median favour "story" purely through timing
+        _publish(db, late, {"views": 1000}, f"l-extra{index}")
+    db.commit()
+    for snapshot in db.query(MetricSnapshot).all():
+        publication = db.get(Publication, snapshot.publication_id)
+        snapshot.collected_at = publication.published_at + timedelta(days=7)
+    db.commit()
+    report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
+    multipliers = _model(db)["hook_multipliers"]
+    assert multipliers["question"] == multipliers["story"] == 1.0
+    raw = {row["group"].split("|")[2]: row["signals"]["views"]["median"] for row in report["observed"]}
+    assert raw["story"] > raw["question"]
+
+
+def test_rolling_window_excludes_old_publications(db, awaiting_video):
+    a, b = _video(db, awaiting_video, "question"), _video(db, awaiting_video, "story")
+    for index in range(2):
+        _publish(db, a, {"views": 100}, f"old-a{index}", age_days=90)
+        _publish(db, b, {"views": 900}, f"old-b{index}", age_days=90)
+    db.commit()
+    for snapshot in db.query(MetricSnapshot).all():
+        snapshot.collected_at = db.get(Publication, snapshot.publication_id).published_at + timedelta(days=7)
+    db.commit()
+    report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
+    assert report["observed"] == [] and report["model_updates"] == []
+    assert report["window"]["days"] == 60
+
+
+def test_group_medians_carry_bootstrap_interval(db, awaiting_video):
+    video = _video(db, awaiting_video, "question")
+    for index, views in enumerate((80, 100, 120, 140)):
+        _publish(db, video, {"views": views}, f"ci{index}")
+    db.commit()
+    report = weekly_learning(db, db.info["tmp_path"], is_demo=True)
+    low, high = report["observed"][0]["signals"]["views"]["median_ci90"]
+    assert 80 <= low <= 110 <= high <= 140

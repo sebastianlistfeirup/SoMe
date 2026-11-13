@@ -56,6 +56,8 @@ class RealMediaPlan(BaseModel):
     quality_dimensions: dict[str, float] | None = None
     idea_id: str | None = Field(default=None, max_length=50)
     series_id: str | None = Field(default=None, max_length=100)
+    experiment_id: int | None = None
+    experiment_variant_id: str | None = Field(default=None, max_length=40)
     scenes: list[RealMediaScene] = Field(min_length=1, max_length=30)
 
 

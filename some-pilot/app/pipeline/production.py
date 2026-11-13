@@ -10,8 +10,9 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Script, Topic, VideoVersion
 from app.pipeline.ai import PACKET_PROMPT_VERSION, ScriptDraft, build_clip_plan, current_prompt_version, demo_draft, packet_draft, packet_excerpts, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
-from app.pipeline.brand_ident import concat_with_idents, ident_metadata
+from app.pipeline.brand_ident import DURATION as IDENT_SECONDS, concat_with_idents, ident_metadata
 from app.pipeline.editorial import evaluate_editorial_packet
+from app.pipeline.experiments import allocation_report, verify_assignment, verify_rendered_variant
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.posts import build_post
@@ -116,6 +117,17 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     post = build_post(draft.title, draft.post_text, default_hashtags, [claim.source_url for claim in draft.claims], ai_disclosure=True)
     features = production_features(topic, media_plan, draft, lane, packet, dry_run)
     features.update({"production_cost": production_cost, "real_media_required": True, "minimum_real_media_ratio": media_plan.minimum_real_ratio})
+    if media_plan.experiment_id is not None:
+        if not media_plan.experiment_variant_id:
+            raise ValueError("experiment_variant_required")
+        story_key = (packet or {}).get("story_id") or media_plan.idea_id or f"topic-{topic.id}"
+        marker = verify_assignment(db, media_plan.experiment_id, media_plan.experiment_variant_id, story_key, features)
+        if not marker["is_pilot"] and not dry_run and allocation_report(db)["over_budget"]:
+            raise ValueError("exploration_budget_exceeded_80_20")
+        features["experiment"] = {**marker, "story_key": story_key}
+        features["allocation"] = "experiment"
+    else:
+        features["allocation"] = "known_format"
     video = VideoVersion(script_id=script.id, topic_id=topic.id, version=version_number, output_dir=str(output), post_json=post, hook_type=draft.hook_type, format=features["format"], language=topic.language, features_json=features)
     db.add(video)
     db.flush()
@@ -209,6 +221,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         layout = render_real_media(prepared, narration, captions, draft.title, content, coverage)
         concat_with_idents(content, rendered, landscape=False)
         layout["brand_ident"] = ident_metadata(False)
+        video.features_json = {**video.features_json, "intro_seconds": IDENT_SECONDS, "outro_seconds": IDENT_SECONDS}
         thumb = output / "thumbnail.jpg"
         layout["thumbnail"] = thumbnail_from_source(prepared, durations, thumb)
         board = output / "storyboard.jpg"
@@ -221,6 +234,11 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
             transition(video, "BLOCKED")
             raise ValueError("technical_blocked:" + ",".join(technical["reasons"]))
         video.duration_seconds = technical["duration_seconds"]
+        try:
+            verify_rendered_variant({**video.features_json, "duration_seconds": video.duration_seconds})
+        except ValueError:
+            transition(video, "BLOCKED")
+            raise
         video.features_json = {**video.features_json, "duration_seconds": video.duration_seconds, "opening_text": opening_text(caption_segments), "thumbnail_type": layout["thumbnail"].get("type", "source_frame") if isinstance(layout.get("thumbnail"), dict) else "source_frame", "scene_count": len(prepared), "real_media_ratio": coverage.get("real_media_ratio")}
         transition(video, "TECH_CHECKED")
         contains_people = any(item.scene.contains_people for item in prepared)

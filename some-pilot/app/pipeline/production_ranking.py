@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Asset, License, Script, Topic, VideoVersion
 from app.pipeline.approvals import paused, sha256_file, transition
-from app.pipeline.brand_ident import concat_with_idents, ident_metadata
+from app.pipeline.brand_ident import DURATION as IDENT_SECONDS, concat_with_idents, ident_metadata
 from app.pipeline.editorial import GameReception, editorial_score, freshness_blockers, reception_blockers, EvidenceClaim
 from app.pipeline.game_research import PREPARATION_FRESHNESS, RELEASE_FRESHNESS, as_utc, game_preparation_blockers
 from app.pipeline.media import probe, require_tools, transcribe
@@ -94,7 +94,7 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
     db.add(script)
     db.flush()
     post = build_post(plan.title, plan.post_text, ["gaming", "handheldgaming", "gamingpc"], sorted({str(scene.clip_url) for scene in plan.scenes}), ai_disclosure=True, non_affiliation=True)
-    video = VideoVersion(script_id=script.id, topic_id=topic.id, output_dir=str(output), post_json=post, hook_type="ranking_reveal", language="en", features_json={"niche": topic.niche, "platform": platform, "format": "editorial_gameplay_ranking", "aspect_ratio": "16:9" if platform == "youtube" else "9:16", "pacing": "fast", "narration_tempo": get_platform(platform).tempo, "voice_provider": voice_provider, "voice_preset": plan.voice_model, "voice_only": True, "avatar_present": False, "real_gameplay_clips": 10, "synthetic_fallback": False, "mobile_style": mobile_style, "full_bleed_action": platform != "youtube" and mobile_style == "zoom"})
+    video = VideoVersion(script_id=script.id, topic_id=topic.id, output_dir=str(output), post_json=post, hook_type="ranking_reveal", format="editorial_gameplay_ranking", language="en", features_json={"feature_schema": "production-features-v1", "niche": topic.niche, "lane": "gaming", "hook_type": "ranking_reveal", "intro_seconds": IDENT_SECONDS, "outro_seconds": IDENT_SECONDS, "platform": platform, "format": "editorial_gameplay_ranking", "aspect_ratio": "16:9" if platform == "youtube" else "9:16", "pacing": "fast", "narration_tempo": get_platform(platform).tempo, "voice_provider": voice_provider, "voice_preset": plan.voice_model, "voice_only": True, "avatar_present": False, "real_gameplay_clips": 10, "synthetic_fallback": False, "mobile_style": mobile_style, "full_bleed_action": platform != "youtube" and mobile_style == "zoom"})
     db.add(video)
     db.flush()
     assets = []

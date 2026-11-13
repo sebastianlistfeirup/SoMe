@@ -38,9 +38,18 @@ def result_file(db, command_name: str, payload: dict, output: str | None = None)
     return target
 
 
+def _alembic_config() -> Config:
+    return Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
+
+
 def migrate() -> None:
-    config = Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
-    command.upgrade(config, "head")
+    command.upgrade(_alembic_config(), "head")
+
+
+def expected_migration() -> str:
+    from alembic.script import ScriptDirectory
+
+    return ScriptDirectory.from_config(_alembic_config()).get_current_head()
 
 
 def doctor(db, paid_check: bool = False) -> dict:
@@ -55,7 +64,7 @@ def doctor(db, paid_check: bool = False) -> dict:
         migration_version = None
     checks = {
         "database": "ok",
-        "migration": {"current": migration_version, "expected": "0001", "ok": migration_version == "0001"},
+        "migration": {"current": migration_version, "expected": expected_migration(), "ok": migration_version == expected_migration()},
         "tools": tools,
         "disk": {"total": disk.total, "used": disk.used, "free": disk.free, "used_percent": round(disk.used / disk.total * 100, 2), "alarm": disk.used / disk.total > 0.8, "stop_render": disk.used / disk.total > 0.9},
         "model_cache": {"path": str(settings.model_cache_dir), "whisper_small_cached": (settings.model_cache_dir / "whisper").exists()},
@@ -141,7 +150,48 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("recover-jobs")
     user = sub.add_parser("init-user")
     user.add_argument("--username", default="owner")
+    experiment = sub.add_parser("experiment", help="Pre-registered one-variable experiments")
+    experiment.add_argument("action", choices=["create", "list", "assign", "evaluate", "stop"])
+    experiment.add_argument("--spec", type=Path, help="JSON spec for create")
+    experiment.add_argument("--id", type=int)
+    experiment.add_argument("--story", help="Story key (packet story_id) for assign")
+    experiment.add_argument("--reason", default="")
+    sub.add_parser("scorecard", help="Weekly scorecard and learning-model governance state")
     return parser
+
+
+def run_extended(db, args) -> dict | None:
+    """Commands added after the original CLI contract; returns None when not handled."""
+    if args.command == "experiment":
+        from app.db.models import Experiment
+        from app.pipeline.experiments import ExperimentSpec, assign_variant, create_experiment, evaluate_experiment, stop_experiment
+
+        if args.action == "create":
+            if not args.spec:
+                raise ValueError("experiment_spec_required")
+            spec = ExperimentSpec.model_validate_json(args.spec.read_text(encoding="utf-8"))
+            experiment = create_experiment(db, spec)
+            return {"experiment_id": experiment.id, "spec_sha256": experiment.spec_sha256, "status": experiment.status}
+        if args.action == "list":
+            return {"experiments": [{"id": item.id, "name": item.name, "status": item.status, "variable": (item.spec_json or {}).get("variable"), "decision": item.decision, "samples": (item.results_json or {}).get("samples")} for item in db.query(Experiment).order_by(Experiment.id).all()]}
+        if args.id is None:
+            raise ValueError("experiment_id_required")
+        if args.action == "assign":
+            if not args.story:
+                raise ValueError("experiment_story_required")
+            return assign_variant(db, args.id, args.story)
+        if args.action == "evaluate":
+            return evaluate_experiment(db, args.id)
+        experiment = stop_experiment(db, args.id, args.reason)
+        return {"experiment_id": experiment.id, "status": experiment.status, "decision": experiment.decision}
+    if args.command == "scorecard":
+        from app.db.models import Setting
+        from app.pipeline.governance import GOVERNANCE_KEY, scorecard
+
+        state = db.get(Setting, GOVERNANCE_KEY)
+        value = state.value_json if state else {}
+        return {"scorecard": scorecard(db), "active_version": (value.get("active") or {}).get("version"), "candidate_version": (value.get("candidate") or {}).get("version"), "recent_events": value.get("events", [])[-10:]}
+    return None
 
 
 def main() -> int:
@@ -151,7 +201,10 @@ def main() -> int:
     db = SessionLocal()
     try:
         payload = {}
-        if args.command == "migrate":
+        extended = run_extended(db, args)
+        if extended is not None:
+            payload = extended
+        elif args.command == "migrate":
             migrate()
             payload = {"status": "migrated"}
         elif args.command == "init-db":

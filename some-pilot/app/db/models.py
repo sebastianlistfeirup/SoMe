@@ -173,6 +173,11 @@ class Experiment(Base):
     allocation_json: Mapped[dict] = mapped_column(JSON, default=dict)
     results_json: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    spec_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    spec_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decision: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
 
 class Cost(Base):
