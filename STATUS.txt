@@ -28,7 +28,7 @@ Ingen garanti for vækst, likes, subscribers eller fejlfri drift.
 DEPLOY-STATUS (manuelt, opdateres ved deploy)
 - VPS kører forbedringsrunden (image some-pilot:32f8ada43552, også tagget :local), deployet 2026-11-13 21:01 UTC med scripts/deploy.sh: 272/272 tests, verificeret krypteret backup før migration (some-backup-20261113T210026Z.zip.enc), migration 0002, doctor OK, web/worker healthy, loopback og offentlig HTTPS-health ok med publish_enabled=false.
 - Der findes intet rollback-image for 8589e38e (det blev overskrevet ved første tagged deploy, se TEST_PROTOCOL). Fra næste deploy er 32f8ada43552 rollback-målet.
-- Serverens app.env har stadig VOICE_PROVIDER=kokoro (kun visning; produktion bruger altid ElevenLabs). Ejerhandling: sæt VOICE_PROVIDER=elevenlabs.
+- 2026-11-13 21:22 UTC: VOICE_PROVIDER=elevenlabs sat i /opt/some/secrets/app.env (backup app.env.bak-20261113T212216Z). Web og worker er genskabt på some-pilot:32f8ada43552; doctor viser provider=elevenlabs, og health er ok.
 
 FORMÅL OG REGLER
 SoMe-maskinen producerer rettighedssikre, dokumenterede videoer til Pixel and Parameters (gaming, retro, handheld, lokal/PC-AI). Ingen nye redaktionelle videoer før ejeren skriver "Nu må du begynde". Intet publiceres uden ejergodkendelse af den præcise version. Se CLAUDE_HANDOFF.md, OWNER_ACTIONS.md, docs/KPI.md og docs/PILOT_PLAN.md.
