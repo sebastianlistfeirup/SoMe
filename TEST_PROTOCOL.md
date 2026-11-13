@@ -307,3 +307,8 @@ Commit `24447828`: **295 passed** lokalt (23 nye tests). Pushet, **ikke deployet
   - Image `some-pilot:71d87757b448`; rollback-mål `32f8ada43552` findes.
   - `/login` svarer 200. `/login/2fa` og `/account/security` sender uden login korrekt videre til login.
   - Én bruger, 2-faktor endnu ikke tilmeldt. Dashboardet er fortsat IP-begrænset.
+- **2-faktor-tilmelding fejlede for ejeren:** Ejeren fik gentagne gange "Koden passede ikke" som rå JSON. Serverens ur var NTP-synkroniseret og passede på sekundet med en ekstern kilde, og den gemte nøgle havde korrekt format. Den sandsynlige årsag er en fejltastet nøgle eller en app-konto oprettet som tællerbaseret.
+- **Rettelse (`d5d944c0`):**
+  - QR-kode (`segno==1.6.1`, ren Python) og fejlside i HTML med vejledning.
+  - Knap til ny nøgle før tilmelding og ±60 sek. tolerance ved tilmelding.
+  - 297 passed lokalt og på VPS, backup `some-backup-20261113T222407Z.zip.enc`, healthy, rollback-mål `71d87757b448`.
