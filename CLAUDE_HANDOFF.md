@@ -26,14 +26,13 @@ Der må **ikke** produceres nye redaktionelle ejervideoer, før ejeren eksplicit
 
 ## 2. Aktuel verificeret status
 
-Seneste relevante applikationscommit:
+Fakta genereres nu i `STATUS.txt` (`python -m app.cli status-report`). Historik står i `TEST_PROTOCOL.md` (changelog). Beslutninger ligger i `some-pilot/docs/decisions/` og er bundet til tests.
 
-- `918bd2c9` — `Require MobyGames research and verify cross-platform footage`
-- `ca3b639` — dokumentationsopdatering efter deployment
+**Lokalt:** Commit `d5129c98` plus docs: **272/272 tests**, migration 0002. Forbedringsrunden `04ceceff` → `d5129c98` er **ikke pushet eller deployet**.
 
-Verificeret både lokalt og på Contabo-VPS:
+**Deployet og verificeret på Contabo-VPS (`8589e38e`):**
 
-- **199/199 tests består** (efter `8589e38e`)
+- **199/199 tests består**
 - Standard Docker-build består
 - Migration 0001 er OK
 - `doctor` er OK
@@ -140,6 +139,24 @@ Den godkendte visuelle version må ikke ændres uden ny ejergodkendelse. Ingen a
   - Paid/pris/nøgle-gates før eksterne kald.
 
 Læringen er ikke færdig som dokumenteret selvforbedrende hjerne. Første store forbedring bør være native retention-, watchtime-, likes- og subscriptionsdata på alle platforme, efterfulgt af sammenlignelige A/B-tests.
+
+### Nyt i forbedringsrunden (2026-11-13)
+
+- `app/pipeline/taxonomy.py`: fast hook-liste (8 typer) og CTA-typer.
+- `app/pipeline/ai.py`: `packet_draft`. I live-produktion ejer pakken narration og claims; Claude skriver kun titel, caption og hook.
+- `app/pipeline/quality.py`: blind uafhængig kvalitetsscore (85-gaten), afvisningskategorier, ejerfeedback i prompts og kalibrering.
+- `app/pipeline/stats.py`, `metrics.py`, `learning.py`: retention-kurve, signals v2, 60-dages vindue, vækstkorrektion og bootstrap-intervaller.
+- `app/pipeline/experiments.py`: forhåndsregistrerede eksperimenter med én variabel og 80/20-budget.
+- `app/pipeline/governance.py`: scorecard, skyggetilstand og rollback. Prompts bruger kun den aktive model.
+- `app/pipeline/ideas.py`: idérangering 80/20 og research fra Content Bible (`IdeaSuggestion`).
+- `app/pipeline/jobs.py`, `worker.py`: backoff, fejlfiler, retry, produktion som job, lease-fornyelse og JSON-logs.
+- `app/pipeline/alerts.py`, `accounts.py`, `ops.py`, `redact.py`: alarmer, kontotjek, driftstal, omkostningsrapport og redigering af secrets.
+- `app/pipeline/variants.py`: platformvarianter og AI-mærkning (digest v2) i godkendelsen.
+- `app/pipeline/owner_workflow.py`: tidslog, forudfyldt pakke og udgiverpolitik-register.
+- `app/pipeline/audience.py`: serier, derivater, kommentarer, manuel Test & Compare og kildekommentar.
+- `app/pipeline/status_report.py`: genereret STATUS.
+- Drift: `.github/workflows/ci.yml`, `scripts/deploy.sh` (tagget image, backup, auto-rollback), `scripts/rollback.sh`, `compose.staging.yaml` og `scripts/deploy_staging.sh`.
+- Indhold: `content/SERIES.json`, `content/PUBLISHER_POLICIES.json`, `content/pilot/*.json`. Dokumenter: `docs/KPI.md`, `docs/PILOT_PLAN.md`.
 
 ### Publicering og review
 
@@ -353,29 +370,27 @@ Disse eksisterede før denne handoff og skal ikke slettes eller committes uden e
 
 ## 14. Prioriterede næste opgaver
 
-### Højeste prioritet: læring og metrics
+Færdige punkter fra den tidligere liste (2026-11-13):
 
-1. Implementér native retention-, watchtime-, likes- og subscriptionsindsamling for YouTube og undersøg Meta/TikTok API-kapacitet.
-2. ~~Udvid `weekly_learning` fra kun views til engagement-, retention- og subscriber-signaler med samme dampede, non-kausale metode.~~ Implementeret og deployet i `72a3269c` (197 tests lokalt og på VPS).
-3. Opret kontrolleret A/B-eksperimentmodel med én ændring ad gangen.
-4. Gem eksperimenthypotese, variant, randomisering, resultat og rollback.
+- YouTube retention, watch time, likes og subscribers i læringen.
+- A/B-model med én variabel.
+- Platformvariant-preview.
+- Afvisningskategorier.
+- Dead-letter og retry.
+- Kontostatus.
+- Offsite backup (kode; udbyder mangler).
+- Hook-retention 1/3/5 s.
+- Scene-frafald.
 
-### Backend
+### Næste opgaver
 
-5. Platformvariant-preview før godkendelse.
-6. Visuelt mediebibliotek med rettigheder, kontaktark og tidligere brug.
-7. Afvisningskategorier der kan ændre video/klip/stemme — ikke kun tekst.
-8. Jobovervågning, dead-letter-håndtering og bedre reconciliation.
-9. Konto-/tokenstatus uden at vise secrets.
-10. Offsite backup og restorecenter.
-
-### Opslagsmotor
-
-11. Hookoptimering baseret på 1/3/5-sekunders retention.
-12. Destinationspecifikke scripts, captions, covers og CTA’er.
-13. Clip- og scene-ranking fra faktisk retention.
-14. Automatisk visuel kvalitetskontrol for crops, sorte frames, gentagelser og læsbarhed.
-15. Stemme-/udtalekontrol for spilnavne, tal og tempo.
+1. **Push og deploy forbedringsrunden** via den nye `deploy.sh` (kræver ejerens OK). Kør derefter staging-scriptet én gang og generér STATUS på VPS.
+2. **Piloten** efter ejerens “Nu må du begynde” (`docs/PILOT_PLAN.md`).
+3. Meta/TikTok-metrics: undersøg Insights-/Display-API-kapacitet og byg import. Indtil da bruges CSV-import med aliaser.
+4. Visuelt mediebibliotek med rettigheder, kontaktark og tidligere brug.
+5. Automatisk visuel kvalitetskontrol for crops, sorte frames, gentagelser og læsbarhed.
+6. Stemme- og udtalekontrol for spilnavne, tal og tempo.
+7. Undersøg introens effekt: `introRetention` måles nu. Viser data, at seere falder fra i de 3,5 sek., skal det forelægges ejeren. Introen må ikke ændres uden ny godkendelse.
 
 ### Eksterne punkter
 
@@ -407,4 +422,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **199 tests** lokalt og på VPS (`8589e38e`).
+Forventet baseline på genoptagelsestidspunktet: **272 tests** lokalt. VPS: **199** (`8589e38e`) indtil forbedringsrunden deployes.

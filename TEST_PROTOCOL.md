@@ -1,5 +1,7 @@
 # Testprotokol — SoMe-maskinen
 
+> Fra 2026-11-13 er denne fil en changelog. Aktuelle fakta (testtal, migration, sikkerhedsflag, integrationer) genereres i STATUS.txt med `python -m app.cli status-report`.
+
 Dato: 2026-11-10 til 2026-11-11
 Miljø: Windows-vært, Git Bash, Docker Desktop Linux containers, Python 3.11, SQLite/WAL, FFmpeg, faster-whisper small/int8, Kokoro-82M ONNX
 Formål: Skelne mellem faktisk udførte lokale kontroller og integrationer, der stadig kræver ejerens konti og godkendelser.
@@ -216,3 +218,54 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - Nye tests beviser, at en hook med stærk YouTube- og svag Instagram-performance får det sample-vægtede gennemsnit og ikke den sidste gruppe, og at en hook, der kun findes på en platform med høj rækkevidde, ikke belønnes for platformens views. Eksisterende tests er tilpasset den nye `updates`-struktur.
 - Standardbuild og hele testpakken: **199 passed** lokalt, kun den kendte Starlette-deprecationwarning.
 - Commit `8589e38e` er pushet og deployet med `./scripts/deploy.sh`. Også på VPS bestod **199 passed**. Migration 0001 og doctor er OK (`dry_run=true`, `publish_enabled=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`). Web og worker er healthy; loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
+
+## Forbedringsrunde: motor, læring, backend og projekt — 2026-11-13
+
+Commits `04ceceff` → `d5129c98`, lokalt testet, ikke pushet eller deployet. Standardbuild og hele pakken: **272 passed** (inkl. 46 Content Bible-kontrakttests). Ingen videoer produceret, intet publiceret, ingen betalte kald, ingen footage ændret.
+
+Fundne og rettede fejl (bevist med test før rettelsen):
+- **Live-manuskript kunne ikke bestå sin egen gate.** Claude skrev narration ud fra view-tal, og gaten krævede pakkens receptionslinjer ordret. En realistisk omskrivning blev blokeret med `spoken_reception_not_in_narration`. Nu er narrationen pakkens voiceovers ordret (ADR 0004).
+- **Multi-destination publicering stoppede efter første platform.** Publisher nummer to kaldte `PUBLISHING → PUBLISHING`, som tilstandsmaskinen afviser. Den gamle test sprang publisheren over. Nu går videoen kun i `PUBLISHING` én gang, og der er en YouTube+TikTok-test.
+- Hook-multiplikator blev overskrevet af sidste gruppe, og hooks blev sammenlignet med tværplatform-medianen (rettet i `8589e38e`).
+
+Nyt (kort; detaljer i commit-beskeder og ADR'er under `some-pilot/docs/decisions`):
+- **Motor:**
+  - fast hook-taksonomi (8 typer) og rigtige produktionsfeatures
+  - blind uafhængig kvalitetsscore som 85-gate (planlæggerens score er en forudsigelse og kalibreres mod resultater)
+  - afvisningskategorier, hvor tekstrettelse nægtes ved video- og stemmeproblemer
+  - idérangering 80/20 og research fra Content Bible
+- **Læring:**
+  - YouTube retention-kurve (1/3/5 s, intro-retention, hook-retention efter intro, frafald pr. scene)
+  - 60-dages vindue, korrektion for kanalvækst, 90 %-bootstrap-intervaller
+  - forhåndsregistrerede eksperimenter med én variabel (flere pr. historie i piloten)
+  - scorecard med netto-subs pr. 1.000 views, guardrails, skyggetilstand og automatisk rollback
+- **Backend:**
+  - produktion som job med fremdrift og lease-fornyelse
+  - eksponentiel backoff, redigerede fejlfiler og retry-knap
+  - alarmer (webhook/SMTP, fra som standard), daglige kontotjek uden secrets
+  - offsite WebDAV-backup (fra som standard) og månedlig gendannelsestest
+  - driftsside, månedlig omkostningsrapport
+  - platformvarianter og AI-mærkning bundet i godkendelses-hashen (YouTube `containsSyntheticMedia`, TikTok `is_aigc`)
+  - Kokoro og espeak blokeres ved godkendelse, HeyGen fjernet
+  - proxy-headers og login-loft pr. IP
+- **Drift:**
+  - GitHub Actions CI
+  - tagget deploy med backup før migration og automatisk rollback, `rollback.sh`
+  - staging på port 8001 med publicering og paid jobs tvunget fra
+  - migration 0002 (additiv)
+- **Projekt:**
+  - pilotplan (2×2, 12 videoer) og KPI'er
+  - tidslog for ejerens tid med flaskehalsrapport
+  - forudfyldt pakke uden fakta
+  - udgiverpolitik-register (Devolver og Nintendo; verifikation afventer ejeren)
+  - genereret STATUS
+  - 10 ADR'er bundet til tests
+  - `.gitignore` for lokale arbejdsmapper
+- **Ekstra:**
+  - serier (`content/SERIES.json`)
+  - derivater pr. pakkevariant
+  - kommentaranalyse uden forfatterdata
+  - manuel registrering af YouTube Test & Compare
+  - kildekommentar til manuel fastgørelse
+
+Ikke verificeret: rigtige API-kald til retention, kommentarer, kontotjek, alarmer og offsite (alt er mock-testet). Den nye deploy-proces er ikke kørt på VPS. CI-workflowet er ikke kørt på GitHub.

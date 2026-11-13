@@ -1,3 +1,5 @@
+> **Erstattet.** Denne fil er historisk. Den aktuelle handoff er `CLAUDE_HANDOFF.md`; fakta står i `STATUS.txt` (genereret), beslutninger i `some-pilot/docs/decisions/`.
+
 # SoMe-maskinen — komplet håndoff til Codex
 
 **Dato for håndoff:** 2026-11-09  

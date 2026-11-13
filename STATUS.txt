@@ -1,55 +1,34 @@
-SoMe-maskinen — STATUS
-Opdateret: 2026-11-13
-Repository: https://github.com/sebastianlistfeirup/SoMe
+SoMe-maskinen — STATUS (genereret)
+Genereret: 2026-11-13T20:51:41+00:00 · miljø: local · commit: d5129c98be3f
+Genereres med: python -m app.cli status-report --tests-passed <N> --environment <local|vps>
+Arkitektur og regler: CLAUDE_HANDOFF.md · historik: TEST_PROTOCOL.md (changelog)
 
-AKTIV ARKITEKTUR
-- Pixel and Parameters Content Bible v1.1 er integreret med 20 recipes, 120 idéer, 58 evidenskilder og redaktionelle scoringer. Ikke-demo-produktion kræver en schema-valideret `editorial-packet.json`, lane-match og mindst 85 point. Research-eksempler, uaktuelle kilder og manglende hørbar reception blokerer før stemme/rendering; kildernes udløb kontrolleres igen ved dispatch. Steam- og Metacritic-opslag accepterer ikke manglende data som succes.
-- Hvert featured game kræver nu en konkret, inspiceret MobyGames-side med review score eller eksplicit ikke-fundet-note, fun facts eller ikke-fundet-note samt dokumenterede udgivelsesplatforme. Footage-mappen er kun proveniens og begrænser ikke genbrug. Et platformsopslag kræver frisk dokumentation for netop den platform; generelle cross-platform-opslag har ingen målplatformslås.
-- Backendens review-center viser den færdige video, thumbnail, titel, opslagstekst, hashtags, kilder og medieprocent. ElevenLabs-narration kan afspilles separat, når den findes i manifestet.
-- Facebook, Instagram, YouTube og TikTok er valgt som standard. Ejeren kan fjerne destinationer, vælge YouTube-synlighed og angive et fremtidigt tidspunkt. Kun forbundne, konkrete konto-ID'er kan godkendes.
-- Godkendelsen er immutable: Den binder video, thumbnail, narration, subtitles, alignment, script, editorial-pakke, tekst, links, destinationer, konto-ID'er, synlighed og tidspunkt med SHA-256, når artifacts findes. Ændringer kræver en ny revision og ny godkendelse.
-- Godkendelse opretter automatisk ét idempotent publiceringsjob pr. destination. Worker understøtter separat kø, status, tre forsøg, delvis completion og RECONCILE_REQUIRED ved usikkert resultat. Afvisning opretter ingen publiceringsjobs.
-- En pakke markeres først PUBLISHED, når samtlige valgte destination/konto-par er bekræftet. En fejl på én destination gentager ikke allerede publicerede destinationer.
+FAKTA
+- Testpakke: 272 bestået
+- Migration: 0002 (forventet 0002, ok=ja)
+- Sikkerhed: DRY_RUN=True, PUBLISH_ENABLED=False, PAID_JOBS_ENABLED=False, WORKER_CONCURRENCY=1
+- Stemme: produktion=elevenlabs, kun demo=kokoro, ElevenLabs konfigureret=nej
 
-MEDIEPRODUKTION
-- Ny produktion kræver en reel medieplan. Mindst 80 % af varigheden skal være rigtige videoklip eller rigtige billeder; AI-genereret indhold tæller ikke som reelt.
-- Den ejergodkendte Pixel & Parameters-intro/outro er obligatorisk i begge aktive produktionsflows. Alle nye videoer får 3,5 sek. intro og 3,5 sek. outro med den godkendte P-kollision, separate orange blokke, AI-undertekst og dæmpet baggrundslyd. YouTube bruger 1920×1080 (16:9); TikTok, Instagram Reels og Facebook bruger 1080×1920 (9:16). Outro-teksten er FOLLOW FOR MORE. Eksisterende videoer ændres ikke bagud.
-- Intro/outro renderes én gang pr. format og genbruges via en cache, der invalideres ved ændret logo eller renderer. Produktionsflowet kontrollerer format, 30 fps, H.264/yuv420p og AAC stereo 48 kHz med reelle FFmpeg-tests.
-- Almindelig ikke-demo-produktion bruger ElevenLabs. Gaming: `HfRP3cIhYLmeNHeTvkWK`. AI: `8CjmkufHc22WbMZEBHbm`. Kokoro findes kun til gamle/tekniske demo-flows og er ikke kreativt godkendt.
-- ElevenLabs `/with-timestamps` gemmer faktisk WAV, rå og normaliseret alignment, request-ID når leverandøren returnerer det, varighed, succesfulde kald og DKK-omkostning. Undertekster udledes fra alignment; Whisper bruges som separat udtalekontrol.
-- Manifestet indeholder dynamisk de faktiske artifacts: video, thumbnail, script, post, claims, rights, checks, subtitles, voice report og eventuelle narration/alignment/transcription-filer. Der er ikke længere et fast filtal.
-- YouTube afventer processingStatus=succeeded og sætter den godkendte thumbnail før PUBLISHED. Instagram bruger signet HTTPS-video og cover_url. Facebook dokumenterer source_frame og ikke et påstået custom cover.
+PUBLICERING
+- youtube: publishing_configured=False, oauth_verified=False
+- instagram: publishing_configured=False, oauth_verified=False
+- facebook: publishing_configured=False, oauth_verified=False
+- tiktok: publishing_configured=False, oauth_verified=False, direct_post_eligible=False, direct_post_blocker=tiktok_direct_post_not_eligible
 
-TIKTOK
-- Sandbox `video.upload` og inbox-kladden er verificeret, men en kladde er ikke offentlig publicering og kan ikke længere markeres PUBLISHED af den aktive Direct Post-adapter.
-- Direct Post kræver samtidigt `TIKTOK_DIRECT_POST_ENABLED=true`, dokumenteret production-review og eksplicit ejerconsent. Ellers er den præcise blocker `tiktok_direct_post_not_eligible`.
-- Den gatede adapter bruger creator_info og `/post/publish/video/init/`, aldrig inbox-endpointet. Kun `PUBLISH_COMPLETE` accepteres som publiceret. Production-review og reelt Direct Post-kald er ikke verificeret.
+LÆRING
+- Aktiv læringsmodel: ingen endnu
+- Aktive eksperimenter: 0
 
-VERIFICERET LOKALT
-- Standardbuild og hele testpakken: 199/199 tests består lokalt og på VPS efter kohorte-/pr.-hook-rettelsen.
-- Ugentlig læring bruger én værdi pr. publicering (nærmeste snapshot omkring dag 7) og fem signaler: views, retention (averageViewPercentage), watch time pr. view, engagement (likes+comments+shares) pr. 1.000 views og netto-subscribers pr. 1.000 views. Hvert signal dæmpes med n/(n+5), kræver mindst to samples og begrænses til 0,75–1,25; signalerne kombineres med et vægtet geometrisk gennemsnit (`learning-signals-v1`: 0,30/0,25/0,20/0,15/0,10) over de signaler, der faktisk findes. Med kun views er resultatet identisk med den tidligere formel. Manuelle CSV-importer fra Meta/TikTok kan bruge aliaser som `follows`/`followers_gained`. Vægtene er redaktionelle valg, ikke kausale effekter. En hook sammenlignes kun med andre hooks i samme kohorte (platform, format og længdebucket); kohorter med kun én hook springes over og vises som `groups_without_comparable_hook`. Hook-multiplikatoren er et sample-vægtet geometrisk gennemsnit over alle kohorter, hvor hooken findes, i stedet for den sidst beregnede gruppe. Commit `72a3269c` er deployet.
-- Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost, AI-lane-valg, intro/outro i begge formater, MobyGames-krav og verificeret cross-platform-genbrug.
-- Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
+DRIFT
+- Kontotjek: ikke kørt endnu
+- Åbne advarsler: disk_usage
 
-VERIFICERET PÅ VPS
-- Commit `8589e38e` (pr.-hook-aggregering og kohortesammenligning) er deployet oven på `72a3269c` (læring med retention, engagement og subscribers). Hele pakken består også på VPS: 199/199 tests.
-- Migration 0001 og doctor er OK. Web og worker er healthy, og både loopback og offentlig HTTPS-health svarer `status=ok`, `publish_enabled=false`, `paid_jobs_enabled=true`.
-- Doctor viser `direct_post_eligible=false` og `direct_post_blocker=tiktok_direct_post_not_eligible`. ElevenLabs er konfigureret; der er ikke foretaget nye betalte produktionskald.
+Ingen garanti for vækst, likes, subscribers eller fejlfri drift.
 
-OMKOSTNINGSESTIMAT PR. OPSLAG
-- Claude baseline pr. parent story: ca. 0,207 DKK. Fire ekstra platformadapteringer kan medføre ca. 0,240 DKK ekstra, afhængigt af promptlængde og revisioner.
-- ElevenLabs: 0,533288 DKK pr. 1.000 tegn. Ved ca. 845–1.273 tegn/minut er det ca. 0,45–0,68 DKK/minut.
-- 1 minut: ca. 0,76–1,13 DKK. 2 minutter: ca. 1,31–1,81 DKK. Det lave interval bruger Claude-baseline; det høje inkluderer fire adapteringer og den hurtigste målte stemme.
-- Det er estimater, ikke fakturaer. Ekstra research, revisioner, regenerering, moms og kursændringer kan øge prisen.
+DEPLOY-STATUS (manuelt, opdateres ved deploy)
+- VPS kører 8589e38e med 199/199 tests (verificeret 2026-11-13).
+- Commits efter 8589e38e (forbedringsrunden: 04ceceff → d5129c98) er testet lokalt (272/272) men IKKE pushet eller deployet.
+- Ved næste deploy: kør scripts/deploy.sh (tagget image, backup før migration 0002, automatisk rollback) og generér derefter STATUS på VPS med --environment vps.
 
-SIKKERHEDSTILSTAND
-DRY_RUN=true; PUBLISH_ENABLED=false; PAID_JOBS_ENABLED=true; WORKER_CONCURRENCY=1; MONTHLY_AI_BUDGET_DKK=50; MAX_JOB_AI_COST_DKK=5.
-Ingen live publicering sker uden ny konkret ejergodkendelse og aktiverede, eligible integrationsforhold.
-
-ÅBNE EJER-/EKSTERNE PUNKTER
-- Der må ikke produceres nye videoer eller ændres footage, før ejeren skriver “Nu må du begynde”. Reelle pilotvideoer og end-to-end publiceringstests afventer derfor.
-- TikTok production-demo/review og eksplicit Direct Post-consent mangler.
-- Fuld automatisk research → medieplan → rendering og visuelt footagebibliotek er ikke færdig. Reelle langtidsmetrics og dokumenteret læringsforbedring findes ikke endnu.
-- YouTube-appen står i Testing; Meta App Review/Advanced Access mangler. Offsite backup er ikke konfigureret.
-
-Se OWNER_ACTIONS.md og TEST_PROTOCOL.md for detaljer og bevis. Der gives ingen 100 % fejlfriheds- eller resultatgaranti.
+FORMÅL OG REGLER
+SoMe-maskinen producerer rettighedssikre, dokumenterede videoer til Pixel and Parameters (gaming, retro, handheld, lokal/PC-AI). Ingen nye redaktionelle videoer før ejeren skriver "Nu må du begynde". Intet publiceres uden ejergodkendelse af den præcise version. Se CLAUDE_HANDOFF.md, OWNER_ACTIONS.md, docs/KPI.md og docs/PILOT_PLAN.md.

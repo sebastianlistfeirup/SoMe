@@ -93,7 +93,7 @@ Tests
   docker compose build
   docker compose run --rm --no-deps worker pytest -q
 
-Den aktuelle pakke har 199 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+Den aktuelle pakke har 272 tests (inkl. 46 Content Bible-kontrakttests). Aktuelle fakta genereres med `python -m app.cli status-report`. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
 Gameplay-ranking (internetklip og ElevenLabs-voiceover)
 ------------------------------------------------------
@@ -122,3 +122,21 @@ OBS og FFmpeg behandler nye optagelser på Windows via `scripts/capture_bridge.p
 Nye filer i `C:/Users/compu/Videos/SoMe-captures` overvåges rekursivt, ventes skriveferdige og konverteres til MP4 med kontaktark og `some-capture-v1` manifest. En spilmappe som `Monster Train 2/` vælger spilprofil. Platformmapper som `PS5` og `Switch 2` gemmes derimod som `footage_platform`, mens spillet genkendes i filnavnet. Et ukendt spil stopper med `unknown_game_profile` og bliver aldrig automatisk registreret som standardspillet. Output ligger i `SoMe-processed/<spil>/` og kan uploades via eksisterende SSH-forbindelse til `/opt/some/data/media-library/<spil>/`. Upload kan udelades ved at undlade `--upload`. Ingen optagelse publiceres automatisk, og rettigheds-/ejergodkendelse er stadig obligatorisk. Monster Train 2 kræver desuden kanalspecifikt bevis fra Devolvers officielle tilladelsesgenerator før produktion.
 
 Grok, Gemini og Qwen CLI er lokale processer og kan ikke køre med computeren slukket. Et CLI-abonnement er ikke en cloud-API eller en videogenereringskontrakt. Separate Veo/Imagine API'er kræver egen nøgle, pris og rettighedsafklaring. ElevenLabs bruger den eksisterende paid-/pris-/rettighedsblokerede adapter og aktiveres først efter hemmelig nøgleopsætning og kontrol af abonnementet.
+
+
+Nye kommandoer (forbedringsrunden 2026-11-13)
+--------------------------------------------
+  python -m app.cli ideas --next 10 [--lane gaming|ai|crossover]   # idérangering 80/20
+  python -m app.cli prefill-packet --idea GI001                     # pakkeudkast uden fakta
+  python -m app.cli experiment create --spec content/pilot/pilot-hook.json
+  python -m app.cli experiment assign --id 1 --story <story_id>
+  python -m app.cli experiment evaluate|list|stop|manual-result ...
+  python -m app.cli scorecard                                       # hovedmål, guardrails, aktiv model
+  python -m app.cli calibration                                     # kvalitetsscore mod resultater
+  python -m app.cli timelog add --story <id> --step mobygames --minutes 30
+  python -m app.cli timelog report
+  python -m app.cli plan-derivatives --plan <plan.json>             # én plan pr. pakkevariant
+  python -m app.cli comments | series | cost-report
+  python -m app.cli status-report --tests-passed <N> --environment vps
+
+Live-produktion: editorial-pakkens voiceovers er den låste narration. Claude skriver kun titel, caption og hook-type. 85-gaten bruger en blind uafhængig score. Godkendelsen binder teksten pr. platform og AI-mærket. Deploy: scripts/deploy.sh (tagget image, backup før migration, automatisk rollback), scripts/rollback.sh og scripts/deploy_staging.sh. Beslutninger: docs/decisions/.

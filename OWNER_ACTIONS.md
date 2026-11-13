@@ -157,6 +157,22 @@ NVIDIAs vilkår: https://www.nvidia.com/en-us/geforce-now/terms-of-use/
 - ElevenLabs kræver særskilt ejeraccept af voice, kommercielle vilkår og pris. HeyGen og synlige avatarer er udfaset.
 - Reelle læringsforbedringer er ikke dokumenteret endnu. Fuld automatisk research → medieplan → rendering → multiplatformsplanlægning er ikke færdig.
 
+## 13. Ejerbeslutninger efter forbedringsrunden (2026-11-13)
+
+Alt nedenfor er bygget og testet lokalt (272 tests), men ikke deployet. Intet er slået til uden dig.
+
+- [ ] **Push og deploy:** Giv OK til push af `04ceceff` → `d5129c98` plus docs, og til deploy med den nye `scripts/deploy.sh` (backup før migration 0002 og automatisk rollback).
+- [ ] **GitHub CI:** `.github/workflows/ci.yml` kræver, at det token, der pusher, har `workflow`-adgang.
+- [ ] **Serverens app.env:** Sæt `VOICE_PROVIDER=elevenlabs`. Linjen `VOICE_PRESET` kan slettes. Kokoro er nu kun demo og kan ikke godkendes.
+- [ ] **Alarmkanal:** Vælg webhook (fx Discord) og/eller e-mail, og sæt `ALERT_*` i `/opt/some/secrets/app.env`.
+- [ ] **Offsite backup:** Vælg en udbyder med WebDAV over HTTPS (fx en storage box). Godkend prisen, og sæt `OFFSITE_*`. Kun krypterede backups sendes.
+- [ ] **Staging:** Opret `/opt/some/secrets/staging.env` uden publiceringstokens, og kør `scripts/deploy_staging.sh` (port 8001 via SSH-tunnel).
+- [ ] **Udgiverpolitikker:** Verificér Devolver og Nintendo i `some-pilot/content/PUBLISHER_POLICIES.json` (`verified_at`, `verified_by`, bevis). Indtil da blokeres footage med de rettighedshavere.
+- [ ] **AI-mærkning:** Bekræft standarderne eller ret dem: YouTube fra (gælder realistisk syntetisk indhold), TikTok til, Instagram/Facebook manuelt i appen. Du kan ændre det pr. godkendelse.
+- [ ] **Serier:** Vælg hvilke forslag i `some-pilot/content/SERIES.json` der skal køre.
+- [ ] **Tid:** Log dine minutter pr. trin (Drift-siden eller `timelog add`), så flaskehalsen kan måles.
+- [ ] **Pilot:** Når footage er klar, skriv “Nu må du begynde” og følg `docs/PILOT_PLAN.md`.
+
 ## Præcis næste handling — start produktion når footage er klar
 
 ElevenLabs-nøglen og begge stemmer er allerede konfigureret; der skal ikke ændres i secrets nu. Fortsæt optagelserne som planlagt. Når biblioteket er fyldt, og du vil have den første rigtige pilotproduceret, skriv præcis: **“Nu må du begynde”**. Før det sker, produceres ingen nye videoer og eksisterende footage ændres ikke. TikTok production-demo/review og Direct Post-consent håndteres som et separat efterfølgende punkt.
