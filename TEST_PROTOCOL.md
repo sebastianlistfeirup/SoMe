@@ -284,3 +284,20 @@ Ikke verificeret: rigtige API-kald til retention, kommentarer, kontotjek, alarme
 - **Stemme:** `VOICE_PROVIDER` i serverens `app.env` er ændret fra `kokoro` til `elevenlabs`, og kun den linje er rørt. Backup: `app.env.bak-20261113T212216Z`, rettigheder 600. Web og worker er genskabt på `some-pilot:32f8ada43552`. Doctor viser `provider=elevenlabs`, og health er ok lokalt og via HTTPS.
 - **Staging:** `staging.env` er oprettet med 7 nøgler og ingen tokens (rettigheder 600; app-nøglen er genereret på serveren og aldrig vist). `scripts/deploy_staging.sh` gav 272 passed, migration og health ok på 127.0.0.1:8001 med image `some-pilot:59124b16c4e3`. Bekræftet isolation: data i `/opt/some/staging-data`, `dry_run=true`, publicering og betalte kald fra, ingen tokens sat. Produktionen var uberørt og healthy.
 - **Oprydning:** Den ubrugte linje `VOICE_PRESET` er slettet fra `app.env`. Backup: `app.env.bak-20261113T212412Z`. Nøgle-diff bekræfter, at præcis den ene nøgle er fjernet. Containerne er genskabt; de er healthy, migration 0002 er OK, og `VOICE_PRESET` findes ikke i containermiljøet.
+
+## YouTube-udvidelser, lange videoer, vækstværktøjer og 2-faktor — 2026-11-13
+
+Commit `24447828`: **295 passed** lokalt (23 nye tests). Pushet, **ikke deployet**, fordi deploy kræver ejerens udtrykkelige OK.
+
+- **Undertekster:** SRT forskydes med introens 3,5 sek. og uploades som undertekstspor efter publicering.
+- **Serie-playlister:** Oprettes én gang og genbruges.
+- **Godkendelse og fejl:** Undertekster og playliste er bundet i godkendelsen (digest v2). Mangler tilladelsen `youtube.force-ssl`, meldes `scope_missing_reauthorize`, og en upload, der allerede er lykkedes, rulles aldrig tilbage.
+- **Lange videoer (16:9):** Rigtig FFmpeg-render giver 1920×1080. Kun YouTube kan godkendes. Kapitler følger YouTubes regler, og det første kapitel dækker introen.
+- **Outliers:** views pr. subscriber fra channels.list. Grænsen for outlier er 3×.
+- **Udgivelseskalender:** manuel kalender med krav om kilde og tjek-dato, og forslag 7–45 dage før udgivelse. IGDB kører kun, når ejeren har bekræftet vilkårene.
+- **ElevenLabs-udtaleordbog:** alias-regler. Et forældet ordbogs-ID sendes aldrig.
+- **YPP-fremdrift:** splittet med `creatorContentType`. Affiliate-links kræver et registreret program og oplysningstekst.
+- **Mobil:** mobilvenlig review-side og notifikation med link, når en video venter.
+- **2-faktor:** TOTP verificeret mod RFC 6238-testvektoren, med beskyttelse mod genbrug, gendannelseskoder og `REQUIRE_TOTP`. Sikker "videre til"-adresse og `SameSite=Lax`.
+- **Fund:** UFW tillader SSH fra hele internettet, ikke kun ejerens IP som dokumenteret. Det er ikke ændret.
+- **Ikke verificeret mod rigtige API'er:** undertekster, playlister, IGDB, ElevenLabs-ordbog og YPP-kald er kun mock-testet.

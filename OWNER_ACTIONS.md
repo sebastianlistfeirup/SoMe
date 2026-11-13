@@ -173,6 +173,26 @@ Alt nedenfor er deployet (272 tests på VPS). Intet er slået til uden dig.
 - [ ] **Tid:** Log dine minutter pr. trin (Drift-siden eller `timelog add`), så flaskehalsen kan måles.
 - [ ] **Pilot:** Når footage er klar, skriv “Nu må du begynde” og følg `docs/PILOT_PLAN.md`.
 
+## 14. Ekstern adgang, YouTube-udvidelser og vækstværktøjer (2026-11-13)
+
+Bygget og testet lokalt (295 tests), pushet som `24447828`, men **ikke deployet**. Deploy kræver dit OK.
+
+Ekstern adgang, i denne rækkefølge:
+- [ ] Giv OK til deploy af `24447828` (migration 0003 tilføjer 2-faktor-felter; backup tages automatisk før migrationen).
+- [ ] Log ind hjemmefra, åbn **Sikkerhed**, tilføj nøglen i din authenticator-app, bekræft med en kode, og gem de 8 gendannelseskoder et sikkert sted.
+- [ ] Sig til, når det er gjort. Så sætter jeg `REQUIRE_TOTP=true` og `PUBLIC_DASHBOARD_URL`, fjerner IP-begrænsningen i Caddy og tester login udefra.
+- [ ] Beslut, om SSH (port 22) fortsat skal være åben fra hele internettet. Den er i dag beskyttet af nøgle-login og Fail2ban.
+
+YouTube:
+- [ ] Godkend YouTube-appen igen med scope `youtube.force-ssl` (ud over de nuværende). Uden den springes undertekster og serie-playlister over med status `scope_missing_reauthorize`, mens selve uploaden virker som før.
+
+Vækstværktøjer:
+- [ ] Udtale: Tilføj en regel i `some-pilot/content/PRONUNCIATIONS.json`, hver gang et navn udtales forkert.
+- [ ] Udgivelser: Tilføj kommende spil i `some-pilot/content/RELEASE_CALENDAR.json` med kilde og tjek-dato. IGDB-import kræver en Twitch-app (`IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`), og at du har tjekket, at vilkårene tillader kanalens brug (`IGDB_TERMS_CONFIRMED=true`).
+- [ ] Affiliate: Registrér programmer i `some-pilot/content/AFFILIATE_PROGRAMS.json` med domæne og oplysningstekst, før du bruger affiliate-links. Uregistrerede links blokeres ved godkendelse.
+- [ ] YPP: Tærsklerne i `some-pilot/content/MONETIZATION.json` er læst 2026-11-13. YouTube har annonceret højere tærskler for nye kanaler fra 2027-02-01.
+- [ ] Staging-login: Staging har sin egen tomme database, og du opretter brugeren med kommandoen i afsnit 13.
+
 ## Præcis næste handling — start produktion når footage er klar
 
 ElevenLabs-nøglen og begge stemmer er allerede konfigureret; der skal ikke ændres i secrets nu. Fortsæt optagelserne som planlagt. Når biblioteket er fyldt, og du vil have den første rigtige pilotproduceret, skriv præcis: **“Nu må du begynde”**. Før det sker, produceres ingen nye videoer og eksisterende footage ændres ikke. TikTok production-demo/review og Direct Post-consent håndteres som et separat efterfølgende punkt.
