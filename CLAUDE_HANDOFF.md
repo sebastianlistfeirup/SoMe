@@ -33,7 +33,7 @@ Seneste relevante applikationscommit:
 
 Verificeret både lokalt og på Contabo-VPS:
 
-- **197/197 tests består** (efter `72a3269c`)
+- **199/199 tests består** (efter `8589e38e`)
 - Standard Docker-build består
 - Migration 0001 er OK
 - `doctor` er OK
@@ -407,4 +407,4 @@ MSYS_NO_PATHCONV=1 docker compose -f some-pilot/compose.yaml run --rm --no-deps 
 ssh -F .codex_tmp/deploy/ssh_config some-contabo-deploy 'curl -fsS http://127.0.0.1:8000/healthz'
 ```
 
-Forventet baseline på genoptagelsestidspunktet: **199 tests** lokalt (VPS: 197 indtil næste deploy).
+Forventet baseline på genoptagelsestidspunktet: **199 tests** lokalt og på VPS (`8589e38e`).
