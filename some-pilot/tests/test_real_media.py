@@ -118,6 +118,7 @@ def test_produce_end_to_end_with_real_media(db, tmp_path, monkeypatch):
         return {"decision": "ALLOW", "reasons": [], "provider": provider, "files": [{"segment_id": "full", "path": str(generated), "voice": "test-voice", "duration_seconds": 2}]}
 
     monkeypatch.setattr("app.pipeline.production.prepare_voice", fake_voice)
+    monkeypatch.setattr("app.pipeline.production.concat_with_idents", lambda content, target, **_kwargs: shutil.copyfile(content, target))
     from app.pipeline.ai import demo_draft
     narration_text = demo_draft(topic).narration
     words = narration_text.split()
@@ -183,6 +184,7 @@ def test_live_production_uses_ai_elevenlabs_voice_and_records_cost(db, tmp_path,
         }
 
     monkeypatch.setattr("app.pipeline.production.prepare_voice", fake_voice)
+    monkeypatch.setattr("app.pipeline.production.concat_with_idents", lambda content, target, **_kwargs: shutil.copyfile(content, target))
     draft = demo_draft(topic)
     words = draft.narration.split()
     midpoint = len(words) // 2

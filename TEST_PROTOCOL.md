@@ -180,3 +180,12 @@ Dækning: rettigheder, alder, statusflow, approvalhash, publish-blokering, jobs,
 - VPS doctor: `direct_post_eligible=false`, `direct_post_blocker=tiktok_direct_post_not_eligible`; ElevenLabs konfigureret. Ingen ny ekstern publicering eller betalt produktion blev udført under deployment.
 
 - Endelig auditrevision `0fcc524`: Editorial-pakke er koblet til ikke-demo-produktion med JSON Schema, lane-match, 85-pointsgate, inspected sources og receptionskrav. Ranking har samme gates pr. featured game. Tests dækker research-state, udløb, manglende spoken reception, ændret narrationartifact og blokeret dispatch efter evidensudløb. Resultat lokalt og på VPS: **178 passed**; web/worker healthy.
+
+## Ejergodkendt intro/outro i alle nye formater — 2026-11-13
+
+- Den godkendte animation/lyd er flyttet til den fælles produktionskomponent `app/pipeline/brand_ident.py`; den gamle testpost-renderer delegerer til samme kilde. Der er ikke lavet en alternativ visuel version.
+- Almindelig reel medieproduktion og editorial ranking tilføjer automatisk 3,5 sek. intro og outro. YouTube vælger 1920×1080; øvrige destinationsformater bruger 1080×1920.
+- To parametriserede integrationstests opretter korte syntetiske testklip og udfører den rigtige FFmpeg-sammenføjning i begge formater. Tests kontrollerer opløsning, H.264, yuv420p, 30 fps, 240 frames, AAC stereo 48 kHz og varighed. 3,5 + 1,0 + 3,5 sek. giver 8 sek.; den målte 8,021333 sek. er AAC-padding og ligger inden for den korrekte tolerance 7,9–8,1 sek.
+- Den første testforventning på 8,3–8,7 sek. var en regnefejl og er rettet efter ffprobe af intro, indhold, outro og resultat. Produktionsvideoernes indhold ændredes ikke for at passe testen.
+- Ident-cachen afhænger af både logo- og rendererhash. Testdata-dir respekteres, så testen ikke utilsigtet genbruger serverens gamle identer. `content.mp4` bevares som det rene redaktionelle indhold, mens det endelige `video.mp4` indeholder ident + indhold + ident.
+- Standardbuild og hele pakken: **181 passed**, kun den kendte Starlette TestClient-deprecationwarning. Ingen nye redaktionelle ejervideoer er produceret, eksisterende opslag er ikke ændret, og `C:/Users/compu/Videos/SoMe-captures` er urørt.

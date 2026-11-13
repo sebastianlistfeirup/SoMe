@@ -10,6 +10,7 @@ from app.config import get_settings
 from app.db.models import Asset, Cost, License, Observation, Script, Topic, VideoVersion
 from app.pipeline.ai import build_clip_plan, claude_draft, current_prompt_version, demo_draft, review_draft
 from app.pipeline.approvals import paused, sha256_file, transition
+from app.pipeline.brand_ident import concat_with_idents, ident_metadata
 from app.pipeline.editorial import evaluate_editorial_packet
 from app.pipeline.media import probe, require_tools, storyboard, technical_checks, transcribe
 from app.pipeline.policy import content_policy, rights_policy
@@ -168,8 +169,11 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         audio_duration = float(probe(narration)["format"]["duration"])
         clip_plan = build_clip_plan(caption_segments, [asset.id for asset in assets], audio_duration, [claim.id for claim in draft.claims])
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
+        content = output / "content.mp4"
         rendered = output / "video.mp4"
-        layout = render_real_media(prepared, narration, captions, draft.title, rendered, coverage)
+        layout = render_real_media(prepared, narration, captions, draft.title, content, coverage)
+        concat_with_idents(content, rendered, landscape=False)
+        layout["brand_ident"] = ident_metadata(False)
         thumb = output / "thumbnail.jpg"
         layout["thumbnail"] = thumbnail_from_source(prepared, durations, thumb)
         board = output / "storyboard.jpg"

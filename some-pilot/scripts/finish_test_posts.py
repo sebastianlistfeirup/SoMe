@@ -78,80 +78,9 @@ def centered(draw: ImageDraw.ImageDraw, text: str, y: int, font: ImageFont.FreeT
 
 
 def render_ident(mode: str, outro: bool, target: Path) -> None:
-    width, height = ((1920, 1080) if mode == "landscape" else (1080, 1920))
-    frame_count = round(IDENT_DURATION * FPS)
-    audio = WORK / f"ident-{mode}-{'outro' if outro else 'intro'}.wav"
-    ident_audio(audio, outro)
-    logo = Image.open(LOGO).convert("RGBA").crop((150, 65, 1100, 975))
-    logo_size = 310 if mode == "landscape" else 380
-    logo.thumbnail((logo_size, logo_size), Image.Resampling.LANCZOS)
-    title_font = ImageFont.truetype(FONT, 74 if mode == "landscape" else 61)
-    sub_font = ImageFont.truetype(FONT, 26 if mode == "landscape" else 30)
-    command = [
-        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-        "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{width}x{height}", "-r", str(FPS), "-i", "-",
-        "-i", str(audio), "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p",
-        "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
-        "-shortest", "-movflags", "+faststart", str(target),
-    ]
-    process = subprocess.Popen(command, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert process.stdin is not None
-    for frame_index in range(frame_count):
-        p = frame_index / max(1, frame_count - 1)
-        image = Image.new("RGB", (width, height), "#030814")
-        draw = ImageDraw.Draw(image, "RGBA")
-        for y in range(height):
-            blend = y / max(1, height - 1)
-            color = (3 + round(8 * blend), 8 + round(17 * blend), 20 + round(27 * blend), 255)
-            draw.line((0, y, width, y), fill=color)
-        grid = 90 if mode == "landscape" else 82
-        shift = round((p * grid * (1 if not outro else -1)) % grid)
-        for x in range(-grid + shift, width, grid):
-            draw.line((x, 0, x, height), fill=(25, 239, 255, 20), width=1)
-        for y in range(-grid + shift, height, grid):
-            draw.line((0, y, width, y), fill=(25, 239, 255, 15), width=1)
-        for index in range(12):
-            phase = (p * (1.3 + index * 0.03) + index * 0.083) % 1
-            x = round(phase * (width + 180) - 90)
-            y = round(height * (0.16 + 0.68 * ((index * 0.31) % 1)))
-            size = 18 + (index % 3) * 10
-            color = (255, 91, 76, 150) if index % 2 else (37, 231, 255, 145)
-            draw.rectangle((x, y, x + size, y + size), fill=color)
-        wave_y = round(height * (0.67 if mode == "landscape" else 0.72))
-        points = []
-        for x in range(0, width + 1, 18):
-            yy = wave_y + math.sin((x / width) * math.pi * 5 + p * math.pi * 4) * (25 if mode == "landscape" else 34)
-            points.append((x, yy))
-        draw.line(points, fill=(37, 231, 255, 95), width=4)
-        reveal = min(1.0, max(0.0, (p - 0.08) / 0.24))
-        if outro:
-            reveal = min(1.0, max(0.0, p / 0.18))
-        fade = min(1.0, max(0.0, (1 - p) / 0.12))
-        alpha = reveal * fade
-        scale = 0.78 + 0.22 * (1 - (1 - reveal) ** 3)
-        mark = logo.resize((round(logo.width * scale), round(logo.height * scale)), Image.Resampling.LANCZOS)
-        mark.putalpha(mark.getchannel("A").point(lambda value: round(value * alpha)))
-        mark_y = round(height * (0.21 if mode == "landscape" else 0.29))
-        image.paste(mark, ((width - mark.width) // 2, mark_y), mark)
-        draw = ImageDraw.Draw(image, "RGBA")
-        title_y = round(height * (0.60 if mode == "landscape" else 0.57))
-        centered(draw, "PIXEL & PARAMETERS", title_y, title_font, (255, 255, 255, round(255 * alpha)))
-        subtitle = "FOLLOW FOR MORE" if outro else "GAMING CULTURE  ×  LOCAL AI"
-        sub_y = title_y + (102 if mode == "landscape" else 112)
-        centered(draw, subtitle, sub_y, sub_font, (88, 239, 255, round(235 * alpha)))
-        # Parameter-track reveal supplies a crisp visual beat before the cut.
-        track_y = sub_y + (70 if mode == "landscape" else 86)
-        track_w = 420 if mode == "landscape" else 520
-        left = (width - track_w) // 2
-        draw.rounded_rectangle((left, track_y, left + track_w, track_y + 8), radius=4, fill=(255, 255, 255, 90))
-        knob_x = left + round(track_w * (0.12 + 0.76 * (1 - (1 - min(1, p * 1.4)) ** 3)))
-        draw.ellipse((knob_x - 13, track_y - 9, knob_x + 13, track_y + 17), fill=(255, 91, 76, 235))
-        process.stdin.write(image.tobytes())
-    process.stdin.close()
-    error = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
-    code = process.wait()
-    if code:
-        raise RuntimeError(error[-6000:])
+    from app.pipeline.brand_ident import render_ident as render_approved_ident
+
+    render_approved_ident(mode, outro, target)
 
 
 def brand_content(post: str, source: Path, target: Path, mode: str) -> None:

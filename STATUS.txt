@@ -1,5 +1,5 @@
 SoMe-maskinen — STATUS
-Opdateret: 2026-11-12
+Opdateret: 2026-11-13
 Repository: https://github.com/sebastianlistfeirup/SoMe
 
 AKTIV ARKITEKTUR
@@ -12,6 +12,8 @@ AKTIV ARKITEKTUR
 
 MEDIEPRODUKTION
 - Ny produktion kræver en reel medieplan. Mindst 80 % af varigheden skal være rigtige videoklip eller rigtige billeder; AI-genereret indhold tæller ikke som reelt.
+- Den ejergodkendte Pixel & Parameters-intro/outro er obligatorisk i begge aktive produktionsflows. Alle nye videoer får 3,5 sek. intro og 3,5 sek. outro med den godkendte P-kollision, separate orange blokke, AI-undertekst og dæmpet baggrundslyd. YouTube bruger 1920×1080 (16:9); TikTok, Instagram Reels og Facebook bruger 1080×1920 (9:16). Outro-teksten er FOLLOW FOR MORE. Eksisterende videoer ændres ikke bagud.
+- Intro/outro renderes én gang pr. format og genbruges via en cache, der invalideres ved ændret logo eller renderer. Produktionsflowet kontrollerer format, 30 fps, H.264/yuv420p og AAC stereo 48 kHz med reelle FFmpeg-tests.
 - Almindelig ikke-demo-produktion bruger ElevenLabs. Gaming: `HfRP3cIhYLmeNHeTvkWK`. AI: `8CjmkufHc22WbMZEBHbm`. Kokoro findes kun til gamle/tekniske demo-flows og er ikke kreativt godkendt.
 - ElevenLabs `/with-timestamps` gemmer faktisk WAV, rå og normaliseret alignment, request-ID når leverandøren returnerer det, varighed, succesfulde kald og DKK-omkostning. Undertekster udledes fra alignment; Whisper bruges som separat udtalekontrol.
 - Manifestet indeholder dynamisk de faktiske artifacts: video, thumbnail, script, post, claims, rights, checks, subtitles, voice report og eventuelle narration/alignment/transcription-filer. Der er ikke længere et fast filtal.
@@ -23,8 +25,8 @@ TIKTOK
 - Den gatede adapter bruger creator_info og `/post/publish/video/init/`, aldrig inbox-endpointet. Kun `PUBLISH_COMPLETE` accepteres som publiceret. Production-review og reelt Direct Post-kald er ikke verificeret.
 
 VERIFICERET LOKALT
-- Standardbuild og hele testpakken: 178/178 tests består i frisk Docker-container.
-- Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost og AI-lane-valg.
+- Standardbuild og hele testpakken: 181/181 tests består i frisk Docker-container.
+- Tests dækker fire destinationer, immutable options, HTTP approval/rejection, dubletjobs, schedule, delvis fejl, TikTok eligibility/Direct Post, YouTube processing/cover/reconciliation, Instagram cover, signet thumbnail, ElevenLabs alignment/subtitles/cost, AI-lane-valg og reelle intro/outro-sammenføjninger i 9:16 og 16:9.
 - Alle netværks- og publiceringstests i pakken bruger mocks. Tidligere separate liveintegrationer er beskrevet i TEST_PROTOCOL.md. Der er ikke produceret nye ejervideoer eller ændret footage i dette arbejde.
 
 VERIFICERET PÅ VPS

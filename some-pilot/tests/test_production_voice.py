@@ -51,6 +51,7 @@ def test_ranking_voiceover_reaches_owner_and_passes_real_approval(db, tmp_path, 
         return {"decision": "ALLOW", "voice_only": True, "avatar_present": False, "technical": {"decision": "ALLOW", "duration_seconds": 12.5}}
 
     monkeypatch.setattr("app.pipeline.production_ranking.render_ranking", render)
+    monkeypatch.setattr("app.pipeline.production_ranking.concat_with_idents", lambda content, target, **_kwargs: target.write_bytes(content.read_bytes()))
     monkeypatch.setattr("app.pipeline.production_ranking.probe", lambda _path: {"format": {"duration": "12.5"}})
 
     def thumbnail(_plan_path, output):

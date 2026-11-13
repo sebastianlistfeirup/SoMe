@@ -77,7 +77,14 @@ Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af
 - Første upload manglede gemt `publish_id` og blev reconcileret med ejerbevis uden ny upload. Ny kode gemmer `publish_id` og poller længere.
 - Direct Post er deaktiveret. Production-appens demo-video og review mangler og fortsættes når ejeren er tilbage.
 
-## 6. Reel medieproduktion — ny obligatorisk standard
+## 6. Godkendt intro/outro — obligatorisk for nye videoer
+
+- Den visuelt godkendte P-kollision og den dæmpede baggrundslyd er låst som brand-ident version `original-collision-v1`. Der må ikke laves alternative P-former eller genindføres den kraftige brumme uden ny ejergodkendelse.
+- Alle nye produktionsvideoer får automatisk 3,5 sek. intro og 3,5 sek. outro. Intro siger `GAMING CULTURE × AI`; outro siger `FOLLOW FOR MORE`.
+- YouTube bruger 16:9 (1920×1080). TikTok, Instagram Reels og Facebook bruger 9:16 (1080×1920). Den samme godkendte animation skaleres til formatet; eksisterende opslag og eksisterende footage ændres ikke.
+- Implementationen ligger i `some-pilot/app/pipeline/brand_ident.py`. Reelle FFmpeg-integrationstests dækker begge formater, 30 fps, H.264/yuv420p, AAC stereo 48 kHz og samlet varighed. Cachen genkender ændringer i både logo og renderer.
+
+## 6A. Reel medieproduktion — ny obligatorisk standard
 
 - **Mindst 80 % af hver ny videos varighed skal være rigtige videoklip eller rigtige billeder.** Målingen er duration-weighted. En medieplan kan kræve 90–100 %, men aldrig sænke grænsen.
 - Producentklip, generiske kontekstklip, egne gameplayoptagelser og rigtige fotos med zoom/pan understøttes. Grafik/title cards må højst fylde 20 %.

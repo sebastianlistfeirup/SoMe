@@ -48,6 +48,10 @@ Ikke-demo-produktion kræver også `editorial-packet.json` og alle syv `quality_
 
 `media_composition.json` dokumenterer procent, varighed, scenetyper og kontekst. Manifestet hasher dynamisk alle faktiske leveranceartifacts, herunder script, subtitles, voice report og eventuelle ElevenLabs narration/alignment/transcription-filer. Thumbnail vælges som et rent frame fra originalkilden uden undertekster/titeloverlay. Review-kort og detailvisning viser reel medieprocent; ældre formater markeres som ældre.
 
+Godkendt intro/outro
+--------------------
+Alle nye videoer i både den almindelige produktionspipeline og ranking-pipelinen får automatisk den ejergodkendte Pixel & Parameters-intro og -outro på 3,5 sekunder hver. YouTube bruger 1920×1080 (16:9), mens TikTok, Instagram Reels og Facebook bruger 1080×1920 (9:16). Animationen, de separate orange blokke, `GAMING CULTURE × AI`, `FOLLOW FOR MORE` og den dæmpede lyd kommer fra den fælles `app/pipeline/brand_ident.py`. Cachen invalideres ved ændret logo eller renderer. Ændringer kræver ny visuel ejergodkendelse; eksisterende videoer ændres ikke bagud.
+
 CLI-kontrakt
 ------------
   python -m app.cli doctor
@@ -83,7 +87,7 @@ Tests
   docker compose build
   docker compose run --rm --no-deps worker pytest -q
 
-Den aktuelle pakke har 178 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
+Den aktuelle pakke har 181 tests. Testprotokol og faktiske resultater ligger i TEST_PROTOCOL.md og STATUS.txt. Eksterne integrationer er ikke erklæret verificerede, før relevante private uploads og metrics er gennemført på ejerens konti.
 
 Gameplay-ranking (internetklip og ElevenLabs-voiceover)
 ------------------------------------------------------

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Asset, License, Script, Topic, VideoVersion
 from app.pipeline.approvals import paused, sha256_file, transition
+from app.pipeline.brand_ident import concat_with_idents, ident_metadata
 from app.pipeline.editorial import GameReception, editorial_score, freshness_blockers, reception_blockers, EvidenceClaim
 from app.pipeline.media import probe, require_tools, transcribe
 from app.pipeline.policy import content_policy, rights_policy
@@ -112,7 +113,11 @@ def produce_ranking(db: Session, plan_path: Path, output: Path, platform: str = 
     transition(video, "RIGHTS_CHECKED")
     transition(video, "SCRIPTED")
     layout = render_ranking(plan_path, output, platform, mobile_style, voice_files)
+    content = output / "content.mp4"
     rendered = output / "video.mp4"
+    rendered.replace(content)
+    concat_with_idents(content, rendered, landscape=platform == "youtube")
+    layout["brand_ident"] = ident_metadata(platform == "youtube")
     video.video_path = str(rendered)
     thumb = make_landscape_thumbnail(plan_path, output) if platform == "youtube" else make_thumbnail(plan_path, output)
     video.thumbnail_path = str(thumb)
