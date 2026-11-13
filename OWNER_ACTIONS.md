@@ -12,7 +12,7 @@ Contabo-serveren, Claude, YouTube, Instagram, Facebook og TikTok Sandbox er forb
 
 - 6 vCPU, 12 GB RAM, 300 GB NVMe, fem snapshots, 500 Mbit/s-port og ubegrænset trafik. Kontrolpanelet viser én måneds kontrakt og €23,75/måned, cirka 177 DKK. Endelig faktura og moms er ikke verificeret.
 - Serveren overstiger det tidligere 150 DKK-loft. Der skal ikke købes flere servere eller større API-pakker uden ny beslutning.
-- Applikationscommit `0fcc524` er deployet, **178/178 tests** bestod lokalt og på serveren, web/worker er healthy.
+- Applikationscommit `12d4b0b4` er deployet med obligatorisk godkendt intro/outro, **181/181 tests** bestod lokalt og på serveren, web/worker er healthy.
 - SSH bruger separat ED25519-nøgle. Root- og passwordlogin over SSH er slået fra. UFW og Fail2ban er aktive.
 - Caddy giver gyldig HTTPS på `https://62.171.167.243.sslip.io`. Dashboardbruger er `owner`; initialadgangskoden ligger i root-beskyttet `/opt/some/secrets/initial-admin-password`.
 - Caddy’s admin-whitelist skal opdateres, når ejerens IP skifter. Offentlige health-/juridiske ruter og callbacks er adskilt fra ejer-ruterne.
