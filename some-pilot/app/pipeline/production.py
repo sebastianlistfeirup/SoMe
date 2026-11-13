@@ -68,8 +68,9 @@ def transcription_quality(script: str, transcription: dict) -> dict:
     return {"decision": "ALLOW" if not reasons else "REVIEW", "reasons": reasons, "similarity": round(similarity, 4), "missing_numbers": missing_numbers, "names_and_numbers_require_owner_check": True}
 
 
-def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: Path | None = None) -> VideoVersion:
+def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: Path | None = None, progress=None) -> VideoVersion:
     settings = get_settings()
+    step = progress or (lambda _stage: None)
     if paused(db):
         raise RuntimeError("emergency_stop_active")
     require_tools()
@@ -149,6 +150,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
                 transition(video, "BLOCKED")
                 db.commit()
                 raise ValueError("editorial_blocked:" + ",".join(editorial["blockers"]))
+        step("preparing_media")
         prepared = prepare_media(media_plan, media_plan_path, output)
         assets = []
         licenses = []
@@ -191,6 +193,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         lane = "ai" if "ai" in topic.niche.lower() else "gaming"
         provider = settings.voice_provider if dry_run else "elevenlabs"
         voice_id = settings.elevenlabs_ai_voice_id if lane == "ai" else settings.elevenlabs_gaming_voice_id
+        step("generating_voice")
         voice = prepare_voice([segment], provider, output / "voice", voice_id=voice_id if provider == "elevenlabs" else None)
         (output / "voice_assets.json").write_text(json.dumps(voice, indent=2, ensure_ascii=False), encoding="utf-8")
         if voice["decision"] != "ALLOW":
@@ -227,6 +230,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         (output / "clip_plan.json").write_text(clip_plan.model_dump_json(indent=2), encoding="utf-8")
         content = output / "content.mp4"
         rendered = output / "video.mp4"
+        step("rendering")
         layout = render_real_media(prepared, narration, captions, draft.title, content, coverage)
         concat_with_idents(content, rendered, landscape=False)
         layout["brand_ident"] = ident_metadata(False)
@@ -238,6 +242,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
         video.video_path = str(rendered)
         video.thumbnail_path = str(thumb)
         transition(video, "RENDERED")
+        step("checking")
         technical = technical_checks(rendered, captions)
         if technical["decision"] != "ALLOW":
             transition(video, "BLOCKED")

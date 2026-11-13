@@ -117,3 +117,66 @@ def restore_to_directory(path: Path, target: Path) -> dict:
     finally:
         connection.close()
     return {"restored_to": str(target), "integrity": integrity, "publish_enabled": False, "paid_jobs_enabled": False, "note": "No environment/secrets restored; external publishing remains disabled by configuration."}
+
+
+def offsite_configured() -> bool:
+    settings = get_settings()
+    return bool(settings.offsite_webdav_url and settings.offsite_username and settings.offsite_password)
+
+
+def upload_offsite(path: Path) -> dict:
+    """Upload one encrypted backup to a WebDAV folder (e.g. a storage box) and verify its size.
+
+    Unencrypted backups are never sent off the server. The provider and price are
+    the owner's decision; nothing is uploaded until OFFSITE_* settings exist.
+    """
+    import httpx
+
+    settings = get_settings()
+    if not offsite_configured():
+        return {"status": "not_configured"}
+    if path.suffix != ".enc":
+        raise ValueError("offsite_requires_encrypted_backup")
+    if not settings.offsite_webdav_url.startswith("https://"):
+        raise ValueError("offsite_requires_https")
+    url = settings.offsite_webdav_url.rstrip("/") + "/" + path.name
+    auth = (settings.offsite_username, settings.offsite_password)
+    data = path.read_bytes()
+    response = httpx.put(url, content=data, auth=auth, timeout=300)
+    response.raise_for_status()
+    head = httpx.head(url, auth=auth, timeout=60)
+    head.raise_for_status()
+    remote_size = int(head.headers.get("content-length", -1))
+    if remote_size != len(data):
+        raise ValueError("offsite_size_mismatch")
+    return {"status": "uploaded", "name": path.name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+
+
+def restore_drill(backup_dir: Path, drill_root: Path) -> dict:
+    """Monthly proof that the newest backup can actually be restored. The restored copy is removed afterwards."""
+    import shutil
+
+    candidates = sorted(backup_dir.glob("some-backup-*.zip*"), key=lambda item: item.name, reverse=True)
+    if not candidates:
+        raise ValueError("no_backup_to_restore")
+    latest = candidates[0]
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    target = drill_root / stamp
+    started = datetime.now(timezone.utc)
+    try:
+        result = restore_to_directory(latest, target)
+        counts = {}
+        connection = sqlite3.connect(target / "some.db")
+        try:
+            for table in ("video_versions", "publications", "metric_snapshots", "jobs"):
+                counts[table] = connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        finally:
+            connection.close()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+    report = {"backup": latest.name, "integrity": result["integrity"], "row_counts": counts, "seconds": round((datetime.now(timezone.utc) - started).total_seconds(), 2), "restored_copy_removed": True, "at": started.isoformat()}
+    if result["integrity"] != "ok":
+        raise ValueError("restore_drill_integrity_failed")
+    drill_root.mkdir(parents=True, exist_ok=True)
+    (drill_root / f"drill-{stamp}.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    return report

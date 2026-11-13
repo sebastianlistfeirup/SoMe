@@ -62,6 +62,19 @@ class Settings(BaseSettings):
     secure_cookies: bool = False
     session_ttl_minutes: int = 120
     backup_key: str = ""
+    alert_webhook_url: str = ""
+    alert_smtp_host: str = ""
+    alert_smtp_port: int = 587
+    alert_smtp_user: str = ""
+    alert_smtp_password: str = ""
+    alert_email_from: str = ""
+    alert_email_to: str = ""
+    alert_repeat_hours: int = Field(default=6, ge=1, le=72)
+    offsite_webdav_url: str = ""
+    offsite_username: str = ""
+    offsite_password: str = ""
+    server_monthly_cost_dkk: float = Field(default=176.94, ge=0)
+    expected_monthly_api_dkk: float = Field(default=6.51, ge=0)
     voice_provider: str = "kokoro"
     voice_preset: str = "af_bella"
     voice_speed: float = 1.08

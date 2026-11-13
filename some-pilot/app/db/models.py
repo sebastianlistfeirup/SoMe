@@ -241,6 +241,10 @@ class Job(Base):
     error_code: Mapped[str | None] = mapped_column(String(150), nullable=True)
     result_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    error_message: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    progress_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class AuditEvent(Base):

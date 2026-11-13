@@ -22,6 +22,12 @@ COLUMNS = {
         sa.Column("ended_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("decision", sa.String(120), nullable=True),
     ],
+    "jobs": [
+        sa.Column("error_message", sa.String(500), nullable=True),
+        sa.Column("progress_json", sa.JSON(), nullable=True),
+        sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
+    ],
 }
 
 

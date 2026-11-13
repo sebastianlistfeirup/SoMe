@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block content %}
+<h1>Drift</h1>
+<section>
+  <h2>Advarsler</h2>
+  <p>Kanaler: webhook {{ 'til' if channels.webhook else 'fra' }}, e-mail {{ 'til' if channels.email else 'fra' }}. Advarsler sendes straks ved endeligt fejlede jobs og som daglig opsummering kl. 07.</p>
+  {% if alerts %}<ul>{% for alert in alerts %}<li><span class="status">{{ alert.severity | upper }}</span> {{ alert.message }}</li>{% endfor %}</ul>{% else %}<p>Ingen aktive advarsler.</p>{% endif %}
+</section>
+<section>
+  <h2>Kø og jobs</h2>
+  <pre>{{ metrics | tojson(indent=2) }}</pre>
+  <table><tr><th>Job</th><th>Status</th><th>Forsøg</th><th>Fremdrift</th><th>Forfalder</th></tr>
+  {% for job in running %}<tr><td>{{ job.kind }} <small>{{ job.id[:8] }}</small></td><td><span class="status">{{ job.status }}</span></td><td>{{ job.attempts }}/{{ job.max_attempts }}</td><td>{{ (job.progress_json or {}).get('stage', '') }}</td><td>{{ job.due_at }}</td></tr>{% else %}<tr><td colspan="5">Ingen ventende eller kørende jobs.</td></tr>{% endfor %}</table>
+</section>
+<section>
+  <h2>Endeligt fejlede jobs</h2>
+  <table><tr><th>Job</th><th>Fejl</th><th>Besked</th><th>Detaljer</th><th></th></tr>
+  {% for job, retryable in failed %}<tr><td>{{ job.kind }} <small>{{ job.id[:8] }}</small></td><td>{{ job.error_code }}</td><td>{{ job.error_message or '' }}</td><td><small>{{ job.result_path or '' }}</small></td><td>{% if retryable %}<form method="post" action="/jobs/{{ job.id }}/retry"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button>Prøv igen</button></form>{% else %}<small>Kræver manuel afstemning</small>{% endif %}</td></tr>{% else %}<tr><td colspan="5">Ingen fejlede jobs.</td></tr>{% endfor %}</table>
+</section>
+<section>
+  <h2>Konti og tokens</h2>
+  <form method="post" action="/accounts/check"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button>Tjek forbindelser nu</button></form>
+  <table><tr><th>Platform</th><th>Konfigureret</th><th>OK</th><th>Konto</th><th>Sidst OK</th><th>Udløber (estimat)</th><th>Note</th></tr>
+  {% for name, status in (accounts.get('platforms') or {}).items() %}<tr><td>{{ name }}</td><td>{{ 'ja' if status.configured else 'nej' }}</td><td>{{ 'ja' if status.ok else status.get('error_code', 'nej') }}</td><td>{{ status.get('account_name') or status.get('account_id') or '' }}</td><td>{{ status.get('last_ok_at') or '' }}</td><td>{{ status.get('expires_estimate') or '' }}{% if status.get('expires_in_days') is not none %} ({{ status.expires_in_days }} dage){% endif %}</td><td><small>{{ status.get('note', '') }}</small></td></tr>{% else %}<tr><td colspan="7">Ikke tjekket endnu.</td></tr>{% endfor %}</table>
+  <p><small>Der vises aldrig nøgler eller tokens; kun status, konto og udløb.</small></p>
+</section>
+<section>
+  <h2>Start produktion som job</h2>
+  <p>Medieplanen og dens klip skal ligge under <code>data/media-plans</code>. Rigtig produktion bruger betalte kald (Claude og ElevenLabs) og må kun startes efter ejerens go.</p>
+  <form method="post" action="/jobs/produce"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Emne <select name="topic_id">{% for topic in topics %}<option value="{{ topic.id }}">{{ topic.id }} — {{ topic.title }}</option>{% endfor %}</select></label>
+    <label>Medieplan <select name="media_plan">{% for plan in media_plans %}<option>{{ plan }}</option>{% endfor %}</select></label>
+    <label class="check"><input type="checkbox" name="live" value="true"> Rigtig produktion (ikke demo)</label>
+    <button>Sæt i kø</button>
+  </form>
+</section>
+{% endblock %}

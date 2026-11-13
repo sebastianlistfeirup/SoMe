@@ -449,6 +449,50 @@ def settings_page(request: Request, db: Session = Depends(get_db), auth=Depends(
     return render(request, "settings.html", db, auth, safe_settings=safe, capabilities=capabilities, voice_profiles=voice_profiles)
 
 
+@app.get("/operations", response_class=HTMLResponse)
+def operations(request: Request, db: Session = Depends(get_db), auth=Depends(require_user)):
+    from app.pipeline.alerts import channels_configured, collect_alerts
+    from app.pipeline.jobs import can_retry
+    from app.pipeline.ops import ops_metrics
+
+    running = db.query(Job).filter(Job.status.in_(["RUNNING", "QUEUED"])).order_by(Job.due_at).limit(50).all()
+    failed = db.query(Job).filter(Job.status == "FAILED").order_by(Job.updated_at.desc()).limit(50).all()
+    account_status = db.get(Setting, "account_status")
+    plans_root = settings.data_dir / "media-plans"
+    media_plans = sorted(str(path.relative_to(plans_root)) for path in plans_root.glob("**/*.json") if path.name != "editorial-packet.json") if plans_root.is_dir() else []
+    topics = db.query(Topic).order_by(Topic.created_at.desc()).limit(50).all()
+    return render(request, "operations.html", db, auth, running=running, failed=[(job, can_retry(job)) for job in failed], alerts=collect_alerts(db), channels=channels_configured(), accounts=(account_status.value_json if account_status else {}), metrics=ops_metrics(db), media_plans=media_plans, topics=topics)
+
+
+@app.post("/jobs/{job_id}/retry")
+def retry_job(job_id: str, db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    from app.pipeline.jobs import retry_failed
+
+    try:
+        retry_failed(db, job_id, auth[0].username)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return RedirectResponse("/operations?retried=1", status_code=303)
+
+
+@app.post("/jobs/produce")
+def queue_production(topic_id: int = Form(...), media_plan: str = Form(...), live: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    root = (settings.data_dir / "media-plans").resolve()
+    plan = (root / media_plan).resolve()
+    if root not in plan.parents or not plan.is_file():
+        raise HTTPException(422, "Medieplanen skal ligge under data/media-plans")
+    if not db.get(Topic, topic_id):
+        raise HTTPException(404)
+    job, _created = enqueue(db, "produce", {"topic_id": topic_id, "media_plan": str(plan.relative_to(root)), "dry_run": not live, "requested_by": auth[0].username}, f"produce:{topic_id}:{plan.relative_to(root)}:{'live' if live else 'demo'}:{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}", max_attempts=1)
+    return RedirectResponse(f"/operations?queued={job.id}", status_code=303)
+
+
+@app.post("/accounts/check")
+def check_accounts(db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    enqueue(db, "account_probe", {"requested_by": auth[0].username}, f"account_probe:manual:{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}")
+    return RedirectResponse("/operations?accounts=queued", status_code=303)
+
+
 @app.post("/pause")
 def pause_all(db: Session = Depends(get_db), auth=Depends(csrf_check)):
     set_pause(db, True, auth[0].username)

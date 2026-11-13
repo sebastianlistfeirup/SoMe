@@ -23,6 +23,7 @@
       <a class="{{ 'active' if request.url.path.startswith('/results') else '' }}" href="/results"><span class="nav-symbol">↗</span>Resultater</a>
       <a class="{{ 'active' if request.url.path.startswith('/learnings') else '' }}" href="/learnings"><span class="nav-symbol">◇</span>Læringer</a>
       <span class="nav-label">SYSTEM</span>
+      <a class="{{ 'active' if request.url.path.startswith('/operations') else '' }}" href="/operations"><span class="nav-symbol">⚑</span>Drift</a>
       <a class="{{ 'active' if request.url.path.startswith('/economy') else '' }}" href="/economy"><span class="nav-symbol">¤</span>Økonomi</a>
       <a class="{{ 'active' if request.url.path.startswith('/settings') else '' }}" href="/settings"><span class="nav-symbol">⚙</span>Indstillinger</a>
     </nav>
