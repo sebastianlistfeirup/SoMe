@@ -350,3 +350,23 @@ def test_login_next_cannot_redirect_off_site(db, monkeypatch):
     assert response.headers["location"] == "/review"
     assert "samesite=lax" in response.headers["set-cookie"].lower()
     app.dependency_overrides.clear()
+
+
+def test_enrolment_page_shows_qr_and_errors_render_as_html(db, monkeypatch):
+    client, app = _client(db, monkeypatch)
+    client.post("/login", data={"username": "owner", "password": "a-secure-test-password"})
+    page = client.get("/account/security")
+    assert "<svg" in page.text and "tidsbaseret" in page.text
+    wrong = client.post("/account/2fa/enable", data={"csrf_token": _csrf(page.text), "code": "000000"})
+    assert wrong.status_code == 422 and "text/html" in wrong.headers["content-type"] and "Scan QR-koden igen" in wrong.text
+    before = db.query(AuthUser).one().totp_secret_encrypted
+    assert client.post("/account/2fa/reset", data={"csrf_token": _csrf(page.text)}, follow_redirects=False).status_code == 303
+    db.expire_all()
+    assert db.query(AuthUser).one().totp_secret_encrypted != before
+    app.dependency_overrides.clear()
+
+
+def test_enrolment_tolerates_one_minute_of_clock_drift():
+    secret = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+    assert totp.verify(secret, totp.code_at(secret, 100 - 2), now=100 * 30, window=2) == 98
+    assert totp.verify(secret, totp.code_at(secret, 100 - 2), now=100 * 30) is None

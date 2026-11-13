@@ -295,3 +295,5 @@ code { user-select: all; }
   .watch-check { min-height: 48px; }
   .variant-text { font-size: .95rem; }
 }
+
+.qr-box svg { width: 240px; height: 240px; background: #fff; border-radius: 8px; }

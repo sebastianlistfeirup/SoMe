@@ -240,11 +240,18 @@ def account_security(request: Request, db: Session = Depends(get_db), auth=Depen
             if not user.totp_secret_encrypted:
                 user.totp_secret_encrypted = totp.encrypt_secret(totp.new_secret())
                 db.commit()
-            secret = totp.decrypt_secret(user.totp_secret_encrypted)
-            setup = {"key": totp.grouped(secret), "uri": totp.provisioning_uri(user.username, secret)}
+            setup = _setup_view(user)
         except ValueError as exc:
             setup = {"error": str(exc)}
-    return render(request, "account_security.html", db, auth, setup=setup, recovery_codes=None, require_totp=settings.require_totp, recovery_left=len(user.recovery_codes_json or []))
+    return render(request, "account_security.html", db, auth, setup=setup, recovery_codes=None, require_totp=settings.require_totp, recovery_left=len(user.recovery_codes_json or []), enable_error=None)
+
+
+def _setup_view(user: AuthUser) -> dict:
+    from app.pipeline import totp
+
+    secret = totp.decrypt_secret(user.totp_secret_encrypted)
+    uri = totp.provisioning_uri(user.username, secret)
+    return {"key": totp.grouped(secret), "uri": uri, "qr_svg": totp.qr_svg(uri), "server_time_utc": datetime.now(timezone.utc).strftime("%H:%M:%S")}
 
 
 @app.post("/account/2fa/enable")
@@ -254,9 +261,13 @@ def enable_two_factor(request: Request, code: str = Form(...), db: Session = Dep
     user = auth[0]
     if user.totp_enabled or not user.totp_secret_encrypted:
         raise HTTPException(409, "2-faktor er allerede slået til eller ikke klargjort")
-    step = totp.verify(totp.decrypt_secret(user.totp_secret_encrypted), code)
+    # Enrolment tolerates +/- 60 s clock difference between phone and server.
+    step = totp.verify(totp.decrypt_secret(user.totp_secret_encrypted), code, window=2)
     if step is None:
-        raise HTTPException(422, "Koden passede ikke. Tjek at telefonens ur er korrekt, og prøv den næste kode.")
+        error = "Koden passede ikke. Scan QR-koden igen (slet først den gamle SoMe-maskinen-konto i appen), eller tjek at telefonens ur stilles automatisk."
+        response = render(request, "account_security.html", db, auth, setup=_setup_view(user), recovery_codes=None, require_totp=settings.require_totp, recovery_left=0, enable_error=error)
+        response.status_code = 422
+        return response
     codes, hashes = totp.new_recovery_codes()
     user.totp_enabled = True
     user.totp_last_step = step
@@ -264,6 +275,19 @@ def enable_two_factor(request: Request, code: str = Form(...), db: Session = Dep
     db.add(AuditEvent(actor=user.username, action="TOTP_ENABLED", entity_type="auth_user", entity_id=str(user.id), details_json={}))
     db.commit()
     return render(request, "account_security.html", db, auth, setup=None, recovery_codes=codes, require_totp=settings.require_totp, recovery_left=len(hashes))
+
+
+@app.post("/account/2fa/reset")
+def reset_two_factor_setup(db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    """New key before enrolment (e.g. the old one was typed wrong). Not possible once 2FA is on."""
+    from app.pipeline import totp
+
+    user = auth[0]
+    if user.totp_enabled:
+        raise HTTPException(409, "2-faktor er allerede slået til")
+    user.totp_secret_encrypted = totp.encrypt_secret(totp.new_secret())
+    db.commit()
+    return RedirectResponse("/account/security?reset=1", status_code=303)
 
 
 @app.post("/account/2fa/disable")

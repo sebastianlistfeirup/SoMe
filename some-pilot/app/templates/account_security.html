@@ -14,13 +14,20 @@
   {% elif setup and setup.error %}
     <p class="error">2-faktor kan ikke sættes op: {{ setup.error }}</p>
   {% elif setup %}
+    {% if enable_error %}<p class="error">{{ enable_error }}</p>{% endif %}
     <ol>
-      <li>Åbn din authenticator-app (fx Google Authenticator, Microsoft Authenticator eller 1Password) og vælg at tilføje en konto med en nøgle.</li>
-      <li>Kontonavn: <strong>SoMe-maskinen</strong>. Nøgle: <code>{{ setup.key }}</code> (tidsbaseret, 6 cifre).</li>
-      <li>På telefonen kan du i stedet prøve linket: <a href="{{ setup.uri }}">tilføj til authenticator</a>.</li>
-      <li>Skriv den kode, appen viser, og bekræft.</li>
+      <li>Åbn din authenticator-app (fx Google Authenticator, Microsoft Authenticator eller 1Password), og vælg <em>Scan QR-kode</em>. Har du en gammel konto ved navn SoMe-maskinen i appen fra et tidligere forsøg, så slet den først.</li>
+      <li>Scan koden herunder.</li>
+      <li>Skriv den 6-cifrede kode, appen viser nu, og tryk <strong>Slå 2-faktor til</strong>.</li>
     </ol>
+    <div class="qr-box">{{ setup.qr_svg | safe }}</div>
+    <details><summary>Kan du ikke scanne? Skriv nøglen manuelt</summary>
+      <p>Vælg <em>Indtast nøgle</em> og <strong>tidsbaseret</strong> (ikke tællerbaseret). Kontonavn: SoMe-maskinen. Nøgle: <code>{{ setup.key }}</code>. Mellemrum er ligegyldige. Nøglen indeholder aldrig 0, 1, 8 eller 9.</p>
+      <p>På telefonen kan du i stedet prøve linket: <a href="{{ setup.uri }}">tilføj til authenticator</a>.</p>
+    </details>
+    <p class="field-help">Serverens tid (UTC): {{ setup.server_time_utc }}. Telefonens ur skal stilles automatisk.</p>
     <form method="post" action="/account/2fa/enable"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Kode fra appen <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required></label><button>Slå 2-faktor til</button></form>
+    <form method="post" action="/account/2fa/reset" onsubmit="return confirm('Lav en ny nøgle? Den gamle konto i appen virker så ikke længere.')"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="link">Lav en ny nøgle</button></form>
   {% endif %}
 </section>
 {% endblock %}

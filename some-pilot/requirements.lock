@@ -69,3 +69,4 @@ attrs==26.1.0
 dlinfo==2.0.0
 cloudpickle==3.1.2
 jsonschema==4.25.1
+segno==1.6.1

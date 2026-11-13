@@ -74,6 +74,13 @@ def provisioning_uri(username: str, secret: str) -> str:
     return f"otpauth://totp/{label}?secret={secret}&issuer={quote(ISSUER)}&algorithm=SHA1&digits={DIGITS}&period={STEP_SECONDS}"
 
 
+def qr_svg(uri: str) -> str:
+    """Inline SVG QR code for the otpauth URI (scanning avoids typing the 32-character key)."""
+    import segno
+
+    return segno.make(uri, error="m").svg_inline(scale=6, border=4, dark="#101828", light="#ffffff")
+
+
 def grouped(secret: str) -> str:
     return " ".join(secret[index:index + 4] for index in range(0, len(secret), 4))
 
