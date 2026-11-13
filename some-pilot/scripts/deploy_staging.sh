@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 
 export IMAGE_TAG="$(git rev-parse --short=12 HEAD)"
 export WEB_PORT=8001
-COMPOSE=(sudo -E docker compose -p some-staging -f compose.yaml -f compose.staging.yaml)
+COMPOSE=(sudo --preserve-env=IMAGE_TAG,WEB_PORT docker compose -p some-staging -f compose.yaml -f compose.staging.yaml)
 
 if ! sudo test -f /opt/some/secrets/staging.env; then
   echo "create /opt/some/secrets/staging.env first (no publishing tokens; chmod 600)" >&2

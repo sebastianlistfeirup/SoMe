@@ -5,7 +5,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-COMPOSE=(sudo docker compose -f compose.yaml -f compose.production.yaml)
+# sudo resets the environment; IMAGE_TAG must be passed through explicitly.
+COMPOSE=(sudo --preserve-env=IMAGE_TAG docker compose -f compose.yaml -f compose.production.yaml)
 STATE_DIR="${DEPLOY_STATE_DIR:-/opt/some/deploy-state}"
 TARGET="${1:-$(sudo cat "$STATE_DIR/previous_tag" 2>/dev/null || true)}"
 CURRENT="$(sudo cat "$STATE_DIR/current_tag" 2>/dev/null || echo unknown)"
