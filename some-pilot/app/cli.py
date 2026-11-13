@@ -151,7 +151,9 @@ def build_parser() -> argparse.ArgumentParser:
     user = sub.add_parser("init-user")
     user.add_argument("--username", default="owner")
     experiment = sub.add_parser("experiment", help="Pre-registered one-variable experiments")
-    experiment.add_argument("action", choices=["create", "list", "assign", "evaluate", "stop"])
+    experiment.add_argument("action", choices=["create", "list", "assign", "evaluate", "stop", "manual-result"])
+    experiment.add_argument("--winner", help="Winning variant id for manual-result (omit for no difference)")
+    experiment.add_argument("--evidence", default="", help="What YouTube Studio Test & Compare showed")
     experiment.add_argument("--spec", type=Path, help="JSON spec for create")
     experiment.add_argument("--id", type=int)
     experiment.add_argument("--story", help="Story key (packet story_id) for assign")
@@ -170,6 +172,10 @@ def build_parser() -> argparse.ArgumentParser:
     timelog.add_argument("--minutes", type=float, default=0)
     timelog.add_argument("--note", default="")
     sub.add_parser("cost-report", help="Write the previous month's cost report")
+    derivatives = sub.add_parser("plan-derivatives", help="One media plan per packet variant (research reused)")
+    derivatives.add_argument("--plan", type=Path, required=True)
+    sub.add_parser("comments", help="Fetch YouTube comments and show viewer questions")
+    sub.add_parser("series", help="List recurring series and their performance")
     status = sub.add_parser("status-report", help="Generate STATUS facts from doctor and a test result")
     status.add_argument("--tests-passed", type=int, required=True)
     status.add_argument("--environment", default="local")
@@ -199,6 +205,11 @@ def run_extended(db, args) -> dict | None:
             return assign_variant(db, args.id, args.story)
         if args.action == "evaluate":
             return evaluate_experiment(db, args.id)
+        if args.action == "manual-result":
+            from app.pipeline.audience import record_manual_result
+
+            experiment = record_manual_result(db, args.id, args.winner, args.evidence)
+            return {"experiment_id": experiment.id, "status": experiment.status, "decision": experiment.decision}
         experiment = stop_experiment(db, args.id, args.reason)
         return {"experiment_id": experiment.id, "status": experiment.status, "decision": experiment.decision}
     if args.command == "prefill-packet":
@@ -213,6 +224,20 @@ def run_extended(db, args) -> dict | None:
             row = log_owner_time(db, args.story, args.step, args.minutes, args.note)
             return {"logged": row.id, "story": row.story_key, "step": row.step, "minutes": row.minutes}
         return owner_time_report(db)
+    if args.command == "plan-derivatives":
+        from app.pipeline.audience import plan_derivatives
+
+        return {"written": [str(path) for path in plan_derivatives(args.plan)]}
+    if args.command == "comments":
+        from app.pipeline.audience import collect_comments, suggestions_from_comments
+
+        result = collect_comments(db)
+        result["suggestions"] = [item.id for item in suggestions_from_comments(db)]
+        return result
+    if args.command == "series":
+        from app.pipeline.audience import load_series, series_report
+
+        return {"series": load_series(), "performance": series_report(db)}
     if args.command == "cost-report":
         from app.pipeline.ops import monthly_cost_report
 

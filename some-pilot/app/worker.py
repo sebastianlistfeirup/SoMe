@@ -34,7 +34,7 @@ def next_local(hour: int, weekday: int | None = None) -> datetime:
 
 
 def schedule(db) -> None:
-    jobs = (("research", next_local(6)), ("metrics", datetime.now(timezone.utc)), ("learn_weekly", next_local(8, 0)), ("backup", next_local(3)), ("maintenance", next_local(4)), ("account_probe", next_local(5)), ("alerts_digest", next_local(7)))
+    jobs = (("research", next_local(6)), ("metrics", datetime.now(timezone.utc)), ("learn_weekly", next_local(8, 0)), ("backup", next_local(3)), ("maintenance", next_local(4)), ("account_probe", next_local(5)), ("alerts_digest", next_local(7)), ("comments", next_local(6, 2)))
     for kind, due in jobs:
         enqueue(db, kind, {}, f"{kind}:{due.date().isoformat()}:{due.hour}", due_at=due)
     zone = ZoneInfo(get_settings().app_timezone)
@@ -82,6 +82,14 @@ def execute(db, job) -> Path:
         result = daily_digest(db)
     elif job.kind == "account_probe":
         result = probe_accounts(db)
+    elif job.kind == "comments":
+        from app.pipeline.audience import collect_comments, suggestions_from_comments
+
+        if not settings.youtube_api_key:
+            result = {"status": "not_configured"}
+        else:
+            result = collect_comments(db)
+            result["suggestions"] = [item.id for item in suggestions_from_comments(db)]
     elif job.kind == "cost_report":
         from app.pipeline.ops import monthly_cost_report
 

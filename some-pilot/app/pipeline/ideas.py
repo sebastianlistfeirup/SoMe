@@ -77,6 +77,10 @@ def rank_ideas(db: Session, limit: int = 10, lane: str | None = None, series_by_
     from app.pipeline.governance import active_learning_model
 
     registry = EditorialRegistry()
+    if series_by_recipe is None:
+        from app.pipeline.audience import series_by_recipe as registry_series
+
+        series_by_recipe = registry_series()
     active = active_learning_model(db)
     hook_multipliers = (active or {}).get("model", {}).get("hook_multipliers", {})
     by_recipe, by_series, produced, overall = _outcomes(db)
@@ -105,6 +109,7 @@ def rank_ideas(db: Session, limit: int = 10, lane: str | None = None, series_by_
             "evidence_samples": evidence_n,
             "factors": {"recipe": round(recipe_factor, 4), "hook": round(hook_factor, 4), "series": round(series_factor, 4), "freshness": freshness},
             "learning_question": idea.get("learning_question"),
+            "series_id": series,
         })
     exploit_slots = math.ceil(limit * EXPLOIT_SHARE)
     exploit = sorted(candidates, key=lambda item: (-item["score"], item["idea_id"]))[:exploit_slots]

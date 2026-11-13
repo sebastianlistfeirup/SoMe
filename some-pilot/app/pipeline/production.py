@@ -17,6 +17,7 @@ from app.pipeline.media import probe, require_tools, storyboard, technical_check
 from app.pipeline.policy import content_policy, rights_policy
 from app.pipeline.quality import independent_quality_review
 from app.pipeline.owner_workflow import publisher_policy_blockers
+from app.pipeline.audience import validate_series
 from app.pipeline.posts import build_post
 from app.pipeline.real_media import RealMediaPlan, load_media_plan, media_coverage, prepare_media, render_real_media, thumbnail_from_source, write_media_composition
 from app.pipeline.taxonomy import detect_cta
@@ -119,6 +120,7 @@ def produce(db: Session, topic_id: int, dry_run: bool = True, media_plan_path: P
     default_hashtags = ["ai", "artificialintelligence", "tech"] if "ai" in topic.niche.lower() else ["gaming", "handheldgaming", "tech"]
     post = build_post(draft.title, draft.post_text, default_hashtags, [claim.source_url for claim in draft.claims], ai_disclosure=True)
     features = production_features(topic, media_plan, draft, lane, packet, dry_run)
+    validate_series(media_plan.series_id, features.get("recipe_id"))
     features.update({"production_cost": production_cost, "real_media_required": True, "minimum_real_media_ratio": media_plan.minimum_real_ratio})
     references = list(media_plan.experiments)
     if media_plan.experiment_id is not None:

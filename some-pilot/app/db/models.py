@@ -209,6 +209,21 @@ class OwnerTimeLog(Base):
     logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class VideoComment(Base):
+    """Public top-level comments on our own videos. No author names or channel IDs are stored."""
+
+    __tablename__ = "video_comments"
+    __table_args__ = (UniqueConstraint("remote_id", name="uq_video_comment_remote"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    publication_id: Mapped[int] = mapped_column(ForeignKey("publications.id"), index=True)
+    remote_id: Mapped[str] = mapped_column(String(100))
+    text: Mapped[str] = mapped_column(Text)
+    like_count: Mapped[int] = mapped_column(Integer, default=0)
+    is_question: Mapped[bool] = mapped_column(Boolean, default=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Cost(Base):
     __tablename__ = "costs"
     id: Mapped[int] = mapped_column(primary_key=True)

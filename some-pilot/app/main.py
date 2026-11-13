@@ -22,6 +22,7 @@ from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
 from app.pipeline.variants import AI_LABEL_API, AI_LABEL_DEFAULTS, all_variants
+from app.pipeline.audience import sources_comment
 from app.pipeline.quality import CATEGORY_LABELS, REJECTION_CATEGORIES, normalize_categories, requires_new_production
 from app.pipeline.posts import format_duration, platform_label, post_view, preferred_platform, status_label
 from app.pipeline.signed_media import SignedMediaError, create_link, resolve_link
@@ -299,6 +300,7 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         revisions=revisions,
         rejection_categories=[(key, CATEGORY_LABELS[key]) for key in REJECTION_CATEGORIES],
         post_variants=all_variants(video.post_json, topic.title if topic else ""),
+        sources_comment=sources_comment(video),
         ai_label_defaults=AI_LABEL_DEFAULTS,
         ai_label_api=AI_LABEL_API,
         rejection_needs_new_production=requires_new_production(((latest_rejection.digest_json or {}) if latest_rejection else {}).get("rejection_categories", [])),

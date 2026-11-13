@@ -272,6 +272,7 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
     allocation = None
     next_ideas = []
     owner_time = None
+    audience = None
     quality_calibration = None
     rejection_counts = None
     if not is_demo:
@@ -288,6 +289,9 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         from app.pipeline.owner_workflow import owner_time_report
 
         owner_time = owner_time_report(db)
+        from app.pipeline.audience import comment_insights, derivatives_report, series_report
+
+        audience = {"series": series_report(db), "derivatives": derivatives_report(db), "comments": comment_insights(db)}
         quality_calibration = calibration_report(db)
         rejection_counts = rejection_category_counts(db)
     prompt_dir = settings.data_dir / "prompts"
@@ -312,6 +316,7 @@ def weekly_learning(db: Session, output_dir: Path | None = None, is_demo: bool =
         "governance": governance,
         "next_ideas": next_ideas,
         "owner_time": owner_time,
+        "audience": audience,
         "quality_calibration": quality_calibration,
         "owner_rejection_categories_28d": rejection_counts,
         "signal_weights": {"version": SIGNAL_WEIGHTS_VERSION, "weights": SIGNAL_WEIGHTS},

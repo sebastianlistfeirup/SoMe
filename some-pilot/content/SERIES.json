@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Recurring formats. A series repeats one recipe on a fixed cadence so viewers know what to come back for and so learning compares like with like. Status 'proposed' series are suggestions; the owner activates them.",
+  "series": [
+    {"id": "hidden-gem-of-the-week", "name": "Hidden Gem of the Week", "recipe_id": "GF02", "lane": "gaming", "cadence": "weekly", "promise": "One great game that is not new, and the single reason it still deserves your time.", "status": "proposed"},
+    {"id": "amiga-corner", "name": "The Amiga Corner", "recipe_id": "GF01", "lane": "gaming", "cadence": "biweekly", "promise": "One Amiga moment explained through what the player actually did.", "status": "proposed"},
+    {"id": "handheld-reality-check", "name": "Handheld Reality Check", "recipe_id": "GF05", "lane": "gaming", "cadence": "biweekly", "promise": "What a handheld really does with one game, recorded and sourced.", "status": "proposed"},
+    {"id": "local-ai-fit-test", "name": "Local AI Fit Test", "recipe_id": "AI-F03", "lane": "ai", "cadence": "biweekly", "promise": "Does this local model fit this machine and this task? Measured, not promised.", "status": "proposed"},
+    {"id": "fair-task-duel", "name": "The Fair Task Duel", "recipe_id": "AI-F04", "lane": "ai", "cadence": "monthly", "promise": "Two tools, one identical task, recorded start to finish.", "status": "proposed"}
+  ]
+}
