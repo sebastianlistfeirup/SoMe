@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "observed_at": "2026-11-15",
+  "source": {
+    "name": "Artificial Analysis Intelligence Index",
+    "url": "https://artificialanalysis.ai/leaderboards/models",
+    "note": "Read directly from the leaderboard (status: current). Scores are for the configuration shown in 'config'."
+  },
+  "show_source": true,
+  "source_label_models": "Source: Artificial Analysis Intelligence Index · Nov 2026",
+  "source_label_labs": "Source: Artificial Analysis Intelligence Index · best model per lab · Nov 2026",
+  "models": [
+    {"name": "Claude Fable 5.2", "lab": "Anthropic", "score": 65, "config": "Max, Default Fallback"},
+    {"name": "Gemini 4 Carbon", "lab": "Google", "score": 60, "config": "High"},
+    {"name": "Claude Opus 5.5", "lab": "Anthropic", "score": 59, "config": "Max, Default Fallback"},
+    {"name": "GPT-6 Astra", "lab": "OpenAI", "score": 57, "config": "Max"},
+    {"name": "GPT-6.1 Sol", "lab": "OpenAI", "score": 55, "config": "Max"},
+    {"name": "Claude Sonnet 5.5", "lab": "Anthropic", "score": 55, "config": "Max, Default Fallback"},
+    {"name": "Gemini 4 Hydrogen", "lab": "Google", "score": 54, "config": "Xhigh"},
+    {"name": "GPT-6.1 Terra", "lab": "OpenAI", "score": 51, "config": "Max"},
+    {"name": "Gemini 4 Argon", "lab": "Google", "score": 50, "config": "High"},
+    {"name": "Muse Wonder Full", "lab": "Meta", "score": 50, "config": "Max"}
+  ],
+  "labs": [
+    {"name": "Anthropic", "best_model": "Claude Fable 5.2", "score": 65},
+    {"name": "Google", "best_model": "Gemini 4 Carbon", "score": 60},
+    {"name": "OpenAI", "best_model": "GPT-6 Astra", "score": 57},
+    {"name": "Meta", "best_model": "Muse Wonder Full", "score": 50},
+    {"name": "Moonshot AI", "best_model": "Kimi K3.1 Pro", "score": 46},
+    {"name": "xAI", "best_model": "Grok 4.7", "score": 35},
+    {"name": "Tencent", "best_model": "Hy4", "score": 35},
+    {"name": "Alibaba", "best_model": "Qwen3.8 Max", "score": 34},
+    {"name": "DeepSeek", "best_model": "DeepSeek V4.1 Flash", "score": 33},
+    {"name": "Z.ai", "best_model": "GLM-5.3", "score": 32}
+  ]
+}

@@ -5,3 +5,6 @@ models
 .pytest_cache
 __pycache__
 *.pyc
+# Offline graphics pipeline: not needed in the app image
+assets/graphics
+scripts/blender

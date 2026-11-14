@@ -1,0 +1,21 @@
+{
+  "schema_version": "2.0.0",
+  "observed_at": "2026-11-15",
+  "sources": [
+    {"name": "Artificial Analysis — LLM Leaderboard", "url": "https://artificialanalysis.ai/leaderboards/models"},
+    {"name": "BenchLM — Frontier AI Models", "url": "https://benchlm.ai/frontier-ai-models"}
+  ],
+  "models": [
+    {"model": "Claude Fable 5.2", "lab": "Anthropic"},
+    {"model": "Gemini 4 Carbon", "lab": "Google"},
+    {"model": "Claude Opus 5.5", "lab": "Anthropic"},
+    {"model": "GPT-6 Astra", "lab": "OpenAI"},
+    {"model": "Muse Wonder Full", "lab": "Meta"},
+    {"model": "Kimi K3.1 Pro", "lab": "Moonshot AI"},
+    {"model": "Grok 4.7", "lab": "xAI"},
+    {"model": "Qwen3.8 Max", "lab": "Alibaba"},
+    {"model": "GLM-5.3", "lab": "Z.ai"},
+    {"model": "Mistral Large 4", "lab": "Mistral AI"}
+  ],
+  "note_for_owner": "Re-check the leaderboards before publishing. Logos are read from assets/brand/ai-logos/ (<model-slug>.png first, then <lab-slug>.png); without a file a monogram tile is drawn."
+}
