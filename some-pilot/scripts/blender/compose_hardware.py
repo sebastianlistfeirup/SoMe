@@ -19,8 +19,8 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 CYAN = (0, 196, 232)
 CORAL = (242, 92, 60)
 WHITE = (240, 246, 255)
-LABELS = {"ram": ("RAM", ""), "cpu": ("CPU", ""), "ssd": ("SSD", "")}  # names only: the edit adds any copy
-ORDER = ("ram", "cpu", "ssd")
+LABELS = {"ram": ("RAM", ""), "cpu": ("CPU", ""), "ssd": ("SSD", ""), "gpu": ("GPU", ""), "vram": ("VRAM", "")}  # names only: the edit adds any copy
+ORDER = ("ram", "cpu", "ssd", "gpu", "vram")
 FONT_BOLD = "C:/Windows/Fonts/bahnschrift.ttf"
 FONT_TEXT = "C:/Windows/Fonts/segoeui.ttf"
 
@@ -167,12 +167,12 @@ def compose(folder: Path, out: Path):
             canvas = Image.alpha_composite(canvas, glow_layer(masks[part], CYAN, width))
         taken = []
         obstacles = [masks[part].getbbox() for part in masks]
-        for part in sorted(selection, key=ORDER.index):
+        for number, part in enumerate(sorted(selection, key=ORDER.index), start=1):
             target = masks[part].getbbox()
             numbered = len(selection) > 1
             box = place_card(size, target, card_size(part, scale, numbered), obstacles, taken, portrait)
             taken.append(box)
-            draw_callout(canvas, target, box, part, CYAN, scale, index=(ORDER.index(part) + 1) if numbered else None)
+            draw_callout(canvas, target, box, part, CYAN, scale, index=number if numbered else None)
         name = "highlight-all" if len(selection) > 1 else f"highlight-{selection[0]}"
         canvas.convert("RGB").save(out / f"{name}.png", optimize=True)
 

@@ -121,6 +121,38 @@ def contacts_texture(name, count, size_px=(4096, 128), gap_ratio=0.35):
 
 
 
+def retro_screen_texture(name="retro_screen"):
+    """Pixel-art AI chip for the CRT: brand cyan traces, coral core, scanlines. 320x240 upscaled x4."""
+    path = os.path.join(TEX_DIR, name + ".png")
+    if os.path.exists(path):
+        return path
+    Image, ImageDraw, _ = _pil()
+    w, h = 320, 240
+    img = Image.new("RGB", (w, h), (4, 10, 26))
+    d = ImageDraw.Draw(img)
+    cx, cy = w // 2, h // 2
+    cyan, coral, ice = (0, 196, 232), (242, 92, 60), (200, 240, 255)
+    for k, (dx, dy) in enumerate(((-1, 0), (1, 0), (0, -1), (0, 1))):
+        for j in range(-3, 4):
+            off = j * 9
+            x0 = cx + (off if dy else 0)
+            y0 = cy + (off if dx else 0)
+            length = 70 + (j * 13) % 40
+            x1, y1 = x0 + dx * (40 + length), y0 + dy * (40 + length)
+            d.line([(x0, y0), (x1, y1)], fill=cyan, width=2)
+            d.rectangle([x1 - 2, y1 - 2, x1 + 2, y1 + 2], fill=ice if (j + k) % 3 else coral)
+    d.rectangle([cx - 40, cy - 40, cx + 40, cy + 40], fill=(10, 22, 48), outline=cyan, width=3)
+    for i in range(4):
+        for j in range(4):
+            col = coral if (i, j) in ((1, 1), (2, 2)) else cyan
+            d.rectangle([cx - 30 + i * 16, cy - 30 + j * 16, cx - 30 + i * 16 + 11, cy - 30 + j * 16 + 11], fill=col)
+    for y in range(0, h, 2):
+        d.line([(0, y), (w, y)], fill=(0, 0, 0))
+    img = img.resize((w * 4, h * 4), Image.NEAREST)
+    img.save(path)
+    return path
+
+
 def generate_all() -> list[str]:
     """Every texture the scenes load. Keep names/arguments identical to the calls in pp_lib and the scenes."""
     made = [
@@ -138,6 +170,10 @@ def generate_all() -> list[str]:
         chip_marking_texture("gpu_die", "GN22-X6\nA1 2544\nTAIWAN"),
         label_texture("battery_label", ["Li-ion Battery", "15.48V · 4840mAh · 75Wh", "Do not puncture · Recycle properly"], size_px=(1600, 420), bg=(14, 14, 16), fg=(200, 202, 206)),
         label_texture("ihs_mark", ["", "", ""], size_px=(512, 512), bg=(196, 198, 202), fg=(150, 152, 156)),
+        pcb_texture("gpu_board", base=(10, 11, 14), trace=(22, 24, 30), seed=41, dark=True),
+        chip_marking_texture("vram_chip", "GDDR7\nD8BZC 2G\n2543"),
+        contacts_texture("pcie_contacts", 82),
+        retro_screen_texture(),
     ]
     return made
 

@@ -169,7 +169,7 @@ def models_lineup(fmt):
 
 # --- ratings ---------------------------------------------------------------------------------
 
-def rating_rows(canvas, rows, area, scale, portrait, source_label=None):
+def rating_rows(canvas, rows, area, scale, portrait, source_label=None, logos=True):
     """Ranked horizontal bars from a zero baseline. Single series: one hue, no legend, value at the bar end."""
     draw = ImageDraw.Draw(canvas)
     left, top, right, bottom = area
@@ -178,7 +178,8 @@ def rating_rows(canvas, rows, area, scale, portrait, source_label=None):
     rank_w = 56 * scale
     tile = min(row_h * 0.62, 70 * scale)
     score_font = bold(36 * scale if portrait else 40 * scale)
-    score_w = draw.textlength("00", font=score_font) + 20 * scale
+    value_text = [row.get("value_label", str(row["score"])) for row in rows]
+    score_w = max(draw.textlength(text, font=score_font) for text in value_text + ["00"]) + 20 * scale
     name_w = 430 * scale
     rank_font = bold(30 * scale)
     sub_font = font(FONT_TEXT, 22 * scale)
@@ -187,8 +188,9 @@ def rating_rows(canvas, rows, area, scale, portrait, source_label=None):
         rb = draw.textbbox((0, 0), str(index + 1), font=rank_font)
         draw.text((left, cy - (rb[3] - rb[1]) / 2 - rb[1]), str(index + 1), font=rank_font, fill=MUTED + (255,))
         tx = left + rank_w
-        logo_tile(canvas, tx, cy - tile / 2, tile, row["lab"], row.get("model"), row.get("prefer", "model"))
-        tx += tile + 22 * scale
+        if logos:
+            logo_tile(canvas, tx, cy - tile / 2, tile, row["lab"], row.get("model"), row.get("prefer", "model"))
+            tx += tile + 22 * scale
         label = row["name"]
         if portrait:
             name_font = fit_font(draw, label, 34 * scale, right - tx - score_w)
@@ -219,8 +221,8 @@ def rating_rows(canvas, rows, area, scale, portrait, source_label=None):
         canvas.alpha_composite(track)
         draw = ImageDraw.Draw(canvas)
         draw.rounded_rectangle([bar_x0, bar_y0, bar_x0 + length, bar_y0 + bar_h], radius=radius, fill=CYAN + (255,))
-        sb = draw.textbbox((0, 0), str(row["score"]), font=score_font)
-        draw.text((bar_x0 + length + 14 * scale, bar_y0 + bar_h / 2 - (sb[3] - sb[1]) / 2 - sb[1]), str(row["score"]),
+        sb = draw.textbbox((0, 0), value_text[index], font=score_font)
+        draw.text((bar_x0 + length + 14 * scale, bar_y0 + bar_h / 2 - (sb[3] - sb[1]) / 2 - sb[1]), value_text[index],
                   font=score_font, fill=WHITE + (255,))
     if source_label:
         draw.text((left, bottom + 26 * scale), source_label, font=font(FONT_TEXT, 20 * scale), fill=MUTED + (255,))

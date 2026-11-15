@@ -10,27 +10,440 @@
   "source_label_models": "Source: Artificial Analysis Intelligence Index · Nov 2026",
   "source_label_labs": "Source: Artificial Analysis Intelligence Index · best model per lab · Nov 2026",
   "models": [
-    {"name": "Claude Fable 5.2", "lab": "Anthropic", "score": 65, "config": "Max, Default Fallback"},
-    {"name": "Gemini 4 Carbon", "lab": "Google", "score": 60, "config": "High"},
-    {"name": "Claude Opus 5.5", "lab": "Anthropic", "score": 59, "config": "Max, Default Fallback"},
-    {"name": "GPT-6 Astra", "lab": "OpenAI", "score": 57, "config": "Max"},
-    {"name": "GPT-6.1 Sol", "lab": "OpenAI", "score": 55, "config": "Max"},
-    {"name": "Claude Sonnet 5.5", "lab": "Anthropic", "score": 55, "config": "Max, Default Fallback"},
-    {"name": "Gemini 4 Hydrogen", "lab": "Google", "score": 54, "config": "Xhigh"},
-    {"name": "GPT-6.1 Terra", "lab": "OpenAI", "score": 51, "config": "Max"},
-    {"name": "Gemini 4 Argon", "lab": "Google", "score": 50, "config": "High"},
-    {"name": "Muse Wonder Full", "lab": "Meta", "score": 50, "config": "Max"}
+    {
+      "name": "Claude Fable 5.2",
+      "lab": "Anthropic",
+      "score": 65,
+      "config": "Max, Default Fallback"
+    },
+    {
+      "name": "Gemini 4 Carbon",
+      "lab": "Google",
+      "score": 60,
+      "config": "High"
+    },
+    {
+      "name": "Claude Opus 5.5",
+      "lab": "Anthropic",
+      "score": 59,
+      "config": "Max, Default Fallback"
+    },
+    {
+      "name": "GPT-6 Astra",
+      "lab": "OpenAI",
+      "score": 57,
+      "config": "Max"
+    },
+    {
+      "name": "GPT-6.1 Sol",
+      "lab": "OpenAI",
+      "score": 55,
+      "config": "Max"
+    },
+    {
+      "name": "Claude Sonnet 5.5",
+      "lab": "Anthropic",
+      "score": 55,
+      "config": "Max, Default Fallback"
+    },
+    {
+      "name": "Gemini 4 Hydrogen",
+      "lab": "Google",
+      "score": 54,
+      "config": "Xhigh"
+    },
+    {
+      "name": "GPT-6.1 Terra",
+      "lab": "OpenAI",
+      "score": 51,
+      "config": "Max"
+    },
+    {
+      "name": "Gemini 4 Argon",
+      "lab": "Google",
+      "score": 50,
+      "config": "High"
+    },
+    {
+      "name": "Muse Wonder Full",
+      "lab": "Meta",
+      "score": 50,
+      "config": "Max"
+    }
   ],
   "labs": [
-    {"name": "Anthropic", "best_model": "Claude Fable 5.2", "score": 65},
-    {"name": "Google", "best_model": "Gemini 4 Carbon", "score": 60},
-    {"name": "OpenAI", "best_model": "GPT-6 Astra", "score": 57},
-    {"name": "Meta", "best_model": "Muse Wonder Full", "score": 50},
-    {"name": "Moonshot AI", "best_model": "Kimi K3.1 Pro", "score": 46},
-    {"name": "xAI", "best_model": "Grok 4.7", "score": 35},
-    {"name": "Tencent", "best_model": "Hy4", "score": 35},
-    {"name": "Alibaba", "best_model": "Qwen3.8 Max", "score": 34},
-    {"name": "DeepSeek", "best_model": "DeepSeek V4.1 Flash", "score": 33},
-    {"name": "Z.ai", "best_model": "GLM-5.3", "score": 32}
+    {
+      "name": "Anthropic",
+      "best_model": "Claude Fable 5.2",
+      "score": 65
+    },
+    {
+      "name": "Google",
+      "best_model": "Gemini 4 Carbon",
+      "score": 60
+    },
+    {
+      "name": "OpenAI",
+      "best_model": "GPT-6 Astra",
+      "score": 57
+    },
+    {
+      "name": "Meta",
+      "best_model": "Muse Wonder Full",
+      "score": 50
+    },
+    {
+      "name": "Moonshot AI",
+      "best_model": "Kimi K3.1 Pro",
+      "score": 46
+    },
+    {
+      "name": "xAI",
+      "best_model": "Grok 4.7",
+      "score": 35
+    },
+    {
+      "name": "Tencent",
+      "best_model": "Hy4",
+      "score": 35
+    },
+    {
+      "name": "Alibaba",
+      "best_model": "Qwen3.8 Max",
+      "score": 34
+    },
+    {
+      "name": "DeepSeek",
+      "best_model": "DeepSeek V4.1 Flash",
+      "score": 33
+    },
+    {
+      "name": "Z.ai",
+      "best_model": "GLM-5.3",
+      "score": 32
+    }
+  ],
+  "catalog_note": "Artificial Analysis leaderboard + model pages, read 2026-11-15: Intelligence Index, cost per task (USD), time per task (minutes), context window, release month, weights.",
+  "catalog": [
+    {
+      "name": "Claude Fable 5.2",
+      "lab": "Anthropic",
+      "score": 65,
+      "cost_per_task_usd": 26.54,
+      "time_per_task_min": 44.3,
+      "context": "1M",
+      "released": "2026-11",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Gemini 4 Carbon",
+      "lab": "Google",
+      "score": 60,
+      "cost_per_task_usd": 5.48,
+      "time_per_task_min": 31.3,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Claude Opus 5.5",
+      "lab": "Anthropic",
+      "score": 59,
+      "cost_per_task_usd": 10.04,
+      "time_per_task_min": 25.2,
+      "context": "1M",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "GPT-6 Astra",
+      "lab": "OpenAI",
+      "score": 57,
+      "cost_per_task_usd": 6.24,
+      "time_per_task_min": 22.8,
+      "context": "1M",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "GPT-6.1 Sol",
+      "lab": "OpenAI",
+      "score": 55,
+      "cost_per_task_usd": 1.27,
+      "time_per_task_min": 23.3,
+      "context": "1M",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Claude Sonnet 5.5",
+      "lab": "Anthropic",
+      "score": 55,
+      "cost_per_task_usd": 10.02,
+      "time_per_task_min": 33.6,
+      "context": "1M",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Gemini 4 Hydrogen",
+      "lab": "Google",
+      "score": 54,
+      "cost_per_task_usd": 3.16,
+      "time_per_task_min": 14.7,
+      "context": "1M",
+      "released": "2026-11",
+      "weights": "proprietary"
+    },
+    {
+      "name": "GPT-6.1 Terra",
+      "lab": "OpenAI",
+      "score": 51,
+      "cost_per_task_usd": 0.96,
+      "time_per_task_min": 14.3,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Gemini 4 Argon",
+      "lab": "Google",
+      "score": 50,
+      "cost_per_task_usd": 4.97,
+      "time_per_task_min": 29.6,
+      "context": "1M",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Muse Wonder Full",
+      "lab": "Meta",
+      "score": 50,
+      "cost_per_task_usd": null,
+      "time_per_task_min": null,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Kimi K3.1 Pro",
+      "lab": "Moonshot AI",
+      "score": 46,
+      "cost_per_task_usd": 3.68,
+      "time_per_task_min": 39.7,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "open"
+    },
+    {
+      "name": "Grok 4.7",
+      "lab": "xAI",
+      "score": 35,
+      "cost_per_task_usd": 7.77,
+      "time_per_task_min": 26.6,
+      "context": "500K",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Hy4",
+      "lab": "Tencent",
+      "score": 35,
+      "cost_per_task_usd": 1.03,
+      "time_per_task_min": 14.2,
+      "context": "1M",
+      "released": "2026-11",
+      "weights": "proprietary"
+    },
+    {
+      "name": "Qwen3.8 Max",
+      "lab": "Alibaba",
+      "score": 34,
+      "cost_per_task_usd": 10.02,
+      "time_per_task_min": 48.6,
+      "context": "984K",
+      "released": "2026-09",
+      "weights": "proprietary"
+    },
+    {
+      "name": "DeepSeek V4.1 Flash",
+      "lab": "DeepSeek",
+      "score": 33,
+      "cost_per_task_usd": 0.6,
+      "time_per_task_min": 13.9,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "open"
+    },
+    {
+      "name": "GLM-5.3",
+      "lab": "Z.ai",
+      "score": 32,
+      "cost_per_task_usd": 5.01,
+      "time_per_task_min": 25.0,
+      "context": "1M",
+      "released": "2026-08",
+      "weights": "open"
+    },
+    {
+      "name": "Mistral Large 4",
+      "lab": "Mistral AI",
+      "score": 26,
+      "cost_per_task_usd": 2.06,
+      "time_per_task_min": 13.4,
+      "context": "1M",
+      "released": "2026-10",
+      "weights": "open"
+    }
+  ],
+  "timeline_models": [
+    "GLM-5.3",
+    "Claude Opus 5.5",
+    "GPT-6 Astra",
+    "Grok 4.7",
+    "Qwen3.8 Max",
+    "Gemini 4 Carbon",
+    "Muse Wonder Full",
+    "Kimi K3.1 Pro",
+    "DeepSeek V4.1 Flash",
+    "Mistral Large 4",
+    "Claude Fable 5.2"
+  ],
+  "duels": [
+    [
+      "Claude Fable 5.2",
+      "Gemini 4 Carbon"
+    ]
+  ],
+  "vram": {
+    "capacity_gb": 32,
+    "note": "Approximate Q4_K_M GGUF weight sizes (weights only, no KV cache); capacity = a 32 GB card.",
+    "models": [
+      {
+        "label": "8B",
+        "gb": 4.9
+      },
+      {
+        "label": "32B",
+        "gb": 19.9
+      },
+      {
+        "label": "70B",
+        "gb": 42.5
+      }
+    ]
+  },
+  "context_books": {
+    "note": "~500 tokens per page, 256 pages per book: 128K = 1 book, 1M = 8 books, 10M = 78 books.",
+    "groups": [
+      {
+        "label": "128K",
+        "books": 1
+      },
+      {
+        "label": "1M",
+        "books": 8
+      },
+      {
+        "label": "10M",
+        "books": 78
+      }
+    ]
+  },
+  "quant": {
+    "model": "Qwen2.5 32B",
+    "source": "huggingface.co/bartowski/Qwen2.5-32B-Instruct-GGUF (file sizes)",
+    "gb_per_cube": 2,
+    "levels": [
+      {
+        "label": "FP16",
+        "gb": 65.54
+      },
+      {
+        "label": "Q8",
+        "gb": 34.82
+      },
+      {
+        "label": "Q4",
+        "gb": 19.85
+      },
+      {
+        "label": "Q2",
+        "gb": 12.31
+      }
+    ]
+  },
+  "local_speed": {
+    "benchmark": "llama.cpp llama-bench · Llama 2 7B Q4_0 · tg128 (tokens/s, no flash attention)",
+    "source_label": "Source: llama.cpp community benchmarks · Llama 2 7B Q4_0 · Nov 2026",
+    "sources": [
+      "github.com/ggml-org/llama.cpp/discussions/15013 (CUDA)",
+      "github.com/ggml-org/llama.cpp/discussions/10879 (Vulkan)",
+      "github.com/ggml-org/llama.cpp/discussions/4167 (Apple Metal)"
+    ],
+    "devices": [
+      {
+        "name": "RTX 5090",
+        "sub": "Desktop",
+        "tps": 290.0
+      },
+      {
+        "name": "RTX 4090",
+        "sub": "Desktop",
+        "tps": 186.2
+      },
+      {
+        "name": "RTX 5090 Laptop",
+        "sub": "Laptop",
+        "tps": 156.5
+      },
+      {
+        "name": "Apple M5 Max",
+        "sub": "Mac · 40-core GPU",
+        "tps": 119.9
+      },
+      {
+        "name": "Apple M4 Max",
+        "sub": "Mac · 40-core GPU",
+        "tps": 83.1
+      },
+      {
+        "name": "Ryzen AI Max+",
+        "sub": "Mini PC · Strix Halo",
+        "tps": 51.8
+      },
+      {
+        "name": "Apple M4 Pro",
+        "sub": "Mac mini · 20-core GPU",
+        "tps": 50.7
+      },
+      {
+        "name": "RTX 4050 Laptop",
+        "sub": "Laptop",
+        "tps": 43.7
+      },
+      {
+        "name": "Apple M4",
+        "sub": "Mac mini · 10-core GPU",
+        "tps": 24.1
+      },
+      {
+        "name": "Ryzen AI 300",
+        "sub": "Mini PC · Strix Point",
+        "tps": 22.4
+      }
+    ]
+  },
+  "cost100_models": [
+    "Claude Fable 5.2",
+    "Claude Opus 5.5",
+    "Claude Sonnet 5.5",
+    "GPT-6 Astra",
+    "Gemini 4 Carbon",
+    "Gemini 4 Argon",
+    "Kimi K3.1 Pro",
+    "Gemini 4 Hydrogen",
+    "GPT-6.1 Sol",
+    "GPT-6.1 Terra"
   ]
 }

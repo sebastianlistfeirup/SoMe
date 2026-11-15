@@ -1,0 +1,398 @@
+{
+  "schema_version": "1.0.0",
+  "observed_at": "2026-11-15",
+  "source": {
+    "name": "Notebookcheck — own reviews, class Handheld / UMPC",
+    "url": "https://www.notebookcheck.net/Ranking-Best-gaming-handhelds-tested-by-Notebookcheck.866596.0.html",
+    "note": "Scores and specs from each Notebookcheck review (tested configuration). Selection: current gaming handhelds still on sale; older or superseded models (ROG Ally X, Legion Go gen 1, Ayaneo 2023/24 models) and mini laptops/tablets (GPD Pocket 4, OneXPlayer X1 Pro) left out. Nintendo Switch 2 is not rated by Notebookcheck in this class. Prices are list prices at review time in EUR. Zotac Zone (79%) left out: being phased out at retailers and no official product image was reachable (the Zotac site sits behind a bot check). Legion Go (gen 1, 66%) added at the owner's request. AYANEO NEXT 2 added at the owner's request: no Notebookcheck review exists, so it has no score and is left out of the ranking; specs from AYANEO."
+  },
+  "show_source": true,
+  "source_label": "Source: Notebookcheck reviews · Nov 2026",
+  "handhelds": [
+    {
+      "id": "steam-deck-oled",
+      "name": "Steam Deck OLED",
+      "maker": "Valve",
+      "score": 89,
+      "reviewed": "2024-02",
+      "chip": "AMD Steam Deck OLED APU",
+      "cpu": "Zen 2 · 4C/8T",
+      "gpu": "Radeon 8 CU",
+      "ram": "16 GB LPDDR5",
+      "storage": "1 TB",
+      "display": "7.4\" OLED",
+      "resolution": "1280×800",
+      "refresh": "90 Hz",
+      "battery_wh": 50,
+      "weight_g": 640,
+      "price_eur": 679,
+      "os": "SteamOS",
+      "width_mm": 298,
+      "height_mm": 117
+    },
+    {
+      "id": "rog-xbox-ally-x20",
+      "name": "ROG Xbox Ally X20",
+      "maker": "ASUS",
+      "score": 88,
+      "reviewed": "2026-10",
+      "chip": "AMD Ryzen Z2 Extreme",
+      "cpu": "Zen 5 · 8C/16T",
+      "gpu": "Radeon 890M",
+      "ram": "24 GB LPDDR5X-8000",
+      "storage": "1 TB",
+      "display": "7.4\" OLED",
+      "resolution": "1920×1080",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 80,
+      "weight_g": 756,
+      "price_eur": 1399,
+      "os": "Windows 11",
+      "width_mm": 300,
+      "height_mm": 121
+    },
+    {
+      "id": "rog-xbox-ally-x",
+      "name": "ROG Xbox Ally X",
+      "maker": "ASUS",
+      "score": 86,
+      "reviewed": "2025-10",
+      "chip": "AMD Ryzen Z2 Extreme",
+      "cpu": "Zen 5 · 8C/16T",
+      "gpu": "Radeon 890M",
+      "ram": "24 GB LPDDR5X-8000",
+      "storage": "1 TB",
+      "display": "7.0\" IPS",
+      "resolution": "1920×1080",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 80,
+      "weight_g": 718,
+      "price_eur": 899,
+      "os": "Windows 11",
+      "width_mm": 290,
+      "height_mm": 121
+    },
+    {
+      "id": "msi-claw-8-ex-ai-plus",
+      "name": "Claw 8 EX AI+",
+      "maker": "MSI",
+      "score": 85,
+      "reviewed": "2026-06",
+      "chip": "Intel Arc G3 Extreme",
+      "cpu": "Panther Lake · 14C",
+      "gpu": "Arc B390 (12 Xe3)",
+      "ram": "32 GB LPDDR5X-8533",
+      "storage": "1 TB",
+      "display": "8.0\" IPS",
+      "resolution": "1920×1200",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 80,
+      "weight_g": 786,
+      "price_eur": 1649,
+      "os": "Windows 11",
+      "width_mm": 321,
+      "height_mm": 130
+    },
+    {
+      "id": "msi-claw-8-ai-plus",
+      "name": "Claw 8 AI+",
+      "maker": "MSI",
+      "score": 85,
+      "reviewed": "2025-03",
+      "chip": "Intel Core Ultra 7 258V",
+      "cpu": "Lunar Lake · 8C/8T",
+      "gpu": "Arc 140V",
+      "ram": "32 GB LPDDR5X-8533",
+      "storage": "1 TB",
+      "display": "8.0\" IPS",
+      "resolution": "1920×1200",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 80,
+      "weight_g": 793,
+      "price_eur": 999,
+      "os": "Windows 11",
+      "width_mm": 299,
+      "height_mm": 126
+    },
+    {
+      "id": "msi-claw-a8",
+      "name": "Claw A8",
+      "maker": "MSI",
+      "score": 83,
+      "reviewed": "2025-12",
+      "chip": "AMD Ryzen Z2 Extreme",
+      "cpu": "Zen 5 · 8C/16T",
+      "gpu": "Radeon 890M",
+      "ram": "24 GB LPDDR5X-8000",
+      "storage": "1 TB",
+      "display": "8.0\" IPS",
+      "resolution": "1920×1200",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 80,
+      "weight_g": 765,
+      "price_eur": 999,
+      "os": "Windows 11",
+      "width_mm": 299.5,
+      "height_mm": 126.2
+    },
+    {
+      "id": "legion-go-2",
+      "name": "Legion Go 2",
+      "maker": "Lenovo",
+      "score": 83,
+      "reviewed": "2026-02",
+      "chip": "AMD Ryzen Z2 Extreme",
+      "cpu": "Zen 5 · 8C/16T",
+      "gpu": "Radeon 890M",
+      "ram": "32 GB LPDDR5X-8000",
+      "storage": "1 TB",
+      "display": "8.8\" OLED",
+      "resolution": "1920×1200",
+      "refresh": "144 Hz VRR",
+      "battery_wh": 74,
+      "weight_g": 922,
+      "price_eur": 1500,
+      "os": "Windows 11",
+      "width_mm": 295.6,
+      "height_mm": 136.7
+    },
+    {
+      "id": "rog-xbox-ally",
+      "name": "ROG Xbox Ally",
+      "maker": "ASUS",
+      "score": 82,
+      "reviewed": "2025-10",
+      "chip": "AMD Ryzen Z2 A",
+      "cpu": "Zen 2 · 4C/8T",
+      "gpu": "Radeon 8 CU",
+      "ram": "16 GB LPDDR5X-6400",
+      "storage": "512 GB",
+      "display": "7.0\" IPS",
+      "resolution": "1920×1080",
+      "refresh": "120 Hz VRR",
+      "battery_wh": 60,
+      "weight_g": 670,
+      "price_eur": 599,
+      "os": "Windows 11",
+      "width_mm": 290,
+      "height_mm": 121
+    },
+    {
+      "id": "legion-go-s-steamos",
+      "name": "Legion Go S",
+      "variant": "SteamOS",
+      "maker": "Lenovo",
+      "score": 82,
+      "reviewed": "2025-08",
+      "chip": "AMD Ryzen Z2 Go",
+      "cpu": "Zen 3+ · 4C/8T",
+      "gpu": "Radeon 680M",
+      "ram": "32 GB LPDDR5X-6400",
+      "storage": "1 TB",
+      "storage_source": "Lenovo product page 83N6000GUS (32 GB / 1 TB SteamOS config)",
+      "display": "8.0\" IPS",
+      "resolution": "1920×1200",
+      "refresh": "120 Hz",
+      "battery_wh": 55.5,
+      "weight_g": 736,
+      "price_eur": 749,
+      "os": "SteamOS",
+      "width_mm": 299,
+      "height_mm": 128
+    },
+    {
+      "id": "legion-go",
+      "name": "Legion Go",
+      "maker": "Lenovo",
+      "score": 66,
+      "reviewed": "2024-01",
+      "chip": "AMD Ryzen Z1 Extreme",
+      "cpu": "Zen 4 · 8C/16T",
+      "gpu": "Radeon 780M",
+      "ram": "16 GB DDR5-7500",
+      "storage": "512 GB",
+      "display": "8.8\" IPS",
+      "resolution": "2560×1600",
+      "refresh": "144 Hz",
+      "battery_wh": 49.2,
+      "weight_g": 845,
+      "price_eur": 800,
+      "os": "Windows 11",
+      "width_mm": 299,
+      "height_mm": 131
+    },
+    {
+      "id": "ayaneo-next-2",
+      "name": "NEXT 2",
+      "maker": "AYANEO",
+      "score": null,
+      "reviewed": null,
+      "chip": "AMD Ryzen AI Max+ 395",
+      "cpu": "Zen 5 · 16C/32T",
+      "gpu": "Radeon 8060S",
+      "ram": "64 GB",
+      "storage": "1 TB",
+      "display": "9.06\" OLED",
+      "resolution": "2400×1504",
+      "refresh": "165 Hz",
+      "battery_wh": 116,
+      "weight_g": 1430,
+      "price_usd": 2699,
+      "os": "Windows 11",
+      "spec_source": "AYANEO launch article (ayaneo.com/article/920) + Indiegogo perk AI395-64GB+1TB (regular price USD 2,699). Not tested by Notebookcheck; weight not officially stated. Weight approx. 1.43 kg and size 341.7 × 146.2 mm per Notebookcheck news (notebookcheck.net, global release article).",
+      "source_label": "Source: AYANEO · Nov 2026",
+      "width_mm": 341.7,
+      "height_mm": 146.2,
+      "weight_approx": true
+    }
+  ],
+  "game_fps": {
+    "source_label": "Source: Notebookcheck game benchmarks · Nov 2026",
+    "games": {
+      "strange-brigade": {
+        "label": "Strange Brigade",
+        "setting": "1080p Ultra",
+        "values": {
+          "steam-deck-oled": 30,
+          "rog-xbox-ally-x20": 60,
+          "rog-xbox-ally-x": 58.8,
+          "msi-claw-8-ex-ai-plus": 91.9,
+          "msi-claw-8-ai-plus": 56.1,
+          "msi-claw-a8": 55.4,
+          "legion-go-2": 56.4,
+          "rog-xbox-ally": 33.6,
+          "legion-go-s-steamos": 46,
+          "legion-go": 42.6
+        }
+      },
+      "cyberpunk-2077": {
+        "label": "Cyberpunk 2077",
+        "setting": "1080p Ultra",
+        "values": {
+          "rog-xbox-ally-x20": 29.3,
+          "rog-xbox-ally-x": 28,
+          "msi-claw-8-ex-ai-plus": 39.6,
+          "msi-claw-8-ai-plus": 28.5,
+          "msi-claw-a8": 25,
+          "legion-go-2": 25.1,
+          "rog-xbox-ally": 12.4,
+          "legion-go-s-steamos": 20.1
+        }
+      }
+    }
+  },
+  "chip_families": [
+    {
+      "chip": "Ryzen AI Max+ 395",
+      "family": "Strix Halo",
+      "vendor": "amd",
+      "handhelds": [
+        "ayaneo-next-2"
+      ],
+      "tps": 51.8,
+      "bench_row": "AMD Ryzen AI Max+ 300 Series"
+    },
+    {
+      "chip": "Arc G3 Extreme",
+      "family": "Panther Lake",
+      "vendor": "intel",
+      "handhelds": [
+        "msi-claw-8-ex-ai-plus"
+      ],
+      "tps": 24.5,
+      "bench_row": "Intel Core Ultra 300 Series"
+    },
+    {
+      "chip": "Core Ultra 7 258V",
+      "family": "Lunar Lake",
+      "vendor": "intel",
+      "handhelds": [
+        "msi-claw-8-ai-plus"
+      ],
+      "tps": 24.4,
+      "bench_row": "Intel Core Ultra 200 Series"
+    },
+    {
+      "chip": "Ryzen Z2 Extreme",
+      "family": "Strix Point",
+      "vendor": "amd",
+      "handhelds": [
+        "rog-xbox-ally-x20",
+        "rog-xbox-ally-x",
+        "msi-claw-a8",
+        "legion-go-2"
+      ],
+      "tps": 22.4,
+      "bench_row": "AMD Ryzen AI 300 Series"
+    },
+    {
+      "chip": "Ryzen Z2 Go",
+      "family": "Rembrandt",
+      "vendor": "amd",
+      "handhelds": [
+        "legion-go-s-steamos"
+      ],
+      "tps": 21.3,
+      "bench_row": "AMD Ryzen 6000 Series"
+    },
+    {
+      "chip": "Ryzen Z1 Extreme",
+      "family": "Phoenix",
+      "vendor": "amd",
+      "handhelds": [
+        "legion-go"
+      ],
+      "tps": 18.8,
+      "bench_row": "AMD Ryzen Z1 Extreme"
+    },
+    {
+      "chip": "Steam Deck APU / Z2 A",
+      "family": "Van Gogh",
+      "vendor": "amd",
+      "handhelds": [
+        "steam-deck-oled",
+        "rog-xbox-ally"
+      ],
+      "tps": 17.5,
+      "bench_row": "AMD Steam Deck"
+    }
+  ],
+  "chip_tps_source_label": "Source: llama.cpp Vulkan benchmarks by chip family · Llama 2 7B Q4_0 · Nov 2026",
+  "duels": [
+    [
+      "steam-deck-oled",
+      "rog-xbox-ally-x20"
+    ],
+    [
+      "legion-go-2",
+      "rog-xbox-ally-x"
+    ],
+    [
+      "msi-claw-8-ex-ai-plus",
+      "rog-xbox-ally-x20"
+    ]
+  ],
+  "generations": [
+    {
+      "maker": "Lenovo",
+      "ids": [
+        "legion-go",
+        "legion-go-2"
+      ]
+    },
+    {
+      "maker": "ASUS",
+      "ids": [
+        "rog-xbox-ally-x",
+        "rog-xbox-ally-x20"
+      ]
+    },
+    {
+      "maker": "MSI",
+      "ids": [
+        "msi-claw-8-ai-plus",
+        "msi-claw-8-ex-ai-plus"
+      ]
+    }
+  ]
+}
