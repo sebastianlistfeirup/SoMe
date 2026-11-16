@@ -222,6 +222,11 @@ def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
             if destination["platform"] == "youtube":
                 # Follow-up actions after upload are part of what the owner approves.
                 item["post_publish"] = {"captions": (Path(video.output_dir) / "captions.srt").is_file(), "series_playlist": (video.features_json or {}).get("series_id")}
+        if destination["platform"] == "tiktok" and destination.get("tiktok") is not None:
+            # Privacy, interaction toggles, commercial disclosure and the consent text the owner saw are approved, like YouTube visibility.
+            from app.pipeline.tiktok_post import normalize_post_settings
+
+            item["tiktok"] = normalize_post_settings(destination["tiktok"])
         normalized.append(item)
     normalized.sort(key=lambda item: (item["platform"], item["account"], item["publish_at"] or ""))
     components = {
@@ -242,8 +247,8 @@ def approved_content(review: Review, video: VideoVersion, platform: str, account
     destination = next((item for item in (review.digest_json or {}).get("destinations", []) if item["platform"] == platform and item["account"] == account), None)
     if destination and destination.get("variant"):
         variant = destination["variant"]
-        return {"title": variant.get("title") or video.post_json.get("title", ""), "text": variant["text"], "ai_label": destination.get("ai_label"), "digest_version": 2, "post_publish": destination.get("post_publish") or {}}
-    return {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "text": video.post_json.get("text", ""), "ai_label": None, "digest_version": 1, "post_publish": {}}
+        return {"title": variant.get("title") or video.post_json.get("title", ""), "text": variant["text"], "ai_label": destination.get("ai_label"), "digest_version": 2, "post_publish": destination.get("post_publish") or {}, "tiktok": destination.get("tiktok")}
+    return {"title": video.post_json.get("title") or video.post_json.get("text", "")[:100], "text": video.post_json.get("text", ""), "ai_label": None, "digest_version": 1, "post_publish": {}, "tiktok": (destination or {}).get("tiktok")}
 
 
 def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destinations: list[dict], owner_watched_full_video: bool) -> Review:
@@ -274,6 +279,11 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
         seen.add(key)
         if destination.get("visibility", "public") not in {"private", "unlisted", "public"}:
             raise ApprovalError("invalid_visibility")
+        if destination["platform"] == "tiktok":
+            # TikTok Direct Post has no default privacy level: the owner must have chosen one.
+            from app.pipeline.tiktok_post import normalize_post_settings
+
+            normalize_post_settings(destination.get("tiktok"))
     checks_path = Path(video.output_dir) / "checks.json"
     if not checks_path.exists():
         raise ApprovalError("missing_checks")

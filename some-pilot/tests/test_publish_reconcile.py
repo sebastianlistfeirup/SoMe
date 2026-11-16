@@ -267,14 +267,16 @@ def test_eligible_tiktok_direct_post_never_uses_inbox_endpoint(db, awaiting_vide
         "tiktok_direct_post_consent_confirmed": True,
     }.items():
         monkeypatch.setattr(settings, name, value)
-    approve(db, awaiting_video, "owner", "tiktok", "open-1", True)
+    from app.pipeline.approvals import approve_destinations
+
+    approve_destinations(db, awaiting_video, "owner", [{"platform": "tiktok", "account": "open-1", "digest_version": 2, "ai_label": True, "tiktok": {"privacy_level": "PUBLIC_TO_EVERYONE"}}], True)
     calls = []
 
     def post(url, **kwargs):
         calls.append((url, kwargs))
         assert "/inbox/" not in url
         if "creator_info" in url:
-            return JsonResponse({"data": {"privacy_level_options": ["PUBLIC_TO_EVERYONE"]}})
+            return JsonResponse({"data": {"privacy_level_options": ["PUBLIC_TO_EVERYONE", "SELF_ONLY"]}})
         if url.endswith("/init/"):
             return JsonResponse({"data": {"publish_id": "publish-1", "upload_url": "https://upload.example/file"}})
         return JsonResponse({"data": {"status": "PUBLISH_COMPLETE"}})

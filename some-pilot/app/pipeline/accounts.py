@@ -3,7 +3,8 @@
 YouTube: a Google app in "Testing" issues refresh tokens that typically expire
 seven days after consent, so the first successful check after a (re)authorisation
 is tracked and an expiry estimate is shown. Meta: the token debugger reports the
-real expiry. TikTok: the user-info call proves the token works.
+real expiry. TikTok: the access token is refreshed before it expires (see tiktok_auth), and the
+user-info call proves it works.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -71,23 +72,57 @@ def _meta(now: datetime) -> dict:
     return result
 
 
-def _tiktok(now: datetime) -> dict:
+def _tiktok(db: Session, now: datetime, force_refresh: bool = False) -> dict:
+    """Refreshes the access token when it is close to expiry (or always, when forced), then proves it with user/info."""
+    from app.pipeline import tiktok_auth
+
     settings = get_settings()
-    if not settings.tiktok_access_token:
-        return {"configured": False, "ok": False}
-    response = httpx.get("https://open.tiktokapis.com/v2/user/info/", params={"fields": "open_id,display_name"}, headers={"Authorization": f"Bearer {settings.tiktok_access_token}"}, timeout=20)
+    if not tiktok_auth.configured():
+        return {"configured": False, "ok": False, "note": "No TikTok token stored; the owner must log in with the OAuth helper."}
+    direct_post_eligible = all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed))
+    try:
+        token = tiktok_auth.access_token(db, now, force_refresh=force_refresh)
+        response = httpx.get("https://open.tiktokapis.com/v2/user/info/", params={"fields": "open_id,display_name"}, headers={"Authorization": f"Bearer {token}"}, timeout=20)
+        if response.status_code == 401 and tiktok_auth.load_bundle() and not force_refresh:
+            token = tiktok_auth.access_token(db, now, force_refresh=True)
+            response = httpx.get("https://open.tiktokapis.com/v2/user/info/", params={"fields": "open_id,display_name"}, headers={"Authorization": f"Bearer {token}"}, timeout=20)
+    except tiktok_auth.TikTokAuthError as exc:
+        return {"configured": True, "ok": False, "error_code": redact(str(exc))[:120], "note": "Log in to TikTok again with the OAuth helper.", **_tiktok_token_view(now)}
     if response.status_code >= 400:
-        return {"configured": True, "ok": False, "error_code": f"user_info_http_{response.status_code}", "note": "TikTok access tokens are short-lived; refresh or re-authorise."}
+        return {"configured": True, "ok": False, "error_code": f"user_info_http_{response.status_code}", "note": "TikTok rejected the token; refresh failed or the owner must log in again.", **_tiktok_token_view(now)}
     user = response.json().get("data", {}).get("user", {})
-    return {"configured": True, "ok": True, "account_id": user.get("open_id"), "account_name": user.get("display_name"), "direct_post_eligible": all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed))}
+    view = _tiktok_token_view(now)
+    if view.get("token_store") == "file":
+        _record_tiktok_user(db, user)
+    return {"configured": True, "ok": True, "account_id": user.get("open_id"), "account_name": user.get("display_name"), "direct_post_eligible": direct_post_eligible, "forced_refresh": force_refresh, **view}
 
 
-def probe_accounts(db: Session, now: datetime | None = None) -> dict:
+def _tiktok_token_view(now: datetime) -> dict:
+    from app.pipeline import tiktok_auth
+
+    view = tiktok_auth.public_view(tiktok_auth.load_bundle(), now)
+    if view.get("token_store") == "missing":
+        return {"token_store": "env_without_refresh", "auto_refresh": False}
+    return {**{key: view[key] for key in ("token_store", "scopes", "access_expires_at", "refresh_expires_at", "refresh_expires_in_days", "last_refresh_at")}, "auto_refresh": True, "expires_estimate": view["refresh_expires_at"], "expires_in_days": view["refresh_expires_in_days"]}
+
+
+def _record_tiktok_user(db: Session, user: dict) -> None:
+    setting = db.get(Setting, "tiktok_connection")
+    state = dict(setting.value_json) if setting else {}
+    state.update({"oauth_verified": True, "relogin_required": False, "open_id": user.get("open_id") or state.get("open_id"), "display_name": user.get("display_name") or state.get("display_name")})
+    if setting:
+        setting.value_json = state
+    else:
+        db.add(Setting(key="tiktok_connection", value_json=state))
+    db.commit()
+
+
+def probe_accounts(db: Session, now: datetime | None = None, force_tiktok_refresh: bool = False) -> dict:
     now = now or datetime.now(timezone.utc)
     previous = db.get(Setting, STATUS_KEY)
     previous_platforms = (previous.value_json if previous else {}).get("platforms", {})
     platforms = {}
-    for name, probe in (("youtube", lambda: _youtube(previous_platforms.get("youtube", {}), now)), ("meta", lambda: _meta(now)), ("tiktok", lambda: _tiktok(now))):
+    for name, probe in (("youtube", lambda: _youtube(previous_platforms.get("youtube", {}), now)), ("meta", lambda: _meta(now)), ("tiktok", lambda: _tiktok(db, now, force_tiktok_refresh))):
         try:
             result = probe()
         except Exception as exc:

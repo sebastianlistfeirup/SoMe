@@ -16,7 +16,7 @@ DESTINATIONS = [
     {"platform": "youtube", "account": "channel-1", "visibility": "private", "publish_at": None},
     {"platform": "instagram", "account": "instagram-1", "visibility": "public", "publish_at": None},
     {"platform": "facebook", "account": "page-1", "visibility": "public", "publish_at": None},
-    {"platform": "tiktok", "account": "open-id-1", "visibility": "public", "publish_at": None},
+    {"platform": "tiktok", "account": "open-id-1", "visibility": "public", "publish_at": None, "tiktok": {"privacy_level": "PUBLIC_TO_EVERYONE", "allow_comment": True, "allow_duet": False, "allow_stitch": False}},
 ]
 
 

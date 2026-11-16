@@ -180,6 +180,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("ypp", help="Progress toward the YouTube Partner Program")
     pronunciation = sub.add_parser("pronunciation", help="Sync the ElevenLabs pronunciation dictionary")
     pronunciation.add_argument("--force", action="store_true")
+    probe = sub.add_parser("account-probe", help="Check the YouTube, Meta and TikTok connections (no secrets shown)")
+    probe.add_argument("--force-tiktok-refresh", action="store_true", help="Refresh the TikTok access token even if it is still valid")
     status = sub.add_parser("status-report", help="Generate STATUS facts from doctor and a test result")
     status.add_argument("--tests-passed", type=int, required=True)
     status.add_argument("--environment", default="local")
@@ -254,6 +256,10 @@ def run_extended(db, args) -> dict | None:
         from app.pipeline.pronunciation import sync
 
         return sync(force=args.force)
+    if args.command == "account-probe":
+        from app.pipeline.accounts import probe_accounts
+
+        return probe_accounts(db, force_tiktok_refresh=args.force_tiktok_refresh)
     if args.command == "cost-report":
         from app.pipeline.ops import monthly_cost_report
 

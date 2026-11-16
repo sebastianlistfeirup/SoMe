@@ -49,3 +49,18 @@ def awaiting_video(db):
     db.commit()
     db.refresh(video)
     return video
+
+
+@pytest.fixture(autouse=True)
+def isolated_tiktok_token_store(tmp_path, monkeypatch):
+    """Tests must never read, refresh or overwrite the real TikTok token store under /data,
+    nor use TikTok values from the deploy environment (deploy.sh runs pytest with app.env)."""
+    from app.config import get_settings
+    from app.pipeline import tiktok_auth
+
+    store = tmp_path / "tiktok-secrets" / tiktok_auth.TOKEN_FILE_NAME
+    monkeypatch.setattr(tiktok_auth, "token_path", lambda: store)
+    settings = get_settings()
+    for name, value in {"tiktok_access_token": "", "tiktok_open_id": "", "tiktok_client_key": "", "tiktok_client_secret": "", "tiktok_direct_post_enabled": False, "tiktok_direct_post_reviewed": False, "tiktok_direct_post_consent_confirmed": False}.items():
+        monkeypatch.setattr(settings, name, value)
+    return store

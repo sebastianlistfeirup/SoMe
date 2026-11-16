@@ -22,7 +22,7 @@ def test_variants_respect_each_platform_rules():
 
 
 def _destinations(**labels):
-    return [{"platform": platform, "account": f"{platform}-acct", "visibility": "public", "publish_at": None, "digest_version": 2, "ai_label": labels.get(platform)} for platform in ("youtube", "tiktok")]
+    return [{"platform": platform, "account": f"{platform}-acct", "visibility": "public", "publish_at": None, "digest_version": 2, "ai_label": labels.get(platform), **({"tiktok": {"privacy_level": "PUBLIC_TO_EVERYONE", "allow_comment": True, "allow_duet": False, "allow_stitch": False}} if platform == "tiktok" else {})} for platform in ("youtube", "tiktok")]
 
 
 def test_v2_digest_binds_variant_text_and_ai_label(awaiting_video):
@@ -39,7 +39,7 @@ def test_youtube_and_tiktok_send_approved_variant_and_label(db, awaiting_video, 
     settings = get_settings()
     for name, value in {"dry_run": False, "publish_enabled": True, "tiktok_access_token": "token", "tiktok_open_id": "open-1", "tiktok_direct_post_enabled": True, "tiktok_direct_post_reviewed": True, "tiktok_direct_post_consent_confirmed": True}.items():
         monkeypatch.setattr(settings, name, value)
-    destinations = [{"platform": "youtube", "account": "channel", "visibility": "private", "publish_at": None, "digest_version": 2, "ai_label": True}, {"platform": "tiktok", "account": "open-1", "visibility": "public", "publish_at": None, "digest_version": 2, "ai_label": True}]
+    destinations = [{"platform": "youtube", "account": "channel", "visibility": "private", "publish_at": None, "digest_version": 2, "ai_label": True}, {"platform": "tiktok", "account": "open-1", "visibility": "public", "publish_at": None, "digest_version": 2, "ai_label": True, "tiktok": {"privacy_level": "PUBLIC_TO_EVERYONE", "allow_comment": True, "allow_duet": False, "allow_stitch": False}}]
     review = approve_destinations(db, awaiting_video, "owner", destinations, True)
     expected = approved_content(review, awaiting_video, "tiktok", "open-1")
     assert expected["digest_version"] == 2 and expected["ai_label"] is True

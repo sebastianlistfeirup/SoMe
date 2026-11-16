@@ -345,22 +345,46 @@ class TikTokPublisher:
     api_base = "https://open.tiktokapis.com/v2"
 
     def capabilities(self, db: Session | None = None) -> dict:
+        from app.pipeline import tiktok_auth
+
         settings = get_settings()
-        configured = bool(settings.tiktok_access_token and settings.tiktok_open_id)
+        configured = tiktok_auth.configured()
         connection = db.get(Setting, "tiktok_connection") if db is not None else None
         state = connection.value_json if connection else {}
+        token = tiktok_auth.public_view(tiktok_auth.load_bundle())
         direct_post_eligible = all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed))
-        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "draft_upload_verified": bool(state.get("draft_upload_verified")), "open_id_configured": bool(settings.tiktok_open_id), "direct_post_eligible": direct_post_eligible, "direct_post_blocker": None if direct_post_eligible else "tiktok_direct_post_not_eligible", "manual_export": True}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "draft_upload_verified": bool(state.get("draft_upload_verified")), "open_id_configured": bool(tiktok_auth.open_id()), "token_store": token.get("token_store"), "auto_refresh": token.get("token_store") == "file", "refresh_expires_in_days": token.get("refresh_expires_in_days"), "relogin_required": bool(state.get("relogin_required")), "direct_post_eligible": direct_post_eligible, "direct_post_blocker": None if direct_post_eligible else "tiktok_direct_post_not_eligible", "manual_export": True}
+
+    def _post(self, db: Session, url: str, body: dict, timeout: int) -> httpx.Response:
+        """POST with a fresh token; a 401 forces one refresh and one retry, never a loop."""
+        from app.pipeline import tiktok_auth
+
+        try:
+            token = tiktok_auth.access_token(db)
+            response = httpx.post(url, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=UTF-8"}, json=body, timeout=timeout)
+            if response.status_code == 401 and tiktok_auth.load_bundle():
+                token = tiktok_auth.access_token(db, force_refresh=True)
+                response = httpx.post(url, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=UTF-8"}, json=body, timeout=timeout)
+        except tiktok_auth.TikTokAuthError as exc:
+            raise PublishError(str(exc)) from exc
+        return response
 
     def publish(self, db: Session, video: VideoVersion, account: str) -> Publication:
+        from app.pipeline import tiktok_auth
+        from app.pipeline.tiktok_post import EXTERNAL_VISIBILITY, creator_mismatches, normalize_post_settings, post_info
+
         settings = get_settings()
-        if not all((settings.tiktok_access_token, settings.tiktok_open_id)):
+        if not tiktok_auth.configured():
             raise PublishError("tiktok_not_configured; use_manual_export")
-        if account != settings.tiktok_open_id:
+        if account != tiktok_auth.open_id():
             raise PublishError("tiktok_open_id_mismatch")
         if not all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)):
             raise PublishError("tiktok_direct_post_not_eligible")
         content = approved_content(verify_approval(db, video, "tiktok", account), video, "tiktok", account)
+        if not content.get("tiktok"):
+            # Older approvals carry no owner-chosen privacy level; TikTok forbids a default.
+            raise PublishError("tiktok_post_settings_not_approved_reapprove")
+        options = normalize_post_settings(content["tiktok"])
         publication = new_publication(db, video, "tiktok", account)
         if publication.status == "PUBLISHED":
             return publication
@@ -371,29 +395,21 @@ class TikTokPublisher:
         db.commit()
         video_path = Path(video.video_path)
         size = video_path.stat().st_size
-        headers = {"Authorization": f"Bearer {settings.tiktok_access_token}", "Content-Type": "application/json; charset=UTF-8"}
         try:
-            creator = httpx.post(f"{self.api_base}/post/publish/creator_info/query/", headers=headers, json={}, timeout=30)
+            creator = self._post(db, f"{self.api_base}/post/publish/creator_info/query/", {}, 30)
             self._raise_for_tiktok_error(creator, "creator_info")
             creator_data = creator.json().get("data", {})
-            if "PUBLIC_TO_EVERYONE" not in creator_data.get("privacy_level_options", []):
-                raise PublishError("tiktok_public_direct_post_not_permitted")
-            started = httpx.post(
+            problems = creator_mismatches(options, creator_data, video.duration_seconds)
+            if problems:
+                raise PublishError(f"{problems[0]}_reapprove")
+            started = self._post(
+                db,
                 f"{self.api_base}/post/publish/video/init/",
-                headers=headers,
-                json={
-                    "post_info": {
-                        "title": content["text"],
-                        "privacy_level": "PUBLIC_TO_EVERYONE",
-                        **({"is_aigc": bool(content["ai_label"])} if content["ai_label"] is not None else {}),
-                        "disable_duet": False,
-                        "disable_comment": False,
-                        "disable_stitch": False,
-                        "video_cover_timestamp_ms": 1000,
-                    },
+                {
+                    "post_info": post_info(options, content["text"], content["ai_label"]),
                     "source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": size, "total_chunk_count": 1},
                 },
-                timeout=30,
+                30,
             )
             self._raise_for_tiktok_error(started, "init")
             upload = started.json().get("data", {})
@@ -415,12 +431,7 @@ class TikTokPublisher:
                 raise PublishError("tiktok_binary_upload_failed")
             status = ""
             for _ in range(30):
-                checked = httpx.post(
-                    f"{self.api_base}/post/publish/status/fetch/",
-                    headers=headers,
-                    json={"publish_id": publish_id},
-                    timeout=20,
-                )
+                checked = self._post(db, f"{self.api_base}/post/publish/status/fetch/", {"publish_id": publish_id}, 20)
                 self._raise_for_tiktok_error(checked, "status")
                 status = checked.json().get("data", {}).get("status", "")
                 if status == "PUBLISH_COMPLETE":
@@ -433,7 +444,7 @@ class TikTokPublisher:
             if status != "PUBLISH_COMPLETE":
                 raise PublishError(f"tiktok_direct_post_not_finished_reconcile:{status or 'unknown'}")
             publication.remote_id = publish_id
-            publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": "public", "cover": "source_frame_1000ms"}
+            publication.response_json = {"publish_id": publish_id, "status": status, "external_visibility": EXTERNAL_VISIBILITY[options["privacy_level"]], "privacy_level": options["privacy_level"], "cover": "source_frame_1000ms"}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
             _mark_success(db, publication, video)

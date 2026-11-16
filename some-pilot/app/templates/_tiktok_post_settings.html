@@ -1,0 +1,35 @@
+<fieldset class="tiktok-settings" data-tiktok-panel>
+  <legend>TikTok post settings</legend>
+  {% if tiktok_creator.available %}
+  <p class="tiktok-account">Posting to <strong data-tiktok-nickname>{{ tiktok_creator.nickname }}</strong>{% if tiktok_creator.username %} <span class="muted">@{{ tiktok_creator.username }}</span>{% endif %}</p>
+  {% if not tiktok_direct_post_eligible %}<p class="field-help tiktok-note">Direct Post er ikke aktiveret endnu (afventer TikToks review). Valgene vises, men TikTok kan ikke vælges som destination.</p>{% endif %}
+  <label for="tiktok_privacy_level">Who can view this video
+    <select id="tiktok_privacy_level" name="tiktok_privacy_level" data-tiktok-privacy>
+      <option value="" selected disabled>Select privacy level</option>
+      {% for option in tiktok_creator.privacy_options %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="tiktok-interactions">
+    <span class="tiktok-label">Allow users to</span>
+    <label class="check{% if tiktok_creator.comment_disabled %} is-disabled{% endif %}"><input type="checkbox" name="tiktok_allow_comment" value="true" {% if tiktok_creator.comment_disabled %}disabled{% endif %}> Comment{% if tiktok_creator.comment_disabled %} <small>(disabled in your TikTok settings)</small>{% endif %}</label>
+    <label class="check{% if tiktok_creator.duet_disabled %} is-disabled{% endif %}"><input type="checkbox" name="tiktok_allow_duet" value="true" {% if tiktok_creator.duet_disabled %}disabled{% endif %}> Duet{% if tiktok_creator.duet_disabled %} <small>(disabled in your TikTok settings)</small>{% endif %}</label>
+    <label class="check{% if tiktok_creator.stitch_disabled %} is-disabled{% endif %}"><input type="checkbox" name="tiktok_allow_stitch" value="true" {% if tiktok_creator.stitch_disabled %}disabled{% endif %}> Stitch{% if tiktok_creator.stitch_disabled %} <small>(disabled in your TikTok settings)</small>{% endif %}</label>
+  </div>
+  <div class="tiktok-commercial">
+    <label class="check"><input type="checkbox" name="tiktok_commercial_disclosure" value="true" data-tiktok-disclose> <strong>Disclose video content</strong></label>
+    <p class="field-help">Turn on to disclose that this video promotes goods or services in exchange for something of value. Your video could promote yourself, a third party, or both.</p>
+    <div class="tiktok-commercial-options" data-tiktok-commercial-options hidden>
+      <label class="check"><input type="checkbox" name="tiktok_brand_organic" value="true" data-tiktok-brand-organic> <strong>Your brand</strong> <small>You are promoting yourself or your own business. This video will be classified as Brand Organic.</small></label>
+      <label class="check"><input type="checkbox" name="tiktok_brand_content" value="true" data-tiktok-brand-content> <strong>Branded content</strong> <small>You are promoting another brand or a third party. This video will be classified as Branded Content.</small></label>
+      <p class="field-help tiktok-label-preview" data-tiktok-label-preview hidden></p>
+      <p class="field-help tiktok-warning" data-tiktok-commercial-required hidden>You need to indicate if your content promotes yourself, a third party, or both.</p>
+      <p class="field-help tiktok-warning" data-tiktok-private-warning hidden>Branded content visibility cannot be set to private.</p>
+    </div>
+  </div>
+  {% if tiktok_creator.max_video_post_duration_sec %}<p class="field-help">Maks. videolængde for kontoen: {{ tiktok_creator.max_video_post_duration_sec }} sek. Denne video: {{ video.duration_seconds | duration }}.</p>{% endif %}
+  <p class="tiktok-consent" data-tiktok-consent data-music="{{ tiktok_consent.music }}" data-branded="{{ tiktok_consent.branded }}"><span data-tiktok-consent-text>{{ tiktok_consent.music }}</span>. <a href="{{ tiktok_consent.music_url }}" target="_blank" rel="noopener">Music Usage Confirmation</a><span data-tiktok-branded-link hidden> · <a href="{{ tiktok_consent.branded_url }}" target="_blank" rel="noopener">Branded Content Policy</a></span></p>
+  <p class="field-help">After you approve, TikTok may take a few minutes to process the video before it appears on your profile.</p>
+  {% else %}
+  <p class="field-help tiktok-note">TikTok kan ikke vælges: {{ tiktok_creator.error or 'ikke forbundet' }}. Log ind igen med TikTok-hjælperen (se OWNER_ACTIONS §5).</p>
+  {% endif %}
+</fieldset>

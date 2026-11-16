@@ -22,6 +22,11 @@ from app.pipeline.approvals import ApprovalError, approve, approve_destinations,
 from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
+from app.pipeline.tiktok_auth import open_id as tiktok_open_id
+from app.pipeline.tiktok_post import BRANDED_CONSENT, BRANDED_CONTENT_URL, MUSIC_CONSENT, MUSIC_USAGE_URL
+from app.pipeline.tiktok_post import creator_mismatches as tiktok_creator_mismatches
+from app.pipeline.tiktok_post import creator_view as tiktok_creator_view
+from app.pipeline.tiktok_post import from_form as tiktok_from_form
 from app.pipeline.variants import AI_LABEL_API, AI_LABEL_DEFAULTS, all_variants
 from app.pipeline.audience import sources_comment
 from app.pipeline.quality import CATEGORY_LABELS, REJECTION_CATEGORIES, normalize_categories, requires_new_production
@@ -377,7 +382,7 @@ def destination_options(db: Session) -> list[dict]:
     definitions = [
         ("youtube", youtube_state.get("channel_id", ""), youtube_state.get("channel_title") or "YouTube-konto ikke forbundet"),
         ("instagram", meta_state.get("instagram_account_id") or settings.meta_instagram_account_id, f"@{meta_state['instagram_username']}" if meta_state.get("instagram_username") else "Instagram-konto ikke forbundet"),
-        ("tiktok", tiktok_state.get("open_id") or settings.tiktok_open_id, tiktok_state.get("display_name") or "TikTok-konto ikke forbundet"),
+        ("tiktok", tiktok_open_id() or tiktok_state.get("open_id", ""), tiktok_state.get("display_name") or "TikTok-konto ikke forbundet"),
         ("facebook", meta_state.get("facebook_page_id") or settings.meta_page_id, meta_state.get("facebook_page_name") or "Facebook-side ikke forbundet"),
     ]
     return [
@@ -431,6 +436,7 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
                 evidence[name] = {"error": "unreadable_or_invalid_evidence"}
     selected_platform = preferred_platform(video)
     platforms = destination_options(db)
+    tiktok_creator = tiktok_creator_view(db) if video.status == "AWAITING_OWNER" and "tiktok" in ((video.features_json or {}).get("allowed_platforms") or ["tiktok"]) else {"available": False, "error": "not_requested"}
     selected = selected_destination(db, selected_platform)
     latest_rejection = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "REJECTED").order_by(Review.created_at.desc(), Review.id.desc()).first()
     latest_approval = db.query(Review).filter(Review.video_version_id == video.id, Review.decision == "APPROVED").order_by(Review.created_at.desc(), Review.id.desc()).first()
@@ -460,12 +466,35 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         sources_comment=sources_comment(video),
         ai_label_defaults=AI_LABEL_DEFAULTS,
         ai_label_api=AI_LABEL_API,
+        tiktok_creator=tiktok_creator,
+        tiktok_direct_post_eligible=all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)),
+        tiktok_consent={"music": MUSIC_CONSENT, "branded": BRANDED_CONSENT, "music_url": MUSIC_USAGE_URL, "branded_url": BRANDED_CONTENT_URL},
         rejection_needs_new_production=requires_new_production(((latest_rejection.digest_json or {}) if latest_rejection else {}).get("rejection_categories", [])),
     )
 
 
 @app.post("/review/{video_id}/approve")
-def approve_video(video_id: int, request: Request, platform: str = Form(""), platforms: list[str] | None = Form(None), account: str = Form(""), visibility: str = Form("public"), publish_at: str = Form(""), watched: bool = Form(False), ai_labels: list[str] | None = Form(None), ai_labels_present: bool = Form(False), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+def approve_video(
+    video_id: int,
+    request: Request,
+    platform: str = Form(""),
+    platforms: list[str] | None = Form(None),
+    account: str = Form(""),
+    visibility: str = Form("public"),
+    publish_at: str = Form(""),
+    watched: bool = Form(False),
+    ai_labels: list[str] | None = Form(None),
+    ai_labels_present: bool = Form(False),
+    tiktok_privacy_level: str = Form(""),
+    tiktok_allow_comment: bool = Form(False),
+    tiktok_allow_duet: bool = Form(False),
+    tiktok_allow_stitch: bool = Form(False),
+    tiktok_commercial_disclosure: bool = Form(False),
+    tiktok_brand_organic: bool = Form(False),
+    tiktok_brand_content: bool = Form(False),
+    db: Session = Depends(get_db),
+    auth=Depends(csrf_check),
+):
     video = db.get(VideoVersion, video_id)
     if not video:
         raise HTTPException(404)
@@ -473,6 +502,18 @@ def approve_video(video_id: int, request: Request, platform: str = Form(""), pla
     destinations = []
     try:
         scheduled_at = normalize_publish_at(publish_at)
+        tiktok_options = None
+        if "tiktok" in selected:
+            if not all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)):
+                raise ApprovalError("tiktok_direct_post_not_eligible")
+            tiktok_options = tiktok_from_form(tiktok_privacy_level, tiktok_allow_comment, tiktok_allow_duet, tiktok_allow_stitch, tiktok_commercial_disclosure, tiktok_brand_organic, tiktok_brand_content)
+            # Re-check against the creator's live TikTok settings, not only what the page showed.
+            creator = tiktok_creator_view(db)
+            if not creator.get("available"):
+                raise ApprovalError(creator.get("error") or "tiktok_creator_info_unavailable")
+            problems = tiktok_creator_mismatches(tiktok_options, creator["raw"], video.duration_seconds)
+            if problems:
+                raise ApprovalError(problems[0])
         for selected_platform in selected:
             option = selected_destination(db, selected_platform)
             destination_account = account.strip() if len(selected) == 1 and account.strip() else option["account"]
@@ -485,6 +526,7 @@ def approve_video(video_id: int, request: Request, platform: str = Form(""), pla
                 "publish_at": scheduled_at,
                 "digest_version": 2,
                 "ai_label": (selected_platform in (ai_labels or [])) if ai_labels_present else None,
+                **({"tiktok": tiktok_options} if selected_platform == "tiktok" else {}),
             })
         review = approve_destinations(db, video, auth[0].username, destinations, watched)
         jobs = enqueue_publication_jobs(db, review)

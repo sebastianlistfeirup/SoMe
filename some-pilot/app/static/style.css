@@ -297,3 +297,16 @@ code { user-select: all; }
 }
 
 .qr-box svg { width: 240px; height: 240px; background: #fff; border-radius: 8px; }
+.tiktok-settings { display: grid; gap: .6rem; margin: .75rem 0; padding: .8rem; border: 1px solid var(--line); border-radius: 8px; }
+.tiktok-settings.is-inactive { opacity: .6; }
+.tiktok-settings legend { color: #344054; font-size: .75rem; font-weight: 700; }
+.tiktok-settings select { display: block; width: 100%; margin-top: .35rem; padding: .6rem; border: 1px solid #d0d5dd; border-radius: 7px; }
+.tiktok-settings label { color: #475467; font-size: .7rem; font-weight: 650; }
+.tiktok-account { margin: 0; font-size: .75rem; }
+.tiktok-interactions { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; }
+.tiktok-label { color: #475467; font-size: .7rem; font-weight: 650; }
+.tiktok-commercial-options { display: grid; gap: .35rem; padding-left: 1rem; }
+.tiktok-commercial-options small { display: block; color: #98a2b3; font-weight: 400; }
+.tiktok-consent { margin: 0; color: #344054; font-size: .7rem; }
+.tiktok-warning { color: #b42318; }
+.is-disabled { opacity: .55; cursor: not-allowed; }

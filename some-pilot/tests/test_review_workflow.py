@@ -155,8 +155,12 @@ def test_http_multi_approval_dispatches_exact_accounts_once(db, awaiting_video, 
     db.add(Setting(key="meta_connection", value_json={"instagram_account_id": "instagram-1", "facebook_page_id": "page-1"}))
     db.add(Setting(key="tiktok_connection", value_json={"open_id": "open-id-1"}))
     db.commit()
-    monkeypatch.setattr(get_settings(), "dry_run", False)
-    monkeypatch.setattr(get_settings(), "publish_enabled", True)
+    for name in ("dry_run",):
+        monkeypatch.setattr(get_settings(), name, False)
+    for name in ("publish_enabled", "tiktok_direct_post_enabled", "tiktok_direct_post_reviewed", "tiktok_direct_post_consent_confirmed"):
+        monkeypatch.setattr(get_settings(), name, True)
+    creator = {"privacy_level_options": ["PUBLIC_TO_EVERYONE", "SELF_ONLY"], "comment_disabled": False, "duet_disabled": False, "stitch_disabled": False}
+    monkeypatch.setattr("app.main.tiktok_creator_view", lambda _db: {"available": True, "nickname": "P&P", "raw": creator})
     client, csrf = authenticated_client(db)
     try:
         data = {
@@ -164,6 +168,7 @@ def test_http_multi_approval_dispatches_exact_accounts_once(db, awaiting_video, 
             "platforms": ["youtube", "instagram", "facebook", "tiktok"],
             "visibility": "unlisted",
             "watched": "true",
+            "tiktok_privacy_level": "SELF_ONLY",
         }
         response = client.post(f"/review/{awaiting_video.id}/approve", data=data, follow_redirects=False)
         assert response.status_code == 303
@@ -171,6 +176,8 @@ def test_http_multi_approval_dispatches_exact_accounts_once(db, awaiting_video, 
         assert len(jobs) == 4
         youtube = next(job for job in jobs if job.payload["platform"] == "youtube")
         assert youtube.payload["visibility"] == "unlisted"
+        review = db.query(Review).filter_by(decision="APPROVED").one()
+        assert next(item for item in review.digest_json["destinations"] if item["platform"] == "tiktok")["tiktok"]["privacy_level"] == "SELF_ONLY"
         assert {job.payload["account"] for job in jobs} == {"channel-1", "instagram-1", "page-1", "open-id-1"}
         duplicate = client.post(f"/review/{awaiting_video.id}/approve", data=data, follow_redirects=False)
         assert duplicate.status_code == 409

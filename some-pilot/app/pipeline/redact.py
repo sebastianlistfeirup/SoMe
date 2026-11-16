@@ -22,8 +22,14 @@ def redact(text: str | None) -> str:
         return ""
     value = str(text)
     settings = get_settings()
-    for field in SECRET_FIELDS:
-        secret = str(getattr(settings, field, "") or "")
+    secrets = [str(getattr(settings, field, "") or "") for field in SECRET_FIELDS]
+    try:
+        from app.pipeline.tiktok_auth import secret_values
+
+        secrets += secret_values()  # refreshed TikTok tokens live in the token store, not in settings
+    except Exception:
+        pass
+    for secret in secrets:
         if len(secret) >= 6:
             value = value.replace(secret, "[REDACTED]")
     for pattern in PATTERNS:

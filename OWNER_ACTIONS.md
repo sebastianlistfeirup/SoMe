@@ -70,12 +70,86 @@ Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af
 - Facebook bruger direkte multipart-upload efter Graph-fejl 390 ved URL-upload.
 - Meta App Review/Advanced Access er ikke gennemført; tests bruger ejerens konto og Standard Access.
 
-## 5. TikTok — Sandbox og kladde verificeret
+## 5. TikTok — automatisk token-fornyelse og Direct Post-review
 
-- App: `SoMe-maskinen-sandbox`; scopes `user.info.basic` og `video.upload`; målkonto `@pixelandparameters` er accepteret.
-- Ejeren har bekræftet **“Din indhold fra SoMe-maskinen er klar”** i TikTok-appen. Det er en API-kladde i inboxen, ikke et offentligt opslag.
-- Første upload manglede gemt `publish_id` og blev reconcileret med ejerbevis uden ny upload. Ny kode gemmer `publish_id` og poller længere.
-- Direct Post er deaktiveret. Production-appens demo-video og review mangler og fortsættes når ejeren er tilbage.
+**Status 2026-11-16:**
+- Koden fornyer nu selv TikTok-adgangen. Adgangstokenet (ca. 24 timer) fornyes automatisk med refresh-tokenet (ca. 365 dage), før det udløber, og overlever genstarter.
+- Tokens ligger i `/opt/some/data/secrets/tiktok_oauth.json` (kun læsbar for app-brugeren) og vises eller logges aldrig. `app.env` har kun `TIKTOK_OPEN_ID`.
+- Godkendelsessiden har et TikTok-panel med kontonavn fra TikTok, valg af synlighed uden standardvalg, Comment/Duet/Stitch, kommerciel mærkning og samtykketeksten "By posting, you agree to TikTok's Music Usage Confirmation". Valgene er låst i godkendelsens SHA-digest ligesom YouTube-synlighed.
+- Direct Post er stadig **slået fra** (`TIKTOK_DIRECT_POST_ENABLED/REVIEWED/CONSENT_CONFIRMED=false`). TikTok kan ikke vælges som destination, før TikTok har godkendt reviewet. Ingen TikTok-opslag er sendt.
+- Historik: Sandbox-appen `SoMe-maskinen-sandbox` lavede én API-kladde i inboxen (ikke offentlig) med `video.upload`. Inbox-flowet bruges ikke længere.
+
+### 5A. Log ind igen på TikTok (nu, med sandbox-appen) — ca. 5 min
+
+1. Gå til [developers.tiktok.com](https://developers.tiktok.com/) → **Manage apps** → `SoMe-maskinen-sandbox`.
+2. Under **Products → Content Posting API**: slå **Direct Post** til. Det giver scopet `video.publish`, som TikTok-panelet skal bruge.
+3. Under **Login Kit**: tjek at redirect-URI er præcis `https://62.171.167.243.sslip.io/integrations/tiktok/callback`.
+4. Under **Sandbox settings → Target users**: tjek at `@pixelandparameters` stadig står som accepteret.
+5. Sig til Claude: **"Start TikTok-login"**. Claude starter login-hjælperen på serveren og sender dig login-linket (fra `/opt/some/secrets/tiktok-login-url.txt`). Linket virker kun én gang.
+6. Åbn linket, log ind som **@pixelandparameters** og godkend adgangen. Du indtaster selv adgangskode og 2FA.
+7. Du ser siden **"TikTok-forbindelsen er oprettet"**. Sig til Claude, at du er færdig.
+8. Claude kører `account-probe` og derefter `account-probe --force-tiktok-refresh`. Begge skal vise TikTok `ok`, og den anden viser at fornyelsen virker.
+
+### 5B. Flyt til en production-app med Direct Post — ca. 30 min
+
+1. På [developers.tiktok.com](https://developers.tiktok.com/) → **Manage apps**: åbn appens **Production**-del (ikke sandbox), eller opret en ny app, hvis sandbox-appen ikke har en production-del.
+2. **App details:**
+   - App-navn: `Pixel and Parameters`
+   - Ikon: `some-pilot/app/static/tiktok-app-icon.png`
+   - Kategori: *Entertainment*
+   - Beskrivelse (engelsk): *Pixel and Parameters is a private publishing tool for one creator. The creator reviews every video and posts it to their own TikTok account.*
+   - Terms of Service URL: `https://62.171.167.243.sslip.io/terms`
+   - Privacy Policy URL: `https://62.171.167.243.sslip.io/privacy`
+   - Platform: **Web**, website `https://62.171.167.243.sslip.io`
+3. **URL properties / domæne-verifikation:**
+   - Verificér `https://62.171.167.243.sslip.io/`.
+   - Filen `tiktokDNEepLrDLh4SgEN8VZPDcTcL09iuTuaj.txt` ligger allerede i roden.
+   - Viser TikTok et **andet** filnavn til production-appen, så send det til Claude. Det kræver en lille kodeændring og et deploy.
+4. **Products:**
+   - **Login Kit**, med redirect-URI `https://62.171.167.243.sslip.io/integrations/tiktok/callback`.
+   - **Content Posting API**, med **Direct Post slået til**.
+5. **Scopes:** kun `user.info.basic` og `video.publish`. Tilføj ikke `video.upload`, som ikke bruges længere. Ubrugte scopes er en almindelig afvisningsgrund.
+6. **Nøgler:**
+   - Giv Claude production-appens **Client key** og **Client secret**.
+   - Claude skriver dem i `/opt/some/secrets/app.env` (0600) med backup og viser dem aldrig.
+   - Claude genstarter først, når ingen jobs kører.
+7. **Log ind igen** som i 5A, nu med production-appen. Det gamle sandbox-token afvises bevidst (`tiktok_client_key_changed_login_required`), fordi tokens hører til én app.
+
+### 5C. Demo-video og review — ca. 30 min
+
+TikTok vil se hele flowet i én skærmoptagelse, mp4/mov. Optag med **Win+Alt+R** (Xbox Game Bar) eller Klippeværktøj → Optag. Optag i engelsk browser, og hold musen rolig. Forløb:
+
+1. Vis login: åbn TikTok-login-linket og log ind som @pixelandparameters, så TikToks samtykkeskærm med scopes ses. Afslut på "TikTok-forbindelsen er oprettet". Brug et nyt link fra Claude, for linket virker kun én gang.
+2. Åbn review-centret `https://62.171.167.243.sslip.io/review` og log ind. Klip gerne 2FA-trinnet ud.
+3. Åbn en video, der venter på godkendelse. Afspil forhåndsvisningen et par sekunder.
+4. Scroll til **TikTok post settings**, og vis i rækkefølge:
+   - **Kontonavnet** ("Posting to …"), som kommer fra TikTok.
+   - Dropdown **Who can view this video**: vis at intet er valgt, og vælg derefter en mulighed.
+   - **Allow users to: Comment / Duet / Stitch**: vis at de starter slået fra, og slå én til. Gråe felter er slået fra i TikTok-kontoens egne indstillinger.
+   - **Disclose video content**: slå til, og vis den røde besked om at en type skal vælges.
+     - Vælg **Your brand**, og vis mærket "Promotional content".
+     - Vælg **Branded content**, og vis mærket "Paid partnership" og at "Only me" bliver utilgængelig.
+     - Slå derefter mærkningen fra igen.
+   - **Samtykketeksten** "By posting, you agree to TikTok's Music Usage Confirmation". Den ændres til "Branded Content Policy and Music Usage Confirmation", når Branded content er valgt.
+5. Sæt flueben i "Jeg har set hele videoen", og tryk **Godkend opslag og publicér**.
+6. Vis det færdige opslag på TikTok-profilen. *Det kræver en beslutning fra dig først* (se punkt 9).
+7. **Review-formularen** (engelsk tekst, kan kopieres):
+   - `user.info.basic`: *Shows the creator which TikTok account is connected (display name) and verifies the connection daily.*
+   - `video.publish`: *The creator reviews each video in our web review page, chooses privacy level, interaction settings and commercial content disclosure, and explicitly approves. Only then is the video posted with Direct Post to the creator's own account.*
+8. Send reviewet. Svaret kommer typisk på 1–2 uger via e-mail.
+9. **Beslutning, før demoen optages:** Så længe Direct Post-flagene er slået fra, er TikTok gråtonet som destination. Panelet kan vises, men godkendelsen kan ikke sendes til TikTok.
+   - TikTok vil normalt se hele flowet til og med opslaget (punkt 5–6). Derfor anbefales det at slå flagene til **midlertidigt**:
+     - Claude slår dem til, kun mens demoen optages med sandbox-appen.
+     - Der postes ét opslag med **Only me**. En ikke-reviewet app kan kun poste privat.
+     - Bagefter slår Claude flagene fra igen.
+   - Det sker kun, hvis du skriver det udtrykkeligt ("ja, ét Only me-demoopslag"). Ellers stopper demoen ved panelet.
+
+### 5D. Når TikTok har godkendt reviewet
+
+1. Videresend eller beskriv TikToks godkendelses-e-mail til Claude.
+2. Claude sætter `TIKTOK_DIRECT_POST_ENABLED`, `TIKTOK_DIRECT_POST_REVIEWED` og `TIKTOK_DIRECT_POST_CONSENT_CONFIRMED` til `true` og genstarter, når ingen jobs kører.
+3. Derefter kan TikTok vælges på godkendelsessiden. Synlighed skal vælges aktivt hver gang.
+4. Ældre godkendelser uden TikTok-valg publiceres aldrig til TikTok (`tiktok_post_settings_not_approved_reapprove`).
 
 ## 6. Godkendt intro/outro — obligatorisk for nye videoer
 
