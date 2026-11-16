@@ -64,3 +64,12 @@ def isolated_tiktok_token_store(tmp_path, monkeypatch):
     for name, value in {"tiktok_access_token": "", "tiktok_open_id": "", "tiktok_client_key": "", "tiktok_client_secret": "", "tiktok_direct_post_enabled": False, "tiktok_direct_post_reviewed": False, "tiktok_direct_post_consent_confirmed": False}.items():
         monkeypatch.setattr(settings, name, value)
     return store
+
+
+@pytest.fixture(autouse=True)
+def default_login_without_totp(monkeypatch):
+    """deploy.sh runs pytest with the production app.env, where REQUIRE_TOTP=true; tests that
+    exercise 2FA turn it on themselves, all others log in with password only."""
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "require_totp", False)
