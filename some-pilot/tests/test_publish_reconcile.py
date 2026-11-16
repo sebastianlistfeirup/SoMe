@@ -64,6 +64,8 @@ def test_facebook_graph_error_reports_safe_detail(db, awaiting_video, monkeypatc
         "public_base_url": "https://example.com",
     }.items():
         monkeypatch.setattr(settings, name, value)
+    awaiting_video.features_json = {**awaiting_video.features_json, "aspect_ratio": "16:9"}
+    db.commit()
     approve(db, awaiting_video, "owner", "facebook", "page-1", True)
     monkeypatch.setattr("app.pipeline.platforms.create_link", lambda *_args: "https://example.com/signed-video")
 

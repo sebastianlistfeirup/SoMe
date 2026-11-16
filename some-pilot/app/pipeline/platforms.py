@@ -338,6 +338,26 @@ FACEBOOK_CHUNK_TIMEOUT = 300
 FACEBOOK_CHUNK_ATTEMPTS = 3
 
 
+# Owner rule 13 (2026-11-16): 9:16 videos go to the Page as Reels. As regular page videos they
+# show in the feed as a narrow pillarboxed strip.
+FACEBOOK_REEL_UPLOAD_TIMEOUT = 600
+FACEBOOK_REEL_POLL_SECONDS = 600
+FACEBOOK_REEL_POLL_MAX_DELAY = 20
+
+
+def is_vertical(video: VideoVersion) -> bool:
+    aspect = (video.features_json or {}).get("aspect_ratio")
+    if aspect in {"9:16", "16:9", "1:1", "4:5"}:
+        return aspect == "9:16"
+    from app.pipeline.media import probe
+
+    try:
+        stream = next((item for item in probe(Path(video.video_path)).get("streams", []) if item.get("codec_type") == "video"), {})
+        return int(stream["width"]) < int(stream["height"])
+    except Exception as exc:  # never guess the format: a 9:16 video posted as a page video breaks rule 13
+        raise PublishError("facebook_video_aspect_unknown") from exc
+
+
 def _graph_error_detail(response: httpx.Response) -> str:
     try:
         error = response.json().get("error", {})
@@ -383,6 +403,7 @@ class FacebookPublisher:
         if account != settings.meta_page_id:
             raise PublishError("facebook_page_mismatch")
         content = approved_content(verify_approval(db, video, "facebook", account), video, "facebook", account)
+        vertical = is_vertical(video)
         publication = new_publication(db, video, "facebook", account)
         if publication.status == "PUBLISHED":
             return publication
@@ -391,6 +412,8 @@ class FacebookPublisher:
         publication.status = "PUBLISHING"
         _enter_publishing(video)
         db.commit()
+        if vertical:
+            return self._publish_reel(db, publication, video, account, content["text"])
         url = f"https://graph-video.facebook.com/{settings.meta_graph_version}/{account}/videos"
         headers = {"Authorization": f"Bearer {settings.meta_page_access_token}"}
         video_path = Path(video.video_path)
@@ -444,6 +467,84 @@ class FacebookPublisher:
         except Exception as exc:
             if finishing:
                 _mark_timeout(db, publication, video, "facebook_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
+            raise
+
+
+    def _reel_status(self, base: str, headers: dict, video_id: str) -> dict:
+        """Poll until the reel is published, failed, or the window closes; returns the last status."""
+        deadline = time.monotonic() + FACEBOOK_REEL_POLL_SECONDS
+        delay = 2.0
+        while True:
+            polled = httpx.get(f"{base}/{video_id}", headers=headers, params={"fields": "status"}, timeout=20)
+            polled.raise_for_status()
+            status = polled.json().get("status", {}) or {}
+            publishing = (status.get("publishing_phase") or {}).get("status")
+            if status.get("video_status") == "error" or publishing in {"complete", "error"} or time.monotonic() + delay > deadline:
+                return status
+            time.sleep(delay)
+            delay = min(delay * 1.5, FACEBOOK_REEL_POLL_MAX_DELAY)
+
+    def _publish_reel(self, db: Session, publication: Publication, video: VideoVersion, account: str, description: str) -> Publication:
+        """Reels Publishing API: start -> binary upload to rupload -> finish(PUBLISHED) -> poll status.
+
+        Before finish nothing is public, so failures are FAILED and a retry starts over. From finish
+        on, the reel may already be live: anything short of a confirmed "complete" is RECONCILE_REQUIRED.
+        """
+        settings = get_settings()
+        base = f"https://graph.facebook.com/{settings.meta_graph_version}"
+        token = settings.meta_page_access_token
+        headers = {"Authorization": f"Bearer {token}"}
+        video_path = Path(video.video_path)
+        size = video_path.stat().st_size
+        finishing = False
+        try:
+            started = self._graph_post(f"{base}/{account}/video_reels", headers, "reel_start", 60, data={"upload_phase": "start"})
+            video_id = started.get("video_id")
+            upload_url = started.get("upload_url") or f"https://rupload.facebook.com/video-upload/{settings.meta_graph_version}/{video_id}"
+            if not video_id:
+                raise PublishError("facebook_reel_session_missing")
+            if not upload_url.startswith("https://rupload.facebook.com/"):
+                raise PublishError("facebook_reel_unexpected_upload_host")
+            publication.upload_session = video_id
+            publication.response_json = {"video_id": video_id, "upload": "reel"}
+            db.commit()
+            with video_path.open("rb") as handle:
+                uploaded = httpx.post(upload_url, headers={"Authorization": f"OAuth {token}", "offset": "0", "file_size": str(size)}, content=handle, timeout=FACEBOOK_REEL_UPLOAD_TIMEOUT)
+            if uploaded.status_code >= 400:
+                raise PublishError(f"facebook_graph_error:reel_upload:{_graph_error_detail(uploaded)[:300]}")
+            try:
+                upload_ok = bool(uploaded.json().get("success"))
+            except ValueError:
+                upload_ok = False
+            if not upload_ok:
+                raise PublishError("facebook_reel_upload_not_confirmed")
+            finishing = True
+            finished = self._graph_post(f"{base}/{account}/video_reels", headers, "reel_finish", 120, data={"upload_phase": "finish", "video_id": video_id, "video_state": "PUBLISHED", "description": description})
+            if not finished.get("success"):
+                raise PublishError("facebook_reel_finish_not_confirmed_reconcile")
+            publication.remote_id = video_id
+            db.commit()
+            status = self._reel_status(base, headers, video_id)
+            phase = (status.get("publishing_phase") or {}).get("status")
+            if phase != "complete":
+                raise PublishError(f"facebook_reel_not_confirmed_reconcile:{status.get('video_status') or 'unknown'}:{phase or 'unknown'}")
+            publication.response_json = {"id": video_id, "format": "reel", "video_status": status.get("video_status"), "publishing_phase": phase, "bytes": size}
+            publication.status = "PUBLISHED"
+            publication.published_at = utcnow()
+            _mark_success(db, publication, video)
+            db.commit()
+            return publication
+        except httpx.TimeoutException as exc:
+            if finishing:
+                _mark_timeout(db, publication, video, "facebook_reel_reconcile_required")
+                raise PublishError("facebook_reel_reconcile_required") from exc
+            _mark_failure(db, publication, video, exc)
+            raise PublishError("facebook_reel_upload_timeout") from exc
+        except Exception as exc:
+            if finishing:
+                _mark_timeout(db, publication, video, "facebook_reel_reconcile_required")
             else:
                 _mark_failure(db, publication, video, exc)
             raise

@@ -26,8 +26,10 @@ class Response:
             raise httpx.HTTPStatusError("error", request=None, response=None)
 
 
-def facebook_ready(db, video, monkeypatch, payload=b"0123456789"):
+def facebook_ready(db, video, monkeypatch, payload=b"0123456789", aspect="16:9"):
     settings = get_settings()
+    video.features_json = {**(video.features_json or {}), "aspect_ratio": aspect}
+    db.commit()
     for name, value in {"dry_run": False, "publish_enabled": True, "meta_page_access_token": "test-page-token", "meta_page_id": "page-1", "meta_graph_version": "v27.0"}.items():
         monkeypatch.setattr(settings, name, value)
     with open(video.video_path, "wb") as handle:
@@ -194,3 +196,85 @@ def test_instagram_expired_container_is_failed_so_a_retry_starts_fresh(db, await
     with pytest.raises(PublishError, match="instagram_container_expired"):
         InstagramPublisher().publish(db, awaiting_video, "instagram-1")
     assert db.get(Publication, publication.id).status == "FAILED"
+
+
+# --- Facebook Reels for 9:16 (owner rule 13) ---------------------------------------------------
+
+
+def reel_graph(calls, finish_success=True, upload_status=200):
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        if url.startswith("https://rupload.facebook.com/"):
+            return Response({"success": True} if upload_status < 400 else {"error": {"message": "bad"}}, upload_status)
+        phase = kwargs["data"]["upload_phase"]
+        if phase == "start":
+            return Response({"video_id": "reel-1", "upload_url": "https://rupload.facebook.com/video-upload/v27.0/reel-1"})
+        return Response({"success": finish_success})
+
+    return post
+
+
+def test_vertical_video_is_published_as_facebook_reel(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch, aspect="9:16")
+    calls, polls = [], []
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph(calls))
+    states = [{"video_status": "processing", "publishing_phase": {"status": "in_progress"}}, {"video_status": "ready", "publishing_phase": {"status": "complete"}}]
+
+    def get(url, **kwargs):
+        polls.append((url, kwargs))
+        return Response({"status": states.pop(0)})
+
+    monkeypatch.setattr(platforms.httpx, "get", get)
+    publication = FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert publication.status == "PUBLISHED" and publication.remote_id == "reel-1"
+    assert publication.response_json["format"] == "reel"
+    assert calls[0][0] == "https://graph.facebook.com/v27.0/page-1/video_reels" and calls[0][1]["data"] == {"upload_phase": "start"}
+    upload = calls[1]
+    assert upload[0] == "https://rupload.facebook.com/video-upload/v27.0/reel-1"
+    assert upload[1]["headers"]["Authorization"] == "OAuth test-page-token"
+    assert upload[1]["headers"]["offset"] == "0" and upload[1]["headers"]["file_size"] == "10"
+    finish = calls[2][1]["data"]
+    assert finish["upload_phase"] == "finish" and finish["video_id"] == "reel-1" and finish["video_state"] == "PUBLISHED" and finish["description"]
+    assert not any("/videos" in call[0] for call in calls), "a 9:16 video must never be a regular page video"
+    assert polls[0][1]["params"] == {"fields": "status"}
+
+
+def test_reel_upload_failure_before_finish_is_failed(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch, aspect="9:16")
+    calls = []
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph(calls, upload_status=500))
+    with pytest.raises(PublishError, match="reel_upload"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert db.query(Publication).one().status == "FAILED"
+    assert not any(call[1].get("data", {}).get("upload_phase") == "finish" for call in calls if "data" in call[1])
+
+
+def test_reel_not_confirmed_after_finish_requires_reconcile(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch, aspect="9:16")
+    clock = Clock()
+    monkeypatch.setattr(platforms.time, "monotonic", clock.monotonic)
+    monkeypatch.setattr(platforms.time, "sleep", clock.sleep)
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph([]))
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status": {"video_status": "processing", "publishing_phase": {"status": "in_progress"}}}))
+    with pytest.raises(PublishError, match="facebook_reel_not_confirmed_reconcile"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    publication = db.query(Publication).one()
+    assert publication.status == "RECONCILE_REQUIRED" and publication.remote_id == "reel-1"
+    assert clock.now <= platforms.FACEBOOK_REEL_POLL_SECONDS
+
+
+def test_unknown_aspect_falls_back_to_probe_and_never_guesses(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch)
+    awaiting_video.features_json = {"is_demo": True}
+    db.commit()
+    monkeypatch.setattr("app.pipeline.media.probe", lambda _path: {"streams": [{"codec_type": "video", "width": 1080, "height": 1920}]})
+    assert platforms.is_vertical(awaiting_video) is True
+
+    def broken(_path):
+        raise RuntimeError("ffprobe failed")
+
+    monkeypatch.setattr("app.pipeline.media.probe", broken)
+    monkeypatch.setattr(platforms.httpx, "post", lambda *_a, **_k: pytest.fail("must not upload with an unknown format"))
+    with pytest.raises(PublishError, match="facebook_video_aspect_unknown"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert db.query(Publication).count() == 0
