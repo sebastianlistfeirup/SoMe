@@ -72,7 +72,12 @@ Priserne er ikke fakturaer. Længere research, flere revisioner, regenerering af
 
 ## 5. TikTok — automatisk token-fornyelse og Direct Post-review
 
-**Status 2026-11-16:**
+**Status 2026-11-16 kl. 22:10 (dansk tid):**
+- ✅ Ejeren har logget ind igen (5A er gennemført).
+  - Forbindelsestjekket viser TikTok `ok`, også efter en tvungen fornyelse af adgangen.
+  - Login-nøglen (refresh-tokenet) udløber 2027-11-16.
+  - `creator_info` virker, med kontoen "Pixel and Parameters" og synlighed Everyone/Friends/Only me.
+- Næste skridt er 5B (production-appen) og 5C (demo og review).
 - Koden fornyer nu selv TikTok-adgangen. Adgangstokenet (ca. 24 timer) fornyes automatisk med refresh-tokenet (ca. 365 dage), før det udløber, og overlever genstarter.
 - Tokens ligger i `/opt/some/data/secrets/tiktok_oauth.json` (kun læsbar for app-brugeren) og vises eller logges aldrig. `app.env` har kun `TIKTOK_OPEN_ID`.
 - Godkendelsessiden har et TikTok-panel med kontonavn fra TikTok, valg af synlighed uden standardvalg, Comment/Duet/Stitch, kommerciel mærkning og samtykketeksten "By posting, you agree to TikTok's Music Usage Confirmation". Valgene er låst i godkendelsens SHA-digest ligesom YouTube-synlighed.
@@ -150,6 +155,15 @@ TikTok vil se hele flowet i én skærmoptagelse, mp4/mov. Optag med **Win+Alt+R*
 2. Claude sætter `TIKTOK_DIRECT_POST_ENABLED`, `TIKTOK_DIRECT_POST_REVIEWED` og `TIKTOK_DIRECT_POST_CONSENT_CONFIRMED` til `true` og genstarter, når ingen jobs kører.
 3. Derefter kan TikTok vælges på godkendelsessiden. Synlighed skal vælges aktivt hver gang.
 4. Ældre godkendelser uden TikTok-valg publiceres aldrig til TikTok (`tiktok_post_settings_not_approved_reapprove`).
+
+### 5E. Facebook og Instagram — rettet 2026-11-16 (version `92c59873d958`)
+
+- **Facebook 16:9:** Videoen uploades i bidder (resumable upload). Store lange videoer fejlede før med `unreadable_graph_error`.
+- **Facebook 9:16:** Videoen publiceres som **Reel**, efter ejerregel 13. Kan formatet ikke afgøres, stopper publiceringen i stedet for at gætte.
+- **Instagram:** Systemet venter op til 10 minutter på Reels-behandlingen (før 60 sekunder). Et nyt forsøg publicerer en allerede færdig container én gang uden ny upload.
+- **Venter på ejeren:**
+  - Facebook-job `2715e3cf` (video 10) er ikke sendt igen. Det er et offentligt opslag og kræver ejerens ja.
+  - YouTube-jobbene for video 10, 12, 14, 15 og 16 står som `publishing_disabled` og venter på ejerens beslutning om synlighed.
 
 ## 6. Godkendt intro/outro — obligatorisk for nye videoer
 
