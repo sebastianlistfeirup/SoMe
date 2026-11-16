@@ -75,6 +75,10 @@ def execute(db, job) -> Path:
         video = create_post_revision(db, job.payload["video_id"], job.payload["review_id"], job.id)
         result = {"status": "AWAITING_OWNER", "video_id": video.id, "source_video_id": job.payload["video_id"], "scope": "title_caption_hashtags"}
     elif job.kind == "publish":
+        from app.pipeline.jobs import renew_lease
+
+        # Chunked Facebook uploads and the 10-minute Instagram container poll outlast the default lease.
+        renew_lease(db, job, "publish", lease_seconds=1800)
         result = publish_destination(db, job.payload)
     elif job.kind == "produce":
         result = run_produce_job(db, job)

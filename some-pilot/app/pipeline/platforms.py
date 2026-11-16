@@ -8,7 +8,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.models import Publication, Setting, VideoVersion, utcnow
+from app.db.models import AuditEvent, Publication, Setting, VideoVersion, utcnow
 from app.pipeline.approvals import approved_content, transition, verify_approval
 from app.pipeline.signed_media import create_link
 
@@ -206,6 +206,11 @@ class YouTubePublisher:
         return publication
 
 
+# Reels containers often need several minutes; poll with backoff instead of giving up after 60 s.
+INSTAGRAM_POLL_SECONDS = 600
+INSTAGRAM_POLL_MAX_DELAY = 20
+
+
 class InstagramPublisher:
     def capabilities(self, db: Session | None = None) -> dict:
         settings = get_settings()
@@ -213,6 +218,61 @@ class InstagramPublisher:
         connection = db.get(Setting, "meta_connection") if db is not None else None
         state = connection.value_json if connection else {}
         return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "profile_verified": bool(state.get("instagram_profile_verified")), "test_publication_verified": bool(state.get("instagram_test_publication_verified")), "private_upload_verified": False, "private_upload_supported": False, "manual_export": True, "public_media_url_required": True}
+
+    def _container_status(self, base: str, headers: dict, container_id: str, seconds: float = INSTAGRAM_POLL_SECONDS) -> str:
+        """Poll until the container leaves IN_PROGRESS or the window closes; returns the last status_code."""
+        deadline = time.monotonic() + seconds
+        delay = 2.0
+        while True:
+            polled = httpx.get(f"{base}/{container_id}", headers=headers, params={"fields": "status_code"}, timeout=20)
+            polled.raise_for_status()
+            status = polled.json().get("status_code", "")
+            if status in {"FINISHED", "PUBLISHED", "ERROR", "EXPIRED"} or time.monotonic() + delay > deadline:
+                return status
+            time.sleep(delay)
+            delay = min(delay * 1.5, INSTAGRAM_POLL_MAX_DELAY)
+
+    def _publish_container(self, db: Session, publication: Publication, video: VideoVersion, base: str, headers: dict, account: str, container_id: str) -> Publication:
+        published = httpx.post(f"{base}/{account}/media_publish", headers=headers, data={"creation_id": container_id}, timeout=30)
+        published.raise_for_status()
+        remote_id = published.json().get("id")
+        publication.remote_id = remote_id
+        publication.response_json = {"container_id": container_id, "id": remote_id}
+        publication.status = "PUBLISHED"
+        publication.published_at = utcnow()
+        _mark_success(db, publication, video)
+        db.commit()
+        return publication
+
+    def reconcile(self, db: Session, publication: Publication, video: VideoVersion, account: str) -> Publication:
+        """Finish a publication whose container outlived the poll window, without uploading again.
+
+        FINISHED: the container was never published, so media_publish it now. PUBLISHED: it may
+        already be live and the media id is unknown, so a human must confirm. ERROR/EXPIRED: the
+        container is dead, and the next retry creates a new one.
+        """
+        settings = get_settings()
+        base = f"https://graph.facebook.com/{settings.meta_graph_version}"
+        headers = {"Authorization": f"Bearer {settings.meta_access_token}"}
+        container_id = publication.upload_session
+        status = self._container_status(base, headers, container_id)
+        if status == "FINISHED":
+            try:
+                self._publish_container(db, publication, video, base, headers, account, container_id)
+            except Exception as exc:
+                db.rollback()
+                raise PublishError("instagram_reconcile_publish_unconfirmed") from exc
+            db.add(AuditEvent(actor="system", action="PUBLICATION_RECONCILED", entity_type="publication", entity_id=str(publication.id), details_json={"platform": "instagram", "container_status": status, "remote_id": publication.remote_id}))
+            db.commit()
+            return publication
+        if status in {"ERROR", "EXPIRED"}:
+            publication.status = "FAILED"
+            publication.error_code = f"instagram_container_{status.lower()}"
+            db.commit()
+            raise PublishError(f"instagram_container_{status.lower()}_retry_creates_new_container")
+        if status == "PUBLISHED":
+            raise PublishError("instagram_container_already_published_manual_reconcile")
+        raise PublishError(f"instagram_reconcile_required:{status or 'unknown'}")
 
     def publish(self, db: Session, video: VideoVersion, account: str, media_url: str = "") -> Publication:
         settings = get_settings()
@@ -222,6 +282,12 @@ class InstagramPublisher:
             raise PublishError("explicit_valid_meta_graph_version_required")
         if account != settings.meta_instagram_account_id:
             raise PublishError("instagram_account_mismatch")
+        existing = db.query(Publication).filter(Publication.idempotency_key == f"video:{video.id}:platform:instagram:account:{account}").first()
+        if existing and existing.status == "RECONCILE_REQUIRED":
+            verify_approval(db, video, "instagram", account)
+            if existing.upload_session and not existing.remote_id:
+                return self.reconcile(db, existing, video, account)
+            raise PublishError("reconcile_required_before_retry")
         media_url = media_url or create_link(db, video, "instagram", account)
         cover_url = create_link(db, video, "instagram", account, asset="thumbnail")
         if not media_url.startswith("https://") or not cover_url.startswith("https://"):
@@ -233,6 +299,7 @@ class InstagramPublisher:
             raise PublishError("reconcile_required_before_retry")
         content = approved_content(verify_approval(db, video, "instagram", account), video, "instagram", account)
         publication.status = "PUBLISHING"
+        publication.upload_session = None
         _enter_publishing(video)
         db.commit()
         base = f"https://graph.facebook.com/{settings.meta_graph_version}"
@@ -245,31 +312,15 @@ class InstagramPublisher:
             container_id = created.json()["id"]
             publication.upload_session = container_id
             db.commit()
-            status = ""
-            for _ in range(30):
-                polled = httpx.get(f"{base}/{container_id}", headers=headers, params={"fields": "status_code"}, timeout=20)
-                polled.raise_for_status()
-                status = polled.json().get("status_code", "")
-                if status == "FINISHED":
-                    break
-                if status == "ERROR":
-                    raise PublishError("instagram_media_processing_failed")
-                time.sleep(2)
+            status = self._container_status(base, headers, container_id)
+            if status in {"ERROR", "EXPIRED"}:
+                raise PublishError("instagram_media_processing_failed")
             if status != "FINISHED":
                 raise PublishError("instagram_media_processing_not_finished_reconcile")
-            published = httpx.post(f"{base}/{account}/media_publish", headers=headers, data={"creation_id": container_id}, timeout=30)
-            published.raise_for_status()
-            remote_id = published.json().get("id")
-            publication.remote_id = remote_id
-            publication.response_json = {"container_id": container_id, "id": remote_id}
-            publication.status = "PUBLISHED"
-            publication.published_at = utcnow()
-            _mark_success(db, publication, video)
-            db.commit()
-            return publication
+            return self._publish_container(db, publication, video, base, headers, account, container_id)
         except (httpx.TimeoutException, PublishError) as exc:
             if isinstance(exc, httpx.TimeoutException) or "not_finished_reconcile" in str(exc):
-                _mark_timeout(db, publication, video)
+                _mark_timeout(db, publication, video, "instagram_reconcile_required")
                 raise PublishError("instagram_reconcile_required") from exc
             _mark_failure(db, publication, video, exc)
             raise
@@ -281,13 +332,47 @@ class InstagramPublisher:
             raise
 
 
+# Graph resumable video upload: a single multipart POST failed for videos of several hundred MB.
+# Facebook decides the chunk boundaries (start_offset/end_offset) in each response.
+FACEBOOK_CHUNK_TIMEOUT = 300
+FACEBOOK_CHUNK_ATTEMPTS = 3
+
+
+def _graph_error_detail(response: httpx.Response) -> str:
+    try:
+        error = response.json().get("error", {})
+        return f"{error.get('type', '')}:{error.get('code', '')}:{error.get('message', '')}"
+    except (ValueError, AttributeError):
+        return f"unreadable_graph_error:http_{response.status_code}"
+
+
 class FacebookPublisher:
     def capabilities(self, db: Session | None = None) -> dict:
         settings = get_settings()
         configured = bool(settings.meta_page_access_token and settings.meta_page_id and settings.meta_graph_version)
         connection = db.get(Setting, "meta_connection") if db is not None else None
         state = connection.value_json if connection else {}
-        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "page_verified": bool(state.get("facebook_page_verified")), "test_publication_verified": bool(state.get("facebook_test_publication_verified")), "page_id": state.get("facebook_page_id"), "manual_export": True, "public_media_url_required": False}
+        return {"publishing_configured": configured, "oauth_verified": bool(state.get("oauth_verified")), "page_verified": bool(state.get("facebook_page_verified")), "test_publication_verified": bool(state.get("facebook_test_publication_verified")), "page_id": state.get("facebook_page_id"), "manual_export": True, "public_media_url_required": False, "upload": "resumable_chunked"}
+
+    def _graph_post(self, url: str, headers: dict, step: str, timeout: int, **kwargs) -> dict:
+        response = httpx.post(url, headers=headers, timeout=timeout, **kwargs)
+        if response.status_code >= 400:
+            raise PublishError(f"facebook_graph_error:{step}:{_graph_error_detail(response)[:300]}")
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise PublishError(f"facebook_graph_error:{step}:unreadable_response") from exc
+
+    def _transfer(self, url: str, headers: dict, session_id: str, start_offset: int, chunk: bytes, name: str) -> dict:
+        for attempt in range(FACEBOOK_CHUNK_ATTEMPTS):
+            try:
+                return self._graph_post(url, headers, "transfer", FACEBOOK_CHUNK_TIMEOUT, data={"upload_phase": "transfer", "upload_session_id": session_id, "start_offset": str(start_offset)}, files={"video_file_chunk": (name, chunk, "application/octet-stream")})
+            except (httpx.TimeoutException, httpx.TransportError):
+                # A chunk transfer is idempotent for its offset, so it is safe to send again.
+                if attempt == FACEBOOK_CHUNK_ATTEMPTS - 1:
+                    raise PublishError("facebook_chunk_transfer_failed")
+                time.sleep(2 * (attempt + 1))
+        raise PublishError("facebook_chunk_transfer_failed")
 
     def publish(self, db: Session, video: VideoVersion, account: str) -> Publication:
         settings = get_settings()
@@ -306,38 +391,61 @@ class FacebookPublisher:
         publication.status = "PUBLISHING"
         _enter_publishing(video)
         db.commit()
+        url = f"https://graph-video.facebook.com/{settings.meta_graph_version}/{account}/videos"
+        headers = {"Authorization": f"Bearer {settings.meta_page_access_token}"}
+        video_path = Path(video.video_path)
+        size = video_path.stat().st_size
+        finishing = False
         try:
-            with Path(video.video_path).open("rb") as handle:
-                response = httpx.post(
-                    f"https://graph.facebook.com/{settings.meta_graph_version}/{account}/videos",
-                    headers={"Authorization": f"Bearer {settings.meta_page_access_token}"},
-                    data={"description": content["text"]},
-                    files={"file": (Path(video.video_path).name, handle, "video/mp4")},
-                    timeout=120,
-                )
-            if response.status_code >= 400:
-                try:
-                    error = response.json().get("error", {})
-                    detail = f"{error.get('type', '')}:{error.get('code', '')}:{error.get('message', '')}"
-                except (ValueError, AttributeError):
-                    detail = "unreadable_graph_error"
-                raise PublishError(f"facebook_graph_error:{detail[:300]}")
-            response.raise_for_status()
-            remote_id = response.json().get("id")
-            if not remote_id:
-                raise PublishError("facebook_remote_video_id_missing")
-            publication.remote_id = remote_id
-            publication.response_json = {"id": remote_id, "cover": "source_frame", "custom_cover_supported": False}
+            started = self._graph_post(url, headers, "start", 60, data={"upload_phase": "start", "file_size": str(size)})
+            session_id = started.get("upload_session_id")
+            video_id = started.get("video_id")
+            if not session_id or not video_id:
+                raise PublishError("facebook_upload_session_missing")
+            # An unfinished session publishes nothing, so failures before "finish" are plain
+            # FAILED and a retry starts a new session; only an unconfirmed finish needs reconciling.
+            publication.upload_session = session_id
+            publication.response_json = {"video_id": video_id, "upload": "resumable"}
+            db.commit()
+            start_offset, end_offset = int(started["start_offset"]), int(started["end_offset"])
+            chunks = 0
+            with video_path.open("rb") as handle:
+                while start_offset < end_offset:
+                    handle.seek(start_offset)
+                    moved = self._transfer(url, headers, session_id, start_offset, handle.read(end_offset - start_offset), video_path.name)
+                    next_start, next_end = int(moved["start_offset"]), int(moved["end_offset"])
+                    if next_start <= start_offset and next_start != next_end:
+                        raise PublishError("facebook_upload_not_advancing")
+                    start_offset, end_offset = next_start, next_end
+                    chunks += 1
+            finishing = True
+            finished = self._graph_post(url, headers, "finish", 120, data={"upload_phase": "finish", "upload_session_id": session_id, "description": content["text"]})
+            if not finished.get("success"):
+                raise PublishError("facebook_finish_not_confirmed_reconcile")
+            publication.remote_id = video_id
+            publication.response_json = {"id": video_id, "cover": "source_frame", "custom_cover_supported": False, "upload": "resumable", "chunks": chunks, "bytes": size}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
             _mark_success(db, publication, video)
             db.commit()
             return publication
-        except httpx.TimeoutException:
-            _mark_timeout(db, publication, video)
-            raise PublishError("facebook_reconcile_required")
-        except Exception as exc:
+        except httpx.TimeoutException as exc:
+            if finishing:
+                _mark_timeout(db, publication, video, "facebook_reconcile_required")
+                raise PublishError("facebook_reconcile_required") from exc
             _mark_failure(db, publication, video, exc)
+            raise PublishError("facebook_upload_timeout") from exc
+        except PublishError as exc:
+            if "reconcile" in str(exc):
+                _mark_timeout(db, publication, video, "facebook_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
+            raise
+        except Exception as exc:
+            if finishing:
+                _mark_timeout(db, publication, video, "facebook_reconcile_required")
+            else:
+                _mark_failure(db, publication, video, exc)
             raise
 
 

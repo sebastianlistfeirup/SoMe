@@ -1,0 +1,196 @@
+"""Facebook resumable chunked upload and Instagram's long container poll + container reconcile."""
+
+import httpx
+import pytest
+
+from app.config import get_settings
+from app.db.models import AuditEvent, Publication
+from app.pipeline import platforms
+from app.pipeline.approvals import approve
+from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, PublishError
+
+
+class Response:
+    def __init__(self, body, status_code=200):
+        self.body = body
+        self.status_code = status_code
+        self.headers = {}
+
+    def json(self):
+        if isinstance(self.body, Exception):
+            raise self.body
+        return self.body
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise httpx.HTTPStatusError("error", request=None, response=None)
+
+
+def facebook_ready(db, video, monkeypatch, payload=b"0123456789"):
+    settings = get_settings()
+    for name, value in {"dry_run": False, "publish_enabled": True, "meta_page_access_token": "test-page-token", "meta_page_id": "page-1", "meta_graph_version": "v27.0"}.items():
+        monkeypatch.setattr(settings, name, value)
+    with open(video.video_path, "wb") as handle:
+        handle.write(payload)
+    approve(db, video, "owner", "facebook", "page-1", True)
+    monkeypatch.setattr(platforms.time, "sleep", lambda *_a: None)
+
+
+def chunked_graph(calls, size, chunk=4, finish=None, transfer_errors=()):
+    errors = list(transfer_errors)
+
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        phase = kwargs["data"]["upload_phase"]
+        if phase == "start":
+            return Response({"upload_session_id": "session-1", "video_id": "fb-video-1", "start_offset": "0", "end_offset": str(min(chunk, size))})
+        if phase == "transfer":
+            if errors:
+                raise errors.pop(0)
+            start = int(kwargs["data"]["start_offset"]) + len(kwargs["files"]["video_file_chunk"][1])
+            return Response({"start_offset": str(start), "end_offset": str(min(start + chunk, size))})
+        return finish(kwargs) if finish else Response({"success": True})
+
+    return post
+
+
+def test_facebook_uploads_large_video_in_resumable_chunks(db, awaiting_video, monkeypatch):
+    payload = b"0123456789"
+    facebook_ready(db, awaiting_video, monkeypatch, payload)
+    calls = []
+    monkeypatch.setattr(platforms.httpx, "post", chunked_graph(calls, len(payload)))
+    publication = FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert publication.status == "PUBLISHED" and publication.remote_id == "fb-video-1"
+    phases = [call[1]["data"]["upload_phase"] for call in calls]
+    assert phases == ["start", "transfer", "transfer", "transfer", "finish"]
+    assert all(call[0] == "https://graph-video.facebook.com/v27.0/page-1/videos" for call in calls)
+    assert calls[0][1]["data"]["file_size"] == "10"
+    assert b"".join(call[1]["files"]["video_file_chunk"][1] for call in calls[1:4]) == payload
+    assert calls[-1][1]["data"]["description"] and calls[-1][1]["data"]["upload_session_id"] == "session-1"
+    assert publication.response_json["chunks"] == 3 and awaiting_video.status == "PUBLISHED"
+
+
+def test_facebook_retries_a_timed_out_chunk(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch)
+    calls = []
+    monkeypatch.setattr(platforms.httpx, "post", chunked_graph(calls, 10, transfer_errors=[httpx.ReadTimeout("slow")]))
+    assert FacebookPublisher().publish(db, awaiting_video, "page-1").status == "PUBLISHED"
+
+
+def test_facebook_failure_before_finish_is_failed_and_retryable(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch)
+    calls = []
+    errors = [httpx.ReadTimeout("slow")] * 3
+    monkeypatch.setattr(platforms.httpx, "post", chunked_graph(calls, 10, transfer_errors=errors))
+    with pytest.raises(PublishError, match="facebook_chunk_transfer_failed"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    publication = db.query(Publication).one()
+    assert publication.status == "FAILED" and publication.remote_id is None
+
+
+def test_facebook_unreadable_error_is_reported_with_status(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch)
+    monkeypatch.setattr(platforms.httpx, "post", lambda *_a, **_k: Response(ValueError("html"), 413))
+    with pytest.raises(PublishError, match="facebook_graph_error:start:unreadable_graph_error:http_413"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert db.query(Publication).one().status == "FAILED"
+
+
+def test_facebook_timeout_at_finish_requires_reconcile(db, awaiting_video, monkeypatch):
+    facebook_ready(db, awaiting_video, monkeypatch)
+
+    def finish(_kwargs):
+        raise httpx.ReadTimeout("maybe published")
+
+    monkeypatch.setattr(platforms.httpx, "post", chunked_graph([], 10, finish=finish))
+    with pytest.raises(PublishError, match="facebook_reconcile_required"):
+        FacebookPublisher().publish(db, awaiting_video, "page-1")
+    assert db.query(Publication).one().status == "RECONCILE_REQUIRED"
+    assert awaiting_video.status == "RECONCILE_REQUIRED"
+
+
+def instagram_ready(db, video, monkeypatch):
+    settings = get_settings()
+    for name, value in {"dry_run": False, "publish_enabled": True, "meta_access_token": "token", "meta_instagram_account_id": "instagram-1", "meta_graph_version": "v27.0", "public_base_url": "https://example.com"}.items():
+        monkeypatch.setattr(settings, name, value)
+    approve(db, video, "owner", "instagram", "instagram-1", True)
+    monkeypatch.setattr("app.pipeline.platforms.create_link", lambda *_a, asset="video": f"https://example.com/{asset}")
+
+
+class Clock:
+    def __init__(self):
+        self.now = 0.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+def test_instagram_waits_minutes_with_backoff_for_container(db, awaiting_video, monkeypatch):
+    instagram_ready(db, awaiting_video, monkeypatch)
+    clock = Clock()
+    monkeypatch.setattr(platforms.time, "monotonic", clock.monotonic)
+    monkeypatch.setattr(platforms.time, "sleep", clock.sleep)
+    monkeypatch.setattr(platforms.httpx, "post", lambda url, **_k: Response({"id": "media-1" if "media_publish" in url else "container-1"}))
+    # FINISHED only after ~4 minutes; the old 60 s window gave up here.
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status_code": "FINISHED" if clock.now >= 240 else "IN_PROGRESS"}))
+    publication = InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    assert publication.status == "PUBLISHED" and publication.remote_id == "media-1"
+    assert clock.sleeps[0] == 2.0 and max(clock.sleeps) == platforms.INSTAGRAM_POLL_MAX_DELAY
+    assert 240 <= clock.now <= platforms.INSTAGRAM_POLL_SECONDS
+
+
+def test_instagram_poll_window_ends_in_reconcile_then_retry_publishes_existing_container(db, awaiting_video, monkeypatch):
+    instagram_ready(db, awaiting_video, monkeypatch)
+    clock = Clock()
+    monkeypatch.setattr(platforms.time, "monotonic", clock.monotonic)
+    monkeypatch.setattr(platforms.time, "sleep", clock.sleep)
+    posts = []
+
+    def post(url, **kwargs):
+        posts.append(url)
+        return Response({"id": "media-1" if "media_publish" in url else "container-1"})
+
+    monkeypatch.setattr(platforms.httpx, "post", post)
+    status = {"value": "IN_PROGRESS"}
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status_code": status["value"]}))
+    with pytest.raises(PublishError, match="instagram_reconcile_required"):
+        InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    publication = db.query(Publication).one()
+    assert publication.status == "RECONCILE_REQUIRED" and publication.upload_session == "container-1"
+    assert clock.now <= platforms.INSTAGRAM_POLL_SECONDS
+    status["value"] = "FINISHED"
+    result = InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    assert result.status == "PUBLISHED" and result.remote_id == "media-1" and awaiting_video.status == "PUBLISHED"
+    assert sum("/media_publish" in url for url in posts) == 1 and sum(url.endswith("/media") for url in posts) == 1
+    assert db.query(AuditEvent).filter_by(action="PUBLICATION_RECONCILED").count() == 1
+
+
+def test_instagram_reconcile_never_republishes_a_published_container(db, awaiting_video, monkeypatch):
+    instagram_ready(db, awaiting_video, monkeypatch)
+    monkeypatch.setattr(platforms.time, "sleep", lambda *_a: None)
+    publication = Publication(video_version_id=awaiting_video.id, platform="instagram", account="instagram-1", idempotency_key=f"video:{awaiting_video.id}:platform:instagram:account:instagram-1", status="RECONCILE_REQUIRED", upload_session="container-9")
+    awaiting_video.status = "RECONCILE_REQUIRED"
+    db.add(publication)
+    db.commit()
+    monkeypatch.setattr(platforms.httpx, "post", lambda *_a, **_k: pytest.fail("must not publish again"))
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status_code": "PUBLISHED"}))
+    with pytest.raises(PublishError, match="already_published_manual_reconcile"):
+        InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    assert db.get(Publication, publication.id).status == "RECONCILE_REQUIRED"
+
+
+def test_instagram_expired_container_is_failed_so_a_retry_starts_fresh(db, awaiting_video, monkeypatch):
+    instagram_ready(db, awaiting_video, monkeypatch)
+    publication = Publication(video_version_id=awaiting_video.id, platform="instagram", account="instagram-1", idempotency_key=f"video:{awaiting_video.id}:platform:instagram:account:instagram-1", status="RECONCILE_REQUIRED", upload_session="container-9")
+    awaiting_video.status = "RECONCILE_REQUIRED"
+    db.add(publication)
+    db.commit()
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status_code": "EXPIRED"}))
+    with pytest.raises(PublishError, match="instagram_container_expired"):
+        InstagramPublisher().publish(db, awaiting_video, "instagram-1")
+    assert db.get(Publication, publication.id).status == "FAILED"

@@ -51,46 +51,6 @@ def test_youtube_capabilities_use_verified_connection_state(db):
     assert result["manual_export"] is True
 
 
-def test_facebook_publish_uses_approved_page_and_direct_video_upload(db, awaiting_video, monkeypatch):
-    from app.pipeline.platforms import FacebookPublisher
-
-    settings = get_settings()
-    for name, value in {
-        "dry_run": False,
-        "publish_enabled": True,
-        "meta_page_access_token": "test-page-token",
-        "meta_page_id": "page-1",
-        "meta_graph_version": "v27.0",
-        "public_base_url": "https://example.com",
-    }.items():
-        monkeypatch.setattr(settings, name, value)
-    approve(db, awaiting_video, "owner", "facebook", "page-1", True)
-
-    calls = []
-
-    class Response:
-        status_code = 200
-
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {"id": "remote-video-1"}
-
-    def post(*args, **kwargs):
-        calls.append((args, kwargs))
-        return Response()
-
-    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
-    publication = FacebookPublisher().publish(db, awaiting_video, "page-1")
-
-    assert publication.status == "PUBLISHED"
-    assert publication.remote_id == "remote-video-1"
-    assert calls[0][1]["files"]["file"][0] == "video.mp4"
-    assert calls[0][1]["data"]["description"]
-    assert calls[0][0][0].endswith("/v27.0/page-1/videos")
-
-
 def test_facebook_graph_error_reports_safe_detail(db, awaiting_video, monkeypatch):
     from app.pipeline.platforms import FacebookPublisher
 
