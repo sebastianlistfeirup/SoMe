@@ -180,6 +180,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("ypp", help="Progress toward the YouTube Partner Program")
     pronunciation = sub.add_parser("pronunciation", help="Sync the ElevenLabs pronunciation dictionary")
     pronunciation.add_argument("--force", action="store_true")
+    thumbnail = sub.add_parser("youtube-thumbnail", help="Set the approved custom thumbnail on an already published YouTube video")
+    thumbnail.add_argument("--publication", type=int, required=True)
     probe = sub.add_parser("account-probe", help="Check the YouTube, Meta and TikTok connections (no secrets shown)")
     probe.add_argument("--force-tiktok-refresh", action="store_true", help="Refresh the TikTok access token even if it is still valid")
     status = sub.add_parser("status-report", help="Generate STATUS facts from doctor and a test result")
@@ -256,6 +258,17 @@ def run_extended(db, args) -> dict | None:
         from app.pipeline.pronunciation import sync
 
         return sync(force=args.force)
+    if args.command == "youtube-thumbnail":
+        from app.db.models import Publication, VideoVersion
+        from app.pipeline.approvals import verify_approval
+        from app.pipeline.platforms import YouTubePublisher
+
+        publication = db.get(Publication, args.publication)
+        if publication is None or publication.platform != "youtube" or publication.status != "PUBLISHED" or not publication.remote_id:
+            raise ValueError("published_youtube_publication_required")
+        video = db.get(VideoVersion, publication.video_version_id)
+        verify_approval(db, video, "youtube", publication.account)  # the thumbnail file must still be the approved one
+        return {"publication_id": publication.id, "remote_id": publication.remote_id, **YouTubePublisher().set_thumbnail(db, publication, video)}
     if args.command == "account-probe":
         from app.pipeline.accounts import probe_accounts
 

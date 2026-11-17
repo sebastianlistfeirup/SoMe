@@ -158,28 +158,6 @@ def test_youtube_waits_for_processing_and_sets_approved_thumbnail(db, awaiting_v
     assert cover_call[1]["files"]["media"][2] == "image/jpeg"
 
 
-def test_youtube_cover_failure_requires_reconciliation_not_reupload(db, awaiting_video, monkeypatch):
-    settings = get_settings()
-    monkeypatch.setattr(settings, "dry_run", False)
-    monkeypatch.setattr(settings, "publish_enabled", True)
-    approve(db, awaiting_video, "owner", "youtube", "channel", True)
-    publisher = YouTubePublisher()
-    monkeypatch.setattr(publisher, "_access_token", lambda: "test-token")
-
-    def post(url, **kwargs):
-        if "thumbnails/set" in url:
-            raise httpx.HTTPError("cover rejected")
-        return StartResponse()
-
-    monkeypatch.setattr("app.pipeline.platforms.httpx.post", post)
-    monkeypatch.setattr("app.pipeline.platforms.httpx.put", lambda *_args, **_kwargs: JsonResponse({"id": "youtube-1"}))
-    monkeypatch.setattr("app.pipeline.platforms.httpx.get", lambda *_args, **_kwargs: JsonResponse({"items": [{"processingDetails": {"processingStatus": "succeeded"}}]}))
-    with pytest.raises(httpx.HTTPError):
-        publisher.publish(db, awaiting_video, "channel", "private")
-    assert db.query(Publication).one().status == "RECONCILE_REQUIRED"
-    assert awaiting_video.status == "RECONCILE_REQUIRED"
-
-
 def test_instagram_reel_uses_signed_video_and_thumbnail(db, awaiting_video, monkeypatch):
     from app.pipeline.platforms import InstagramPublisher
 

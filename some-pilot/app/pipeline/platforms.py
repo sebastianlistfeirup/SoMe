@@ -104,6 +104,10 @@ def _mark_failure(db: Session, publication: Publication, video: VideoVersion, ex
     db.commit()
 
 
+# Long videos can need several minutes of processing before YouTube reports "succeeded".
+YOUTUBE_PROCESSING_SECONDS = 600
+
+
 class YouTubePublisher:
     def __init__(self):
         self.settings = get_settings()
@@ -120,6 +124,52 @@ class YouTubePublisher:
             raise PublishError("youtube_authorization_required")
         response.raise_for_status()
         return response.json()["access_token"]
+
+    def _wait_for_processing(self, token: str, remote_id: str) -> str:
+        """Poll processingDetails for up to YOUTUBE_PROCESSING_SECONDS with backoff (long videos need minutes)."""
+        deadline = time.monotonic() + YOUTUBE_PROCESSING_SECONDS
+        delay = 2.0
+        while True:
+            status_response = httpx.get(
+                "https://www.googleapis.com/youtube/v3/videos",
+                headers={"Authorization": f"Bearer {token}"},
+                params={"part": "status,processingDetails", "id": remote_id},
+                timeout=20,
+            )
+            status_response.raise_for_status()
+            items = status_response.json().get("items", [])
+            processing = items[0].get("processingDetails", {}).get("processingStatus", "") if items else ""
+            if processing in {"succeeded", "failed", "terminated"} or time.monotonic() + delay > deadline:
+                return processing
+            time.sleep(delay)
+            delay = min(delay * 1.5, 20)
+
+    def set_thumbnail(self, db: Session, publication: Publication, video: VideoVersion, token: str | None = None) -> dict:
+        """Upload the approved thumbnail to a published video; records the outcome, never raises for a rejection."""
+        token = token or self._access_token()
+        outcome = {"cover": "custom_thumbnail_set"}
+        try:
+            with Path(video.thumbnail_path).open("rb") as handle:
+                cover = httpx.post(
+                    "https://www.googleapis.com/upload/youtube/v3/thumbnails/set",
+                    headers={"Authorization": f"Bearer {token}"},
+                    params={"videoId": publication.remote_id},
+                    files={"media": (Path(video.thumbnail_path).name, handle, "image/jpeg")},
+                    timeout=60,
+                )
+            if cover.status_code >= 400:
+                try:
+                    error = cover.json().get("error", {})
+                    reasons = ",".join(item.get("reason", "") for item in error.get("errors", [])) or str(error.get("code", ""))
+                except (ValueError, AttributeError):
+                    reasons = "unreadable"
+                outcome = {"cover": "custom_thumbnail_failed", "cover_error": f"http_{cover.status_code}:{reasons}"[:160], "cover_retry": "python -m app.cli youtube-thumbnail --publication " + str(publication.id)}
+        except httpx.HTTPError as exc:
+            outcome = {"cover": "custom_thumbnail_failed", "cover_error": type(exc).__name__, "cover_retry": "python -m app.cli youtube-thumbnail --publication " + str(publication.id)}
+        publication.response_json = {**{key: value for key, value in (publication.response_json or {}).items() if key not in {"cover_error", "cover_retry"}}, **outcome}
+        db.add(AuditEvent(actor="system", action="YOUTUBE_THUMBNAIL_SET" if outcome["cover"] == "custom_thumbnail_set" else "YOUTUBE_THUMBNAIL_FAILED", entity_type="publication", entity_id=str(publication.id), details_json={"remote_id": publication.remote_id, **{key: value for key, value in outcome.items() if key != "cover_retry"}}))
+        db.commit()
+        return outcome
 
     def publish(self, db: Session, video: VideoVersion, account: str, privacy: str = "private") -> Publication:
         if privacy not in {"private", "public", "unlisted"}:
@@ -158,38 +208,19 @@ class YouTubePublisher:
                 raise PublishError("youtube_remote_video_id_missing")
             publication.remote_id = remote_id
             db.commit()
-            processing = ""
-            for _ in range(30):
-                status_response = httpx.get(
-                    "https://www.googleapis.com/youtube/v3/videos",
-                    headers={"Authorization": f"Bearer {token}"},
-                    params={"part": "status,processingDetails", "id": remote_id},
-                    timeout=20,
-                )
-                status_response.raise_for_status()
-                items = status_response.json().get("items", [])
-                processing = items[0].get("processingDetails", {}).get("processingStatus", "") if items else ""
-                if processing == "succeeded":
-                    break
-                if processing in {"failed", "terminated"}:
-                    raise PublishError("youtube_processing_failed_reconcile_required")
-                time.sleep(2)
+            processing = self._wait_for_processing(token, remote_id)
+            if processing in {"failed", "terminated"}:
+                raise PublishError("youtube_processing_failed_reconcile_required")
             if processing != "succeeded":
                 raise PublishError("youtube_processing_not_finished_reconcile_required")
-            with Path(video.thumbnail_path).open("rb") as handle:
-                cover = httpx.post(
-                    "https://www.googleapis.com/upload/youtube/v3/thumbnails/set",
-                    headers={"Authorization": f"Bearer {token}"},
-                    params={"videoId": remote_id},
-                    files={"media": (Path(video.thumbnail_path).name, handle, "image/jpeg")},
-                    timeout=60,
-                )
-            cover.raise_for_status()
-            publication.response_json = {"id": remote_id, "status": body.get("status", {}), "processing_status": processing, "cover": "custom_thumbnail_set"}
+            # The video is live from here on. A rejected custom thumbnail (e.g. a channel without phone
+            # verification) is a warning with a retry command, never a reason to treat the upload as uncertain.
+            publication.response_json = {"id": remote_id, "status": body.get("status", {}), "processing_status": processing, "cover": "pending"}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
             _mark_success(db, publication, video)
             db.commit()
+            self.set_thumbnail(db, publication, video, token)
         except httpx.TimeoutException:
             _mark_timeout(db, publication, video)
             raise PublishError("upload_timeout_reconcile_required")

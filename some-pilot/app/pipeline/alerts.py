@@ -53,6 +53,10 @@ def collect_alerts(db: Session, now: datetime | None = None) -> list[dict]:
             alerts.append({"severity": "error", "code": f"account:{platform}", "message": f"{platform} connection check failed: {status.get('error_code')}"})
         elif status.get("expires_in_days") is not None and status["expires_in_days"] <= 2:
             alerts.append({"severity": "warning", "code": f"token_expiry:{platform}", "message": f"{platform} token expires in {status['expires_in_days']} day(s)."})
+    for publication in db.query(Publication).filter(Publication.platform == "youtube", Publication.status == "PUBLISHED").all():
+        response = publication.response_json or {}
+        if response.get("cover") == "custom_thumbnail_failed":
+            alerts.append({"severity": "warning", "code": f"youtube_thumbnail:{publication.id}", "message": f"YouTube video {publication.remote_id} is live without its custom thumbnail ({response.get('cover_error')}). Retry: {response.get('cover_retry')}"})
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     spent = sum(row.actual_amount if row.actual_amount is not None else row.estimated_amount for row in db.query(Cost).all() if _utc(row.created_at) >= month_start)
     if spent >= 0.8 * settings.monthly_ai_budget_dkk:
