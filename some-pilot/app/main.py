@@ -18,7 +18,7 @@ from app.adapters.youtube import YouTubeAdapter
 from app.config import get_settings
 from app.db.models import AuditEvent, AuthSession, AuthUser, Cost, Job, MetricSnapshot, Publication, Review, Script, Setting, Topic, VideoVersion
 from app.db.session import get_db, init_database
-from app.pipeline.approvals import ApprovalError, approve, approve_destinations, paused, set_pause, transition
+from app.pipeline.approvals import ApprovalError, approve, approve_additional_destinations, approve_destinations, feed_variant, paused, set_pause, transition
 from app.pipeline.dispatch import enqueue_publication_jobs, normalize_publish_at
 from app.pipeline.jobs import enqueue
 from app.pipeline.platforms import FacebookPublisher, InstagramPublisher, TikTokPublisher, YouTubePublisher, manual_export
@@ -384,6 +384,7 @@ def destination_options(db: Session) -> list[dict]:
         ("instagram", meta_state.get("instagram_account_id") or settings.meta_instagram_account_id, f"@{meta_state['instagram_username']}" if meta_state.get("instagram_username") else "Instagram-konto ikke forbundet"),
         ("tiktok", tiktok_open_id() or tiktok_state.get("open_id", ""), tiktok_state.get("display_name") or "TikTok-konto ikke forbundet"),
         ("facebook", meta_state.get("facebook_page_id") or settings.meta_page_id, meta_state.get("facebook_page_name") or "Facebook-side ikke forbundet"),
+        ("facebook_feed", meta_state.get("facebook_page_id") or settings.meta_page_id, meta_state.get("facebook_page_name") or "Facebook-side ikke forbundet"),
     ]
     return [
         {
@@ -467,6 +468,10 @@ def review_detail(video_id: int, request: Request, db: Session = Depends(get_db)
         ai_label_defaults=AI_LABEL_DEFAULTS,
         ai_label_api=AI_LABEL_API,
         tiktok_creator=tiktok_creator,
+        feed=feed_variant(video),
+        feed_option=next((item for item in platforms if item["value"] == "facebook_feed" and item["account"]), None),
+        vertical=(video.features_json or {}).get("aspect_ratio") == "9:16",
+        approved_platforms=[item["platform"] for item in ((latest_approval.digest_json or {}).get("destinations") or [])] if latest_approval else [],
         tiktok_direct_post_eligible=all((settings.tiktok_direct_post_enabled, settings.tiktok_direct_post_reviewed, settings.tiktok_direct_post_consent_confirmed)),
         tiktok_consent={"music": MUSIC_CONSENT, "branded": BRANDED_CONSENT, "music_url": MUSIC_USAGE_URL, "branded_url": BRANDED_CONTENT_URL},
         rejection_needs_new_production=requires_new_production(((latest_rejection.digest_json or {}) if latest_rejection else {}).get("rejection_categories", [])),
@@ -535,6 +540,28 @@ def approve_video(
     return RedirectResponse(f"/review/{video_id}?approved=1&queued={len(jobs)}", status_code=303)
 
 
+@app.post("/review/{video_id}/add-destination")
+def add_destination(video_id: int, platforms: list[str] | None = Form(None), watched: bool = Form(False), ai_labels: list[str] | None = Form(None), db: Session = Depends(get_db), auth=Depends(csrf_check)):
+    """Owner adds a destination to an already published video (today: the 4:5 Facebook feed post)."""
+    video = db.get(VideoVersion, video_id)
+    if not video:
+        raise HTTPException(404)
+    try:
+        added = []
+        for platform in platforms or []:
+            if platform != "facebook_feed":
+                raise ApprovalError("only_facebook_feed_can_be_added_after_publication")
+            option = selected_destination(db, platform)
+            if not option["account"]:
+                raise ApprovalError("connected_account_required")
+            added.append({"platform": platform, "account": option["account"], "visibility": "public", "publish_at": None, "digest_version": 2, "ai_label": platform in (ai_labels or [])})
+        review = approve_additional_destinations(db, video, auth[0].username, added, watched)
+        jobs = enqueue_publication_jobs(db, review, only=added)
+    except ApprovalError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return RedirectResponse(f"/review/{video_id}?approved=1&queued={len(jobs)}", status_code=303)
+
+
 @app.post("/review/{video_id}/reject")
 def reject_video(video_id: int, note: str = Form(""), categories: list[str] | None = Form(None), db: Session = Depends(get_db), auth=Depends(csrf_check)):
     video = db.get(VideoVersion, video_id)
@@ -572,7 +599,7 @@ def revise_video(video_id: int, db: Session = Depends(get_db), auth=Depends(csrf
 
 @app.get("/media/{video_id}/{name}")
 def protected_media(video_id: int, name: str, db: Session = Depends(get_db), auth=Depends(require_user)):
-    if name not in {"video.mp4", "narration.wav", "thumbnail.jpg", "storyboard.jpg", "captions.srt"}:
+    if name not in {"video.mp4", "narration.wav", "thumbnail.jpg", "storyboard.jpg", "captions.srt", "feed_4x5.mp4", "feed_thumbnail.jpg"}:
         raise HTTPException(404)
     video = db.get(VideoVersion, video_id)
     if not video:

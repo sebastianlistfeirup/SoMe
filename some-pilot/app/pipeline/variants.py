@@ -15,6 +15,8 @@ PLATFORM_TEXT_RULES = {
     "instagram": {"title_max": 0, "caption_max": 2000, "hashtags": 8, "cta": "Follow for more."},
     "tiktok": {"title_max": 0, "caption_max": 2000, "hashtags": 5, "cta": "Follow for more."},
     "facebook": {"title_max": 0, "caption_max": 2000, "hashtags": 3, "cta": "Follow the page for more."},
+    # Organic Page feed post with the native 4:5 render (owner 2026-11-17); same text rules as the Reel.
+    "facebook_feed": {"title_max": 0, "caption_max": 2000, "hashtags": 3, "cta": "Follow the page for more."},
 }
 
 # Defaults follow each platform's own rule, and the owner can change them per approval.
@@ -22,8 +24,8 @@ PLATFORM_TEXT_RULES = {
 # places or events. A clearly narrated explainer using a library voice is usually outside it, so the
 # default is off. TikTok's is_aigc label is the conservative default for AI-generated narration.
 # Meta has no API flag; its label must be set manually in the app.
-AI_LABEL_DEFAULTS = {"youtube": False, "tiktok": True, "instagram": True, "facebook": True}
-AI_LABEL_API = {"youtube": "status.containsSyntheticMedia", "tiktok": "post_info.is_aigc", "instagram": None, "facebook": None}
+AI_LABEL_DEFAULTS = {"youtube": False, "tiktok": True, "instagram": True, "facebook": True, "facebook_feed": True}
+AI_LABEL_API = {"youtube": "status.containsSyntheticMedia", "tiktok": "post_info.is_aigc", "instagram": None, "facebook": None, "facebook_feed": None}
 
 
 def _trim(text: str, limit: int) -> str:

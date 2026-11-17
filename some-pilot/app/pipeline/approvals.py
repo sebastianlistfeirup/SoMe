@@ -13,6 +13,51 @@ class ApprovalError(ValueError):
     pass
 
 
+SUPPORTED_PLATFORMS = {"youtube", "instagram", "facebook", "tiktok", "facebook_feed"}
+FEED_VIDEO = "feed_4x5.mp4"
+FEED_THUMBNAIL = "feed_thumbnail.jpg"
+
+
+def feed_variant(video: VideoVersion) -> dict | None:
+    """The native 4:5 render attached to this video for an organic Facebook feed post, if any."""
+    info = (video.features_json or {}).get("feed_variant") or {}
+    if not info or not video.output_dir:
+        return None
+    root = Path(video.output_dir)
+    video_file, thumbnail = root / info.get("video", FEED_VIDEO), root / info.get("thumbnail", FEED_THUMBNAIL)
+    if not video_file.is_file() or not thumbnail.is_file():
+        return None
+    return {**info, "video_path": str(video_file), "thumbnail_path": str(thumbnail)}
+
+
+def _platform_allowed(video: VideoVersion, platform: str) -> bool:
+    allowed = set((video.features_json or {}).get("allowed_platforms") or ["youtube", "instagram", "facebook", "tiktok"])
+    # The feed post is a second Facebook format of the same video, allowed wherever Facebook is.
+    return platform in allowed or (platform == "facebook_feed" and "facebook" in allowed)
+
+
+def _validate_destination(video: VideoVersion, destination: dict, seen: set) -> None:
+    if destination["platform"] not in SUPPORTED_PLATFORMS:
+        raise ApprovalError("unsupported_platform")
+    if not _platform_allowed(video, destination["platform"]):
+        raise ApprovalError(f"format_not_for_platform:{destination['platform']}")
+    if not destination["account"].strip():
+        raise ApprovalError("connected_account_required")
+    key = (destination["platform"], destination["account"])
+    if key in seen:
+        raise ApprovalError("duplicate_destination")
+    seen.add(key)
+    if destination.get("visibility", "public") not in {"private", "unlisted", "public"}:
+        raise ApprovalError("invalid_visibility")
+    if destination["platform"] == "tiktok":
+        # TikTok Direct Post has no default privacy level: the owner must have chosen one.
+        from app.pipeline.tiktok_post import normalize_post_settings
+
+        normalize_post_settings(destination.get("tiktok"))
+    if destination["platform"] == "facebook_feed" and feed_variant(video) is None:
+        raise ApprovalError("facebook_feed_variant_missing")
+
+
 def sha256_file(path: str) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:
@@ -222,6 +267,13 @@ def destinations_digest(video: VideoVersion, destinations: list[dict]) -> dict:
             if destination["platform"] == "youtube":
                 # Follow-up actions after upload are part of what the owner approves.
                 item["post_publish"] = {"captions": (Path(video.output_dir) / "captions.srt").is_file(), "series_playlist": (video.features_json or {}).get("series_id")}
+        if destination["platform"] == "facebook_feed":
+            # The 4:5 file and its thumbnail are what the owner approves for the feed post.
+            feed = feed_variant(video)
+            if feed is None:
+                raise ApprovalError("facebook_feed_variant_missing")
+            item["feed_video_sha256"] = sha256_file(feed["video_path"])
+            item["feed_thumbnail_sha256"] = sha256_file(feed["thumbnail_path"])
         if destination["platform"] == "tiktok" and destination.get("tiktok") is not None:
             # Privacy, interaction toggles, commercial disclosure and the consent text the owner saw are approved, like YouTube visibility.
             from app.pipeline.tiktok_post import normalize_post_settings
@@ -265,25 +317,8 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
     if not destinations:
         raise ApprovalError("destination_required")
     seen = set()
-    allowed = set((video.features_json or {}).get("allowed_platforms") or ["youtube", "instagram", "facebook", "tiktok"])
     for destination in destinations:
-        if destination["platform"] not in {"youtube", "instagram", "facebook", "tiktok"}:
-            raise ApprovalError("unsupported_platform")
-        if destination["platform"] not in allowed:
-            raise ApprovalError(f"format_not_for_platform:{destination['platform']}")
-        if not destination["account"].strip():
-            raise ApprovalError("connected_account_required")
-        key = (destination["platform"], destination["account"])
-        if key in seen:
-            raise ApprovalError("duplicate_destination")
-        seen.add(key)
-        if destination.get("visibility", "public") not in {"private", "unlisted", "public"}:
-            raise ApprovalError("invalid_visibility")
-        if destination["platform"] == "tiktok":
-            # TikTok Direct Post has no default privacy level: the owner must have chosen one.
-            from app.pipeline.tiktok_post import normalize_post_settings
-
-            normalize_post_settings(destination.get("tiktok"))
+        _validate_destination(video, destination, seen)
     checks_path = Path(video.output_dir) / "checks.json"
     if not checks_path.exists():
         raise ApprovalError("missing_checks")
@@ -299,6 +334,51 @@ def approve_destinations(db: Session, video: VideoVersion, reviewer: str, destin
     transition(video, "APPROVED", reviewer)
     db.add(review)
     db.add(AuditEvent(actor=reviewer, action="APPROVED_MULTI_DESTINATION", entity_type="video_version", entity_id=str(video.id), details_json={"approval_sha256": digest["approval_sha256"], "destination_count": len(destinations)}))
+    db.commit()
+    db.refresh(review)
+    return review
+
+
+def approve_additional_destinations(db: Session, video: VideoVersion, reviewer: str, destinations: list[dict], owner_watched_full_video: bool) -> Review:
+    """Add destinations to a video that is already approved and (partly) published, e.g. the 4:5 feed post.
+
+    The new review keeps every earlier destination unchanged and binds the new ones, so the
+    published posts stay covered by an approval of the same files and text. Only the new
+    destinations get publish jobs (see dispatch.enqueue_publication_jobs ``only``).
+    """
+    if not reviewer.strip():
+        raise ApprovalError("owner_reviewer_required")
+    if not owner_watched_full_video:
+        raise ApprovalError("owner_must_watch_full_video")
+    if paused(db):
+        raise ApprovalError("emergency_stop_active")
+    if video.status not in {"PUBLISHING", "PUBLISHED"}:
+        raise ApprovalError("video_not_published")
+    if uses_rejected_voice(video):
+        raise ApprovalError("rejected_voice_not_publishable:kokoro_or_espeak")
+    current = latest_approval(db, video.id)
+    existing = list((current.digest_json or {}).get("destinations") or []) if current else []
+    if not existing:
+        raise ApprovalError("multi_destination_approval_required")
+    if not destinations:
+        raise ApprovalError("destination_required")
+    if destinations_digest(video, existing)["approval_sha256"] != current.digest_json.get("approval_sha256"):
+        raise ApprovalError("approval_invalidated_by_change")
+    seen = {(item["platform"], item["account"]) for item in existing}
+    for destination in destinations:
+        _validate_destination(video, destination, seen)
+    blockers = editorial_blockers(current.checks_json or {})
+    if blockers:
+        raise ApprovalError(blockers[0])
+    digest = destinations_digest(video, existing + destinations)
+    added = [{"platform": item["platform"], "account": item["account"]} for item in destinations]
+    review = Review(video_version_id=video.id, decision="APPROVED", reviewer=reviewer, digest_json={**digest, "supplements_review": current.id, "added_destinations": added}, checks_json=current.checks_json)
+    if video.status == "PUBLISHED":
+        # The state machine never reopens a published video on its own; an owner-approved extra destination does.
+        video.status = "PUBLISHING"
+        video.updated_at = utcnow()
+    db.add(review)
+    db.add(AuditEvent(actor=reviewer, action="APPROVED_ADDITIONAL_DESTINATION", entity_type="video_version", entity_id=str(video.id), details_json={"approval_sha256": digest["approval_sha256"], "added": added, "supplements_review": current.id}))
     db.commit()
     db.refresh(review)
     return review

@@ -25,14 +25,18 @@ def normalize_publish_at(value: str | None) -> str | None:
     return parsed.isoformat()
 
 
-def enqueue_publication_jobs(db: Session, review: Review) -> list[Job]:
+def enqueue_publication_jobs(db: Session, review: Review, only: list[dict] | None = None) -> list[Job]:
+    """Jobs for the review's destinations; ``only`` limits them to newly added ones (already published stay untouched)."""
     if review.decision != "APPROVED":
         return []
     current = latest_approval(db, review.video_version_id)
     if not current or current.id != review.id:
         raise ApprovalError("approval_superseded")
     jobs = []
+    wanted = {(item["platform"], item["account"]) for item in only} if only is not None else None
     for destination in review.digest_json.get("destinations", []):
+        if wanted is not None and (destination["platform"], destination["account"]) not in wanted:
+            continue
         payload = {
             "video_id": review.video_version_id,
             "review_id": review.id,
@@ -90,6 +94,8 @@ def publish_destination(db: Session, payload: dict) -> dict:
         publication = InstagramPublisher().publish(db, video, account)
     elif platform == "facebook":
         publication = FacebookPublisher().publish(db, video, account)
+    elif platform == "facebook_feed":
+        publication = FacebookPublisher().publish_feed(db, video, account)
     elif platform == "tiktok":
         publication = TikTokPublisher().publish(db, video, account)
     else:

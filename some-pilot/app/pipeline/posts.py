@@ -5,6 +5,7 @@ PLATFORM_LABELS = {
     "youtube": "YouTube",
     "instagram": "Instagram",
     "facebook": "Facebook",
+    "facebook_feed": "Facebook-feed (4:5)",
     "tiktok": "TikTok",
     "reels": "Instagram",
 }

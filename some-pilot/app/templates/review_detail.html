@@ -29,7 +29,21 @@
       <form method="post" action="/review/{{ video.id }}/approve" class="approval-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="account" value="{{ selected_account }}">
-        <fieldset class="destination-picker"><legend>Destinationer</legend>{% for option in platforms %}{% set tiktok_blocked = option.value == 'tiktok' and not (tiktok_creator.available and tiktok_direct_post_eligible) %}<label class="destination-option{% if tiktok_blocked %} is-disabled{% endif %}" data-account="{{ option.account }}"><input type="checkbox" name="platforms" value="{{ option.value }}" {% if option.value == 'tiktok' %}data-tiktok-destination {% endif %}{% if tiktok_blocked %}disabled{% else %}checked{% endif %}><span><strong>{{ option.label }}</strong><small>{% if option.value == 'tiktok' and tiktok_creator.available %}{{ tiktok_creator.nickname }}{% if tiktok_creator.username %} (@{{ tiktok_creator.username }}){% endif %}{% else %}{{ option.account_label }}{% endif %}</small></span></label>{% endfor %}</fieldset>
+        <fieldset class="destination-picker"><legend>Destinationer</legend>
+          {% for option in platforms %}
+          {% set blocked = (option.value == 'tiktok' and not (tiktok_creator.available and tiktok_direct_post_eligible)) or (option.value == 'facebook_feed' and not feed) %}
+          {# The feed post is a per-video choice (owner 2026-11-17), so it starts unchecked. #}
+          {% set checked = not blocked and option.value != 'facebook_feed' %}
+          <label class="destination-option{% if blocked %} is-disabled{% endif %}" data-account="{{ option.account }}">
+            <input type="checkbox" name="platforms" value="{{ option.value }}" {% if option.value == 'tiktok' %}data-tiktok-destination{% endif %} {% if blocked %}disabled{% elif checked %}checked{% endif %}>
+            <span>
+              <strong>{% if option.value == 'facebook' %}{{ 'Facebook Reel' if vertical else 'Facebook-video' }}{% else %}{{ option.label }}{% endif %}</strong>
+              <small>{% if option.value == 'tiktok' and tiktok_creator.available %}{{ tiktok_creator.nickname }}{% if tiktok_creator.username %} (@{{ tiktok_creator.username }}){% endif %}{% elif option.value == 'facebook_feed' and not feed %}4:5-version mangler for denne video{% else %}{{ option.account_label }}{% endif %}</small>
+            </span>
+          </label>
+          {% endfor %}
+        </fieldset>
+        {% if feed %}<figure class="feed-preview"><video src="/media/{{ video.id }}/feed_4x5.mp4" poster="/media/{{ video.id }}/feed_thumbnail.jpg" controls preload="metadata" playsinline></video><figcaption><strong>Facebook-feed (4:5)</strong><small>Organisk opslag på siden, uden sorte kanter. Vælg det ovenfor, hvis videoen også skal i feedet.</small></figcaption></figure>{% endif %}
         {% include "_tiktok_post_settings.html" %}
         <div class="approval-settings"><label for="visibility">YouTube-synlighed<select id="visibility" name="visibility"><option value="public" selected>Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label><label for="publish_at">Publicér senere (valgfrit)<input id="publish_at" name="publish_at" type="datetime-local"></label></div>
         <p class="field-help">Alle forbundne destinationer er valgt som standard. Fjern markeringen af en destination for at springe den over. Hvis tidspunktet er tomt, publiceres efter godkendelse.</p>
@@ -50,6 +64,19 @@
     </section>
     {% elif latest_approval %}
     <section class="decision-card approved-panel"><div class="approved-mark">✓</div><div class="approval-result"><p class="eyebrow">Beslutning registreret</p><h2>Opslaget er godkendt</h2><p>Denne revision og dens destinationer er låst. Publiceringsstatus pr. destination:</p><div class="publication-jobs">{% for job in publication_jobs %}<div class="publication-job"><span class="job-platform">{{ job.payload.get('platform') | platform_label }}</span><span class="status status-{{ job.status | lower }}">{{ job.status | status_label }}</span><small>{{ job.payload.get('account') }}{% if job.error_code %} · {{ job.error_code }}{% endif %}</small></div>{% endfor %}</div></div></section>
+    {% if feed and feed_option and 'facebook_feed' not in approved_platforms and video.status in ['PUBLISHING', 'PUBLISHED'] %}
+    <section class="decision-card add-destination">
+      <p class="eyebrow">Tilføj destination</p><h2>Læg den også i Facebook-feedet</h2>
+      <figure class="feed-preview"><video src="/media/{{ video.id }}/feed_4x5.mp4" poster="/media/{{ video.id }}/feed_thumbnail.jpg" controls preload="metadata" playsinline></video><figcaption><strong>Facebook-feed (4:5)</strong><small>{{ feed_option.account_label }} · samme tekst som Facebook-varianten. De opslag, der allerede er sendt, røres ikke.</small></figcaption></figure>
+      <form method="post" action="/review/{{ video.id }}/add-destination" class="approval-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="platforms" value="facebook_feed">
+        <label class="check"><input type="checkbox" name="ai_labels" value="facebook_feed" {% if ai_label_defaults['facebook_feed'] %}checked{% endif %}> AI-mærkning <small>(intet API-felt: sæt mærket manuelt i appen)</small></label>
+        <label class="watch-check"><input type="checkbox" name="watched" value="true" required><span><strong>Jeg har set hele 4:5-videoen</strong><small>Jeg har kontrolleret beskæring, tekst og thumbnail i feedformatet.</small></span></label>
+        <button class="button approve-button" type="submit">Godkend og publicér i feedet</button>
+      </form>
+    </section>
+    {% endif %}
     {% endif %}
 
     <details class="evidence-panel"><summary><span>Kontrol og dokumentation</span><span class="evidence-summary">Se checks og filer</span></summary><div class="evidence-content"><p>Godkendelsen er knyttet til præcis denne videofil, tekst, platform og konto. Enhver ændring kræver ny godkendelse.</p><details><summary>Påstande og kilder</summary><pre>{{ evidence.get('claims.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Rettighedsbevis</summary><pre>{{ evidence.get('rights.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Teknisk og redaktionel kontrol</summary><pre>{{ evidence.get('checks.json', {'error': 'missing'}) | tojson(indent=2) }}</pre></details><details><summary>Versionsmanifest</summary><pre>{{ video.manifest_json | tojson(indent=2) }}</pre></details></div></details>

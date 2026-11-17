@@ -180,6 +180,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("ypp", help="Progress toward the YouTube Partner Program")
     pronunciation = sub.add_parser("pronunciation", help="Sync the ElevenLabs pronunciation dictionary")
     pronunciation.add_argument("--force", action="store_true")
+    feed = sub.add_parser("attach-feed-variant", help="Attach a native 4:5 render (produce_local --format 4x5) to a video as its Facebook feed variant")
+    feed.add_argument("--video", type=int, required=True)
+    feed.add_argument("--source", type=Path, required=True, help="Folder with the 4x5 render: final.mp4, thumbnail.jpg, manifest.json")
     replace = sub.add_parser("facebook-replace-with-reel", help="Owner-approved: republish a 9:16 page video as a Reel, then delete the old post")
     replace.add_argument("--publication", type=int, required=True)
     replace.add_argument("--execute", action="store_true", help="Without it, only show what would happen")
@@ -261,6 +264,14 @@ def run_extended(db, args) -> dict | None:
         from app.pipeline.pronunciation import sync
 
         return sync(force=args.force)
+    if args.command == "attach-feed-variant":
+        from app.db.models import VideoVersion
+        from app.pipeline.feed_variant import attach_feed_variant
+
+        video = db.get(VideoVersion, args.video)
+        if video is None:
+            raise ValueError("video_not_found")
+        return attach_feed_variant(db, video, args.source)
     if args.command == "facebook-replace-with-reel":
         from app.db.models import Publication
         from app.pipeline.platforms import FacebookPublisher

@@ -310,3 +310,9 @@ code { user-select: all; }
 .tiktok-consent { margin: 0; color: #344054; font-size: .7rem; }
 .tiktok-warning { color: #b42318; }
 .is-disabled { opacity: .55; cursor: not-allowed; }
+.feed-preview { display: flex; gap: .8rem; align-items: center; margin: .5rem 0 .9rem; }
+.feed-preview video { width: 168px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 8px; background: #101828; }
+.feed-preview figcaption strong, .feed-preview figcaption small { display: block; }
+.feed-preview figcaption strong { color: #344054; font-size: .75rem; }
+.feed-preview figcaption small { margin-top: .2rem; color: #98a2b3; font-size: .62rem; }
+.add-destination { margin-top: 1rem; }

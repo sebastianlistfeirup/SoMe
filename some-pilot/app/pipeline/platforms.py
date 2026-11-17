@@ -445,9 +445,56 @@ class FacebookPublisher:
         db.commit()
         if vertical:
             return self._publish_reel(db, publication, video, account, content["text"])
+        return self._page_video(db, publication, video, account, Path(video.video_path), content["text"], {"cover": "source_frame", "custom_cover_supported": False})
+
+    def publish_feed(self, db: Session, video: VideoVersion, account: str) -> Publication:
+        """Organic Page feed post with the native 4:5 render: always a regular page video, never a Reel."""
+        from app.pipeline.approvals import feed_variant
+
+        settings = get_settings()
+        if not all((settings.meta_page_access_token, settings.meta_page_id, settings.meta_graph_version)):
+            raise PublishError("facebook_not_configured; use_manual_export")
+        if not re.fullmatch(r"v\d+\.\d+", settings.meta_graph_version):
+            raise PublishError("explicit_valid_meta_graph_version_required")
+        if account != settings.meta_page_id:
+            raise PublishError("facebook_page_mismatch")
+        # verify_approval recomputes the digest, which binds the 4:5 file and thumbnail hashes.
+        content = approved_content(verify_approval(db, video, "facebook_feed", account), video, "facebook_feed", account)
+        feed = feed_variant(video)
+        if feed is None:
+            raise PublishError("facebook_feed_variant_missing")
+        publication = new_publication(db, video, "facebook_feed", account)
+        if publication.status == "PUBLISHED":
+            return publication
+        if publication.status == "RECONCILE_REQUIRED":
+            raise PublishError("reconcile_required_before_retry")
+        publication.status = "PUBLISHING"
+        _enter_publishing(video)
+        db.commit()
+        published = self._page_video(db, publication, video, account, Path(feed["video_path"]), content["text"], {"format": "feed_4x5", "cover": "pending"})
+        self._set_page_video_thumbnail(db, published, Path(feed["thumbnail_path"]))
+        return published
+
+    def _set_page_video_thumbnail(self, db: Session, publication: Publication, thumbnail: Path) -> None:
+        """Best effort: the post is live either way; a rejected thumbnail is recorded, not fatal."""
+        settings = get_settings()
+        outcome = {"cover": "custom_thumbnail_set"}
+        try:
+            with thumbnail.open("rb") as handle:
+                response = httpx.post(f"https://graph.facebook.com/{settings.meta_graph_version}/{publication.remote_id}/thumbnails", headers={"Authorization": f"Bearer {settings.meta_page_access_token}"}, data={"is_preferred": "true"}, files={"source": (thumbnail.name, handle, "image/jpeg")}, timeout=60)
+            if response.status_code >= 400:
+                outcome = {"cover": "custom_thumbnail_failed", "cover_error": _graph_error_detail(response)[:160]}
+        except httpx.HTTPError as exc:
+            outcome = {"cover": "custom_thumbnail_failed", "cover_error": type(exc).__name__}
+        publication.response_json = {**(publication.response_json or {}), **outcome}
+        db.add(AuditEvent(actor="system", action="FACEBOOK_THUMBNAIL_SET" if outcome["cover"] == "custom_thumbnail_set" else "FACEBOOK_THUMBNAIL_FAILED", entity_type="publication", entity_id=str(publication.id), details_json={"remote_id": publication.remote_id, **outcome}))
+        db.commit()
+
+    def _page_video(self, db: Session, publication: Publication, video: VideoVersion, account: str, video_path: Path, description: str, extra: dict) -> Publication:
+        """Graph resumable upload of a regular page video (start/transfer/finish on graph-video)."""
+        settings = get_settings()
         url = f"https://graph-video.facebook.com/{settings.meta_graph_version}/{account}/videos"
         headers = {"Authorization": f"Bearer {settings.meta_page_access_token}"}
-        video_path = Path(video.video_path)
         size = video_path.stat().st_size
         finishing = False
         try:
@@ -473,11 +520,11 @@ class FacebookPublisher:
                     start_offset, end_offset = next_start, next_end
                     chunks += 1
             finishing = True
-            finished = self._graph_post(url, headers, "finish", 120, data={"upload_phase": "finish", "upload_session_id": session_id, "description": content["text"]})
+            finished = self._graph_post(url, headers, "finish", 120, data={"upload_phase": "finish", "upload_session_id": session_id, "description": description})
             if not finished.get("success"):
                 raise PublishError("facebook_finish_not_confirmed_reconcile")
             publication.remote_id = video_id
-            publication.response_json = {"id": video_id, "cover": "source_frame", "custom_cover_supported": False, "upload": "resumable", "chunks": chunks, "bytes": size}
+            publication.response_json = {"id": video_id, **extra, "upload": "resumable", "chunks": chunks, "bytes": size}
             publication.status = "PUBLISHED"
             publication.published_at = utcnow()
             _mark_success(db, publication, video)
