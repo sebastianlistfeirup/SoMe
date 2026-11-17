@@ -180,6 +180,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("ypp", help="Progress toward the YouTube Partner Program")
     pronunciation = sub.add_parser("pronunciation", help="Sync the ElevenLabs pronunciation dictionary")
     pronunciation.add_argument("--force", action="store_true")
+    replace = sub.add_parser("facebook-replace-with-reel", help="Owner-approved: republish a 9:16 page video as a Reel, then delete the old post")
+    replace.add_argument("--publication", type=int, required=True)
+    replace.add_argument("--execute", action="store_true", help="Without it, only show what would happen")
     thumbnail = sub.add_parser("youtube-thumbnail", help="Set the approved custom thumbnail on an already published YouTube video")
     thumbnail.add_argument("--publication", type=int, required=True)
     probe = sub.add_parser("account-probe", help="Check the YouTube, Meta and TikTok connections (no secrets shown)")
@@ -258,6 +261,14 @@ def run_extended(db, args) -> dict | None:
         from app.pipeline.pronunciation import sync
 
         return sync(force=args.force)
+    if args.command == "facebook-replace-with-reel":
+        from app.db.models import Publication
+        from app.pipeline.platforms import FacebookPublisher
+
+        publication = db.get(Publication, args.publication)
+        if publication is None:
+            raise ValueError("publication_not_found")
+        return FacebookPublisher().replace_with_reel(db, publication, execute=args.execute)
     if args.command == "youtube-thumbnail":
         from app.db.models import Publication, VideoVersion
         from app.pipeline.approvals import verify_approval

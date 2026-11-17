@@ -278,3 +278,93 @@ def test_unknown_aspect_falls_back_to_probe_and_never_guesses(db, awaiting_video
     with pytest.raises(PublishError, match="facebook_video_aspect_unknown"):
         FacebookPublisher().publish(db, awaiting_video, "page-1")
     assert db.query(Publication).count() == 0
+
+
+# --- owner-approved replacement of 9:16 page videos with Reels ------------------------------------
+
+
+def published_page_video(db, video, monkeypatch):
+    facebook_ready(db, video, monkeypatch, aspect="9:16")
+    video.status = "PUBLISHED"
+    old = Publication(video_version_id=video.id, platform="facebook", account="page-1", idempotency_key=f"video:{video.id}:platform:facebook:account:page-1", status="PUBLISHED", remote_id="old-page-video", response_json={"id": "old-page-video", "cover": "source_frame"})
+    db.add(old)
+    db.commit()
+    return old
+
+
+def reel_ok(monkeypatch):
+    monkeypatch.setattr(platforms.httpx, "get", lambda *_a, **_k: Response({"status": {"video_status": "ready", "publishing_phase": {"status": "complete"}}}))
+
+
+def test_replace_publishes_reel_first_then_deletes_old_post(db, awaiting_video, monkeypatch):
+    old = published_page_video(db, awaiting_video, monkeypatch)
+    order = []
+
+    def post(url, **kwargs):
+        order.append("reel:" + (kwargs.get("data") or {}).get("upload_phase", "upload"))
+        return reel_graph([])(url, **kwargs)
+
+    def delete(url, **kwargs):
+        order.append("delete")
+        assert url.endswith("/old-page-video") and kwargs["headers"]["Authorization"] == "Bearer test-page-token"
+        return Response({"success": True})
+
+    monkeypatch.setattr(platforms.httpx, "post", post)
+    monkeypatch.setattr(platforms.httpx, "delete", delete)
+    reel_ok(monkeypatch)
+    dry = FacebookPublisher().replace_with_reel(db, old)
+    assert dry["executed"] is False and order == []
+    result = FacebookPublisher().replace_with_reel(db, old, execute=True)
+    assert order == ["reel:start", "reel:upload", "reel:finish", "delete"]
+    assert result["executed"] and result["reel_remote_id"] == "reel-1"
+    db.refresh(old)
+    assert old.status == "REPLACED" and old.response_json["replaced_by_remote_id"] == "reel-1"
+    reel = db.get(Publication, result["reel_publication_id"])
+    assert reel.status == "PUBLISHED" and reel.idempotency_key == f"video:{awaiting_video.id}:platform:facebook:account:page-1"
+    assert db.query(AuditEvent).filter_by(action="FACEBOOK_PAGE_VIDEO_REPLACED_WITH_REEL").count() == 1
+    assert awaiting_video.status == "PUBLISHED"
+    with pytest.raises(PublishError, match="published_facebook_publication_required"):
+        FacebookPublisher().replace_with_reel(db, old, execute=True)
+
+
+def test_replace_keeps_old_post_when_reel_fails_and_rerun_continues(db, awaiting_video, monkeypatch):
+    old = published_page_video(db, awaiting_video, monkeypatch)
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph([], upload_status=500))
+    monkeypatch.setattr(platforms.httpx, "delete", lambda *_a, **_k: pytest.fail("old post must stay while the reel is not live"))
+    with pytest.raises(PublishError):
+        FacebookPublisher().replace_with_reel(db, old, execute=True)
+    db.refresh(old)
+    assert old.status == "REPLACING" and old.remote_id == "old-page-video"
+    deleted = []
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph([]))
+    monkeypatch.setattr(platforms.httpx, "delete", lambda url, **_k: deleted.append(url) or Response({"success": True}))
+    reel_ok(monkeypatch)
+    result = FacebookPublisher().replace_with_reel(db, old, execute=True)
+    assert result["executed"] and len(deleted) == 1
+    assert db.query(Publication).filter_by(platform="facebook", status="PUBLISHED").count() == 1
+
+
+def test_replace_reports_failed_delete_and_rerun_only_retries_delete(db, awaiting_video, monkeypatch):
+    old = published_page_video(db, awaiting_video, monkeypatch)
+    calls = []
+    monkeypatch.setattr(platforms.httpx, "post", reel_graph(calls))
+    reel_ok(monkeypatch)
+    monkeypatch.setattr(platforms.httpx, "delete", lambda *_a, **_k: Response({"error": {"type": "OAuthException", "code": 200, "message": "no permission"}}, 403))
+    with pytest.raises(PublishError, match="old_post_delete_failed"):
+        FacebookPublisher().replace_with_reel(db, old, execute=True)
+    db.refresh(old)
+    assert old.status == "REPLACING" and "no permission" in old.error_code
+    uploads = len(calls)
+    monkeypatch.setattr(platforms.httpx, "delete", lambda *_a, **_k: Response({"success": True}))
+    FacebookPublisher().replace_with_reel(db, old, execute=True)
+    assert len(calls) == uploads, "the reel must not be uploaded twice"
+    db.refresh(old)
+    assert old.status == "REPLACED"
+
+
+def test_replace_refuses_landscape_videos(db, awaiting_video, monkeypatch):
+    old = published_page_video(db, awaiting_video, monkeypatch)
+    awaiting_video.features_json = {**awaiting_video.features_json, "aspect_ratio": "16:9"}
+    db.commit()
+    with pytest.raises(PublishError, match="only_9x16"):
+        FacebookPublisher().replace_with_reel(db, old, execute=True)

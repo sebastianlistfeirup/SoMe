@@ -503,6 +503,61 @@ class FacebookPublisher:
             raise
 
 
+    def replace_with_reel(self, db: Session, old: Publication, execute: bool = False) -> dict:
+        """Owner-approved fix for 9:16 videos posted before rule 13 as regular page videos.
+
+        Order matters: publish the Reel first and delete the old page video only after the Reel is
+        confirmed live, so a failure never leaves the Page without the post. Safe to re-run: an old
+        publication in REPLACING continues where it stopped (retry the Reel, or retry the delete).
+        """
+        settings = get_settings()
+        if old.platform != "facebook" or old.status not in {"PUBLISHED", "REPLACING"} or not old.remote_id:
+            raise PublishError("published_facebook_publication_required")
+        if (old.response_json or {}).get("format") == "reel":
+            raise PublishError("already_a_reel")
+        video = db.get(VideoVersion, old.video_version_id)
+        if not is_vertical(video):
+            raise PublishError("only_9x16_videos_are_replaced_with_reels")
+        if execute and old.status == "REPLACING" and video.status == "FAILED":
+            video.status = "PUBLISHING"  # a re-run after a failed Reel attempt continues the same replacement
+            video.updated_at = utcnow()
+            db.commit()
+        verify_approval(db, video, "facebook", old.account)  # same approved file and text as the post being replaced
+        plan = {"publication_id": old.id, "video_id": video.id, "old_remote_id": old.remote_id, "steps": ["publish_reel", "delete_old_page_video"]}
+        if not execute:
+            return {**plan, "executed": False}
+        if old.status == "PUBLISHED":
+            original_key = old.idempotency_key
+            old.idempotency_key = f"{original_key}:replaced-by-reel:{old.id}"
+            old.status = "REPLACING"
+            old.response_json = {**(old.response_json or {}), "original_idempotency_key": original_key}
+            db.add(AuditEvent(actor="owner-approved", action="FACEBOOK_REPLACE_WITH_REEL_STARTED", entity_type="publication", entity_id=str(old.id), details_json={"old_remote_id": old.remote_id, "video_status": video.status}))
+            db.commit()
+        if video.status == "PUBLISHED":
+            # The state machine never reopens a published video on its own; this owner-approved
+            # replacement does, and _mark_success closes it again once the Reel is live.
+            video.status = "PUBLISHING"
+            video.updated_at = utcnow()
+            db.commit()
+        reel = self.publish(db, video, old.account)
+        if reel.status != "PUBLISHED" or (reel.response_json or {}).get("format") != "reel":
+            raise PublishError("reel_not_confirmed_old_post_kept")
+        response = httpx.delete(f"https://graph.facebook.com/{settings.meta_graph_version}/{old.remote_id}", headers={"Authorization": f"Bearer {settings.meta_page_access_token}"}, timeout=30)
+        try:
+            deleted = response.status_code < 400 and bool(response.json().get("success"))
+        except ValueError:
+            deleted = False
+        if not deleted:
+            old.error_code = f"delete_failed:{_graph_error_detail(response)}"[:100]
+            db.commit()
+            raise PublishError("reel_published_but_old_post_delete_failed_rerun_to_retry")
+        old.status = "REPLACED"
+        old.error_code = None
+        old.response_json = {**(old.response_json or {}), "deleted_at": utcnow().isoformat(), "replaced_by_publication": reel.id, "replaced_by_remote_id": reel.remote_id}
+        db.add(AuditEvent(actor="owner-approved", action="FACEBOOK_PAGE_VIDEO_REPLACED_WITH_REEL", entity_type="publication", entity_id=str(old.id), details_json={"deleted_remote_id": old.remote_id, "reel_publication": reel.id, "reel_remote_id": reel.remote_id}))
+        db.commit()
+        return {**plan, "executed": True, "reel_publication_id": reel.id, "reel_remote_id": reel.remote_id, "old_status": old.status}
+
     def _reel_status(self, base: str, headers: dict, video_id: str) -> dict:
         """Poll until the reel is published, failed, or the window closes; returns the last status."""
         deadline = time.monotonic() + FACEBOOK_REEL_POLL_SECONDS
