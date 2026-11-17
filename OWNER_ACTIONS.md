@@ -161,9 +161,24 @@ TikTok vil se hele flowet i én skærmoptagelse, mp4/mov. Optag med **Win+Alt+R*
 - **Facebook 16:9:** Videoen uploades i bidder (resumable upload). Store lange videoer fejlede før med `unreadable_graph_error`.
 - **Facebook 9:16:** Videoen publiceres som **Reel**, efter ejerregel 13. Kan formatet ikke afgøres, stopper publiceringen i stedet for at gætte.
 - **Instagram:** Systemet venter op til 10 minutter på Reels-behandlingen (før 60 sekunder). Et nyt forsøg publicerer en allerede færdig container én gang uden ny upload.
-- **Venter på ejeren:**
-  - Facebook-job `2715e3cf` (video 10) er ikke sendt igen. Det er et offentligt opslag og kræver ejerens ja.
-  - YouTube-jobbene for video 10, 12, 14, 15 og 16 står som `publishing_disabled` og venter på ejerens beslutning om synlighed.
+- **Gennemført 2026-11-16 aften (ejerens ja):**
+  - Facebook video 10 er publiceret.
+  - YouTube-video 10, 12, 14, 15 og 16 er offentlige.
+
+### 5F. Status 2026-11-17 (version `7b43d42f214b`)
+
+- **YouTube-thumbnails:** Alle fem videoer har nu det godkendte thumbnail. Årsagen til fejlen var, at kanalen ikke var telefonverificeret; ejeren har verificeret den.
+  - Fremover giver en afvist thumbnail kun en advarsel og en alarm. Videoen tæller som publiceret, og thumbnailen sættes bagefter med `python -m app.cli youtube-thumbnail --publication N`.
+  - Lange videoer får op til 10 minutter til YouTube-behandling (før 60 sek.).
+- **De fire forkerte Facebook-opslag er erstattet af Reels** (ejerens ja 2026-11-17): Kratos, Turrican II, Qwen4/Alibaba og Alien Breed-shorten.
+  - Hver Reel blev publiceret og bekræftet live, før det gamle opslag blev slettet.
+  - Alle fire Reels er verificeret live hos Facebook, og de fire gamle opslag findes ikke længere.
+  - Værktøj til samme opgave: `python -m app.cli facebook-replace-with-reel --publication N` (uden `--execute` vises kun planen).
+- **Ny opslagstype: Facebook-feed (4:5).** Et organisk opslag på siden med en ægte 4:5-version (1080x1350) af videoen, uden sorte kanter.
+  - Vælges pr. video på godkendelsessiden ("Facebook-feed (4:5)"). Feltet er ikke valgt på forhånd og er gråt, hvis videoen ikke har en 4:5-version.
+  - Facebook-feltet hedder nu "Facebook Reel" for 9:16 og "Facebook-video" for 16:9.
+  - For videoer, der allerede er publiceret, viser godkendelsessiden "Læg den også i Facebook-feedet". Kun feedopslaget sendes; de eksisterende opslag røres ikke.
+  - 4:5-filen og dens thumbnail er SHA-låst i godkendelsen.
 
 ## 6. Godkendt intro/outro — obligatorisk for nye videoer
 
