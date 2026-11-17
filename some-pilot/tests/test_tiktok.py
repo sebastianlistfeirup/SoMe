@@ -16,6 +16,10 @@ from app.pipeline.redact import redact
 from app.pipeline.tiktok_post import BRANDED_CONSENT, MUSIC_CONSENT, creator_mismatches, normalize_post_settings, post_info
 
 NOW = datetime(2026, 11, 16, 12, 0, tzinfo=timezone.utc)
+
+
+def real_now():
+    return datetime.now(timezone.utc)
 OLD_ACCESS = "act.old-access-token-value"
 OLD_REFRESH = "rft.old-refresh-token-value"
 NEW_ACCESS = "act.new-access-token-value"
@@ -37,7 +41,10 @@ class Response:
             raise RuntimeError(self.status_code)
 
 
-def connect(monkeypatch, expires_in=timedelta(hours=20), refresh_in=timedelta(days=300)):
+def connect(monkeypatch, expires_in=timedelta(hours=20), refresh_in=timedelta(days=300), base=None):
+    """Store a token bundle. Code that takes ``now`` (probe, access_token) uses NOW; the publisher and the
+    review page use the real clock, so their tests pass ``base=real_now()`` to stay valid on any date."""
+    base = base or NOW
     settings = get_settings()
     monkeypatch.setattr(settings, "tiktok_client_key", "client-key-1")
     monkeypatch.setattr(settings, "tiktok_client_secret", "client-secret-value")
@@ -47,10 +54,10 @@ def connect(monkeypatch, expires_in=timedelta(hours=20), refresh_in=timedelta(da
         "open_id": "open-1",
         "scope": "user.info.basic,video.publish,video.upload",
         "client_key": "client-key-1",
-        "issued_at": (NOW - timedelta(hours=4)).isoformat(),
-        "expires_at": (NOW + expires_in).isoformat(),
-        "refresh_expires_at": (NOW + refresh_in).isoformat(),
-        "authorized_at": (NOW - timedelta(days=1)).isoformat(),
+        "issued_at": (base - timedelta(hours=4)).isoformat(),
+        "expires_at": (base + expires_in).isoformat(),
+        "refresh_expires_at": (base + refresh_in).isoformat(),
+        "authorized_at": (base - timedelta(days=1)).isoformat(),
     })
 
 
@@ -276,7 +283,7 @@ def _tiktok_api(calls, creator=CREATOR, first_status=200):
 
 
 def test_publisher_sends_exactly_the_approved_choices_with_refreshed_token(db, awaiting_video, monkeypatch):
-    connect(monkeypatch, expires_in=timedelta(minutes=10))
+    connect(monkeypatch, expires_in=timedelta(minutes=10), base=real_now())
     enable_direct_post(monkeypatch)
     approve_destinations(db, awaiting_video, "owner", [tiktok_destination(commercial_disclosure=True, brand_organic_toggle=True)], True)
     refreshes, calls = [], []
@@ -294,7 +301,7 @@ def test_publisher_sends_exactly_the_approved_choices_with_refreshed_token(db, a
 
 
 def test_publisher_refreshes_once_on_401(db, awaiting_video, monkeypatch):
-    connect(monkeypatch)
+    connect(monkeypatch, base=real_now())
     enable_direct_post(monkeypatch)
     approve_destinations(db, awaiting_video, "owner", [tiktok_destination()], True)
     refreshes, calls = [], []
@@ -306,7 +313,7 @@ def test_publisher_refreshes_once_on_401(db, awaiting_video, monkeypatch):
 
 
 def test_publisher_refuses_legacy_approval_and_changed_creator_settings(db, awaiting_video, monkeypatch):
-    connect(monkeypatch)
+    connect(monkeypatch, base=real_now())
     enable_direct_post(monkeypatch)
     monkeypatch.setattr("app.pipeline.platforms.httpx.post", lambda *a, **k: pytest.fail("TikTok must not be called"))
     approve(db, awaiting_video, "owner", "tiktok", "open-1", True)
@@ -315,7 +322,7 @@ def test_publisher_refuses_legacy_approval_and_changed_creator_settings(db, awai
 
 
 def test_publisher_stops_before_upload_when_creator_disabled_an_approved_toggle(db, awaiting_video, monkeypatch):
-    connect(monkeypatch)
+    connect(monkeypatch, base=real_now())
     enable_direct_post(monkeypatch)
     approve_destinations(db, awaiting_video, "owner", [tiktok_destination()], True)
     calls = []
@@ -326,7 +333,7 @@ def test_publisher_stops_before_upload_when_creator_disabled_an_approved_toggle(
 
 
 def test_direct_post_gate_still_blocks_without_review_flags(db, awaiting_video, monkeypatch):
-    connect(monkeypatch)
+    connect(monkeypatch, base=real_now())
     monkeypatch.setattr(get_settings(), "dry_run", False)
     monkeypatch.setattr(get_settings(), "publish_enabled", True)
     monkeypatch.setattr("app.pipeline.platforms.httpx.post", lambda *a, **k: pytest.fail("ineligible Direct Post reached TikTok"))
@@ -361,7 +368,7 @@ def _client(db):
 def test_review_page_shows_tiktok_creator_choices_and_approval_binds_them(db, awaiting_video, monkeypatch):
     import re
 
-    connect(monkeypatch)
+    connect(monkeypatch, base=real_now())
     monkeypatch.setattr("app.pipeline.tiktok_post.httpx.post", lambda *a, **k: Response({"data": CREATOR, "error": {"code": "ok"}}))
     app, client = _client(db)
     try:
