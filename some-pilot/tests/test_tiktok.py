@@ -381,7 +381,9 @@ def test_review_page_shows_tiktok_creator_choices_and_approval_binds_them(db, aw
         assert "By posting, you agree to TikTok&#39;s Music Usage Confirmation" in page
         assert re.search(r'value="tiktok" data-tiktok-destination disabled', page), "TikTok cannot be chosen before the review flags are set"
         token = re.search(r'name="csrf_token" value="([^"]+)"', page).group(1)
-        form = {"csrf_token": token, "platforms": ["tiktok"], "watched": "true", "ai_labels_present": "true", "ai_labels": ["tiktok"], "tiktok_privacy_level": "MUTUAL_FOLLOW_FRIENDS", "tiktok_allow_comment": "true", "tiktok_allow_stitch": "true"}
+        # The real page always sends the preferred platform's account in a hidden field (2026-11-18 bug: a
+        # TikTok-only approval was bound to the YouTube channel id and failed with tiktok_open_id_mismatch).
+        form = {"csrf_token": token, "account": "UC-youtube-channel-id", "platforms": ["tiktok"], "watched": "true", "ai_labels_present": "true", "ai_labels": ["tiktok"], "tiktok_privacy_level": "MUTUAL_FOLLOW_FRIENDS", "tiktok_allow_comment": "true", "tiktok_allow_stitch": "true"}
         refused = client.post(f"/review/{awaiting_video.id}/approve", data=form, follow_redirects=False)
         assert refused.status_code == 409 and "tiktok_direct_post_not_eligible" in refused.text
         enable_direct_post(monkeypatch)

@@ -519,9 +519,13 @@ def approve_video(
             problems = tiktok_creator_mismatches(tiktok_options, creator["raw"], video.duration_seconds)
             if problems:
                 raise ApprovalError(problems[0])
+        # The page's hidden "account" field always holds the PREFERRED platform's account (e.g. the YouTube channel id),
+        # so it may only be used for that platform. Every other destination uses its own connected account.
+        preferred = preferred_platform(video)
         for selected_platform in selected:
             option = selected_destination(db, selected_platform)
-            destination_account = account.strip() if len(selected) == 1 and account.strip() else option["account"]
+            form_account = account.strip() if selected_platform == preferred else ""
+            destination_account = option["account"] or form_account
             if not destination_account:
                 raise ApprovalError("connected_account_required")
             destinations.append({
