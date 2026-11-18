@@ -1,3 +1,4 @@
+import hashlib
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -208,9 +209,21 @@ def test_offsite_upload_is_off_by_default_and_refuses_unencrypted(tmp_path, monk
     calls = []
     import httpx
 
-    monkeypatch.setattr(httpx, "put", lambda url, content, auth, timeout: calls.append(url) or SimpleNamespace(raise_for_status=lambda: None))
+    def fake_put(url, content, headers, auth, timeout):
+        assert not isinstance(content, bytes)  # streamed, never read whole into memory
+        calls.append((url, headers["Content-Length"], b"".join(content)))
+        return SimpleNamespace(raise_for_status=lambda: None)
+
+    monkeypatch.setattr(httpx, "put", fake_put)
     monkeypatch.setattr(httpx, "head", lambda url, auth, timeout: SimpleNamespace(raise_for_status=lambda: None, headers={"content-length": str(encrypted.stat().st_size)}))
-    assert upload_offsite(encrypted)["status"] == "uploaded" and calls[0].endswith(encrypted.name)
+    result = upload_offsite(encrypted)
+    assert result["status"] == "uploaded" and calls[0][0].endswith(encrypted.name)
+    assert calls[0][1] == str(encrypted.stat().st_size) and calls[0][2] == encrypted.read_bytes()
+    assert result["sha256"] == hashlib.sha256(encrypted.read_bytes()).hexdigest()
+    chunked = tmp_path / "some-backup-20260102T000000Z.zip.encc"
+    chunked.write_bytes(b"PPBKGCM1" + b"\0" * 64)
+    monkeypatch.setattr(httpx, "head", lambda url, auth, timeout: SimpleNamespace(raise_for_status=lambda: None, headers={"content-length": str(chunked.stat().st_size)}))
+    assert upload_offsite(chunked)["status"] == "uploaded" and calls[1][0].endswith(chunked.name)
 
 
 def test_operations_page_retry_and_produce_routes(db, tmp_path, monkeypatch):

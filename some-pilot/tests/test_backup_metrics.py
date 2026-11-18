@@ -29,7 +29,8 @@ def test_encrypted_backup_verify_and_restore(db, monkeypatch):
     destination = db.info["tmp_path"] / "encrypted-backups"
     result = create_backup(db, destination, verify=True)
     assert result["verified"] and result["encrypted"]
-    assert Path(result["path"]).suffix == ".enc"
+    assert Path(result["path"]).suffix == ".encc"
+    assert Path(result["path"]).read_bytes()[:8] == b"PPBKGCM1"
     assert verify_backup(Path(result["path"]))
     restored = restore_to_directory(Path(result["path"]), db.info["tmp_path"] / "restored-encrypted")
     assert restored["integrity"] == "ok"
